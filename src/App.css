@@ -1,0 +1,211 @@
+/* ─────────────────────────────────────────────
+   SEUILS — Global Styles
+   ───────────────────────────────────────────── */
+
+   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Courier+Prime:ital@0;1&display=swap');
+
+   /* ── Reset & base ── */
+   *, *::before, *::after {
+     margin: 0;
+     padding: 0;
+     box-sizing: border-box;
+   }
+   
+   :root {
+     --cream:        #f0ebe0;
+     --cream-60:     rgba(240, 235, 224, 0.6);
+     --cream-40:     rgba(240, 235, 224, 0.4);
+     --cream-25:     rgba(240, 235, 224, 0.25);
+     --cream-15:     rgba(240, 235, 224, 0.15);
+     --cream-08:     rgba(240, 235, 224, 0.08);
+     --dark:         #0a0906;
+     --dark-90:      rgba(10, 9, 6, 0.9);
+   
+     --font-serif:   'Cormorant Garamond', Georgia, serif;
+     --font-mono:    'Courier Prime', 'Courier New', monospace;
+   
+     --transition-slow:   1.4s ease;
+     --transition-medium: 0.8s ease;
+     --transition-fast:   0.4s ease;
+   }
+   
+   html, body, #root {
+     width: 100%;
+     height: 100%;
+     background: var(--dark);
+     color: var(--cream);
+     overflow: hidden;
+     cursor: none;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+   }
+   
+   /* ── App wrapper ── */
+   .app {
+     position: fixed;
+     inset: 0;
+     overflow: hidden;
+   }
+   
+   /* ── Grain overlay ── */
+   .grain {
+     position: fixed;
+     inset: 0;
+     z-index: 600;
+     pointer-events: none;
+     opacity: 0.038;
+     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+     background-size: 128px;
+     animation: grain-shift 0.45s steps(2) infinite;
+   }
+   
+   @keyframes grain-shift {
+     0%   { transform: translate(0, 0); }
+     25%  { transform: translate(-2px, 1px); }
+     50%  { transform: translate(1px, -2px); }
+     75%  { transform: translate(-1px, 2px); }
+     100% { transform: translate(2px, -1px); }
+   }
+   
+   /* ── Vignette ── */
+   .vignette {
+     position: fixed;
+     inset: 0;
+     z-index: 200;
+     pointer-events: none;
+     background: radial-gradient(
+       ellipse at center,
+       transparent 22%,
+       rgba(10, 9, 6, 0.88) 100%
+     );
+   }
+   
+   /* ── Utility: fade-up animation ── */
+   @keyframes fade-up {
+     from {
+       opacity: 0;
+       transform: translateY(12px);
+     }
+     to {
+       opacity: 1;
+       transform: translateY(0);
+     }
+   }
+   
+   /* ── Utility: type cursor blink ── */
+   @keyframes blink {
+     0%, 100% { opacity: 1; }
+     50%       { opacity: 0; }
+   }
+   
+   /* ── SharedUI — persists across passagelist + photostage ── */
+   
+   .shared-back {
+     position: fixed;
+     top: 1.9rem;
+     left: 2rem;
+     z-index: 600;
+     background: none;
+     border: none;
+     font-family: var(--font-serif);
+     font-size: 0.9rem;
+     font-weight: 300;
+     letter-spacing: 0.15em;
+     color: var(--cream-25);
+     transition: color 0.45s ease;
+   }
+   
+   .shared-back:hover {
+     color: var(--cream-60);
+   }
+   
+   .shared-home-link {
+     position: fixed;
+     top: 1.9rem;
+     left: 2rem;
+     z-index: 600;
+     background: none;
+     border: none;
+     font-family: var(--font-serif);
+     font-size: 0.9rem;
+     font-weight: 300;
+     letter-spacing: 0.15em;
+     color: var(--cream-25);
+     transition: color 0.45s ease;
+     display: none; /* shown only in photostage via conditional */
+   }
+   
+   /* Override — when photostage, back is hidden, home-link shown */
+   .shared-home-link {
+     display: block;
+   }
+   
+   .shared-back--photo {
+     position: fixed;
+     top: 1.9rem;
+     right: 2rem;
+     left: auto;
+     z-index: 600;
+     background: none;
+     border: none;
+     font-family: var(--font-serif);
+     font-size: 0.9rem;
+     font-weight: 300;
+     letter-spacing: 0.15em;
+     color: var(--cream-25);
+     transition: color 0.45s ease;
+   }
+   .shared-back--photo:hover { color: var(--cream-60); }
+   
+   .shared-label {
+     position: fixed;
+     top: 2rem;
+     left: 50%;
+     transform: translateX(-50%);
+     z-index: 600;
+     font-family: var(--font-mono);
+     font-size: 0.42rem;
+     letter-spacing: 0.44em;
+     text-transform: uppercase;
+     color: var(--cream-15);
+     white-space: nowrap;
+     pointer-events: none;
+     display: flex;
+     align-items: baseline;
+     gap: 0.8em;
+   }
+   
+   .shared-label__fr {
+     font-family: var(--font-serif);
+     font-style: italic;
+     font-size: 0.68rem;
+     letter-spacing: 0.08em;
+     text-transform: none;
+     color: rgba(240, 235, 224, 0.08);
+   }
+   
+   .shared-dots {
+     position: fixed;
+     bottom: 1.8rem;
+     left: 50%;
+     transform: translateX(-50%);
+     z-index: 600;
+     display: flex;
+     gap: 10px;
+     align-items: center;
+   }
+   
+   .shared-dot {
+     width: 4px;
+     height: 4px;
+     border-radius: 50%;
+     border: none;
+     background: rgba(240, 235, 224, 0.12);
+     padding: 0;
+     transition: background 0.4s, transform 0.4s;
+   }
+   
+   .shared-dot--active {
+     background: rgba(240, 235, 224, 0.62);
+     transform: scale(1.5);
+   }

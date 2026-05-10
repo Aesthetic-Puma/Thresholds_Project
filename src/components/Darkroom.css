@@ -1,0 +1,278 @@
+/* ─────────────────────────────────────────────
+   Darkroom — chambre noire navigation
+   ───────────────────────────────────────────── */
+
+   .darkroom {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: var(--dark);
+    overflow: hidden;
+  }
+  
+  /* ── Photo — full screen, no crop ── */
+  .darkroom__photo {
+    position: absolute;
+    inset: 0;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    transition: background-image 0.1s;
+  }
+  
+  /* ── Sepia tint ── */
+  .darkroom__sepia {
+    position: absolute;
+    inset: 0;
+    background: rgba(100, 70, 30, 0.55);
+    pointer-events: none;
+    mix-blend-mode: multiply;
+    transition: opacity 1.2s ease;
+  }
+  
+  /* ── Canvas mask ── */
+  .darkroom__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  
+  /* ── Development progress bar ── */
+  .darkroom__bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: rgba(180, 140, 90, 0.55);
+    pointer-events: none;
+    z-index: 400;
+    transition: width 0.3s ease;
+  }
+  
+  /* ── Initial instruction ── */
+  .darkroom__instruction {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 400;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+    color: rgba(240, 235, 224, 0.28);
+    text-align: center;
+    line-height: 2;
+    pointer-events: none;
+    animation: fade-up 1.2s ease forwards;
+  }
+  
+  /* ── Text fragment ── */
+  .darkroom__fragment {
+    position: fixed;
+    bottom: 6.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 400;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(0.85rem, 1.4vw, 1.05rem);
+    color: rgba(240, 235, 224, 0.55);
+    letter-spacing: 0.055em;
+    line-height: 1.9;
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+    opacity: 0;
+    transition: opacity 1s ease;
+    pointer-events: none;
+  }
+  
+  .darkroom__fragment--visible {
+    opacity: 1;
+  }
+  
+  .darkroom__type-cursor {
+    display: inline-block;
+    margin-left: 1px;
+    animation: blink 0.85s ease infinite;
+    color: rgba(240, 235, 224, 0.35);
+  }
+  
+  /* ── Hold-still progress ── */
+  .darkroom__hold {
+    position: fixed;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.55rem;
+    pointer-events: none;
+  }
+  
+  .darkroom__hold-label {
+    font-family: var(--font-mono);
+    font-size: 0.44rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(240, 235, 224, 0.22);
+  }
+  
+  .darkroom__hold-track {
+    width: 120px;
+    height: 1px;
+    background: rgba(240, 235, 224, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .darkroom__hold-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: rgba(240, 235, 224, 0.55);
+    transition: width 0.05s linear;
+  }
+  
+  /* ── Next hint ── */
+  .darkroom__next-hint {
+    position: fixed;
+    bottom: 2.8rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 400;
+    font-family: var(--font-mono);
+    font-size: 0.44rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(240, 235, 224, 0.25);
+    pointer-events: none;
+    animation: fade-up 0.8s ease forwards;
+    white-space: nowrap;
+  }
+  
+  /* ── Dev state ── */
+  .darkroom__dev-state {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    z-index: 400;
+    font-family: var(--font-mono);
+    font-size: 0.44rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(180, 140, 90, 0.48);
+    pointer-events: none;
+  }
+  
+  /* ── Chamber label ── */
+  .darkroom__label {
+    position: fixed;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 400;
+    font-family: var(--font-mono);
+    font-size: 0.48rem;
+    letter-spacing: 0.44em;
+    text-transform: uppercase;
+    color: rgba(240, 235, 224, 0.2);
+    white-space: nowrap;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 1em;
+  }
+  
+  .darkroom__label-fr {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    color: rgba(240, 235, 224, 0.12);
+  }
+  
+  /* ── Counter ── */
+  .darkroom__counter {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 400;
+    font-family: var(--font-mono);
+    font-size: 0.48rem;
+    letter-spacing: 0.2em;
+    color: rgba(240, 235, 224, 0.2);
+    pointer-events: none;
+  }
+  
+  .darkroom__counter-cur {
+    color: rgba(240, 235, 224, 0.45);
+  }
+  
+  /* ── Dots ── */
+  .darkroom__dots {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 400;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .darkroom__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(240, 235, 224, 0.12);
+    padding: 0;
+    transition: background 0.4s, transform 0.4s;
+  }
+  
+  .darkroom__dot--active {
+    background: rgba(240, 235, 224, 0.65);
+    transform: scale(1.5);
+  }
+  
+  /* ── Home link ── */
+  .darkroom__home {
+    position: fixed;
+    top: 1.9rem;
+    left: 2rem;
+    z-index: 400;
+    background: none;
+    border: none;
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    color: rgba(240, 235, 224, 0.2);
+    transition: color 0.45s ease;
+  }
+  
+  .darkroom__home:hover {
+    color: rgba(240, 235, 224, 0.6);
+  }
+  
+  /* ── Responsive ── */
+  @media (max-width: 680px) {
+    .darkroom__fragment {
+      bottom: 8rem;
+      font-size: 0.82rem;
+    }
+  
+    .darkroom__instruction {
+      font-size: 0.85rem;
+      width: 85%;
+    }
+  }

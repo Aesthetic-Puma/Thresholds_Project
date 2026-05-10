@@ -1,0 +1,45 @@
+/* Both layers share fixed positioning */
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  will-change: left, top;
+}
+
+/* ── Dot ── */
+.cursor-dot {
+  width: 3px;
+  height: 3px;
+  background: var(--cream);
+  z-index: 10000;
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+  mix-blend-mode: difference;
+}
+
+/* ── Ring ── */
+.cursor-ring {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(240, 235, 224, 0.38);
+  background: transparent;
+  transition:
+    width  0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    height 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    border-color 0.4s ease,
+    opacity 0.3s ease;
+}
+
+/* ── Ring hover state ── */
+.cursor-ring--large {
+  width: 54px;
+  height: 54px;
+  border-color: rgba(240, 235, 224, 0.62);
+}
+
+/* ── Hide OS cursor everywhere ── */
+* {
+  cursor: none !important;
+}

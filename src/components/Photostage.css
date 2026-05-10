@@ -1,0 +1,193 @@
+/* ─────────────────────────────────────────────
+   PhotoStage — iris reveal + orbital anchors
+   ───────────────────────────────────────────── */
+
+   .photo-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 85;
+    overflow: visible; /* anchors can go outside */
+  }
+  
+  /* ── Photo — iris reveal + darkroom development ── */
+  .photo-stage__photo {
+    position: fixed;
+    left: 50%;
+    top: 47%;
+    transform: translate(-50%, -50%);
+    width: min(90vw, 1060px);
+    height: min(86vh, 720px);
+    object-fit: contain;
+    object-position: center;
+    z-index: 88;
+    display: block;
+
+    /* Start closed, overexposed */
+    clip-path: circle(0% at 50% 50%);
+    filter: brightness(4) sepia(0.85) contrast(0.45);
+    transition: clip-path 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Iris open → development animation begins */
+  .photo-stage__photo--open {
+    clip-path: circle(72% at 50% 50%);
+    animation: develop 2.8s cubic-bezier(0.5, 0, 0.15, 1) forwards;
+  }
+
+  /* Darkroom development — slow burn, then chemicals take hold */
+  @keyframes develop {
+    0%   { filter: brightness(4)   sepia(0.9)  contrast(0.40); }
+    15%  { filter: brightness(3.2) sepia(0.82) contrast(0.48); }
+    40%  { filter: brightness(2.0) sepia(0.55) contrast(0.66); }
+    65%  { filter: brightness(1.4) sepia(0.28) contrast(0.84); }
+    85%  { filter: brightness(1.1) sepia(0.08) contrast(0.96); }
+    100% { filter: brightness(1)   sepia(0)    contrast(1);    }
+  }
+  
+  /* ── SVG lines ── */
+  .photo-stage__svg {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 390;
+    pointer-events: none;
+    overflow: visible;
+  }
+  
+  .photo-stage__line {
+    stroke: rgba(240, 235, 224, 0);
+    stroke-width: 0.7;
+    animation: line-in 0.8s ease forwards;
+  }
+  
+  @keyframes line-in {
+    from { stroke: rgba(240, 235, 224, 0); }
+    to   { stroke: rgba(240, 235, 224, 0.2); }
+  }
+  
+  /* ── Dots on photo ── */
+  .photo-stage__dot {
+    position: fixed;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 401;
+    pointer-events: none;
+    animation: dot-in 0.8s ease forwards;
+  }
+  
+  @keyframes dot-in {
+    from {
+      background: rgba(240, 235, 224, 0);
+      box-shadow: none;
+    }
+    to {
+      background: rgba(240, 235, 224, 0.65);
+      box-shadow: 0 0 10px rgba(240, 235, 224, 0.3);
+    }
+  }
+  
+  /* ── Orbit word labels ── */
+  .photo-stage__anchor {
+    position: fixed;
+    z-index: 400;
+    max-width: 180px;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    animation: anchor-in 0.8s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes anchor-in {
+    from { opacity: 0; transform: translate(-50%, -50%) translateY(6px); }
+    to   { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
+  }
+
+  /* Word */
+  .photo-stage__anchor-word {
+    display: block;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 17px;
+    color: rgba(240, 235, 224, 0.88);
+    letter-spacing: 0.05em;
+    line-height: 1.35;
+    white-space: pre-line;
+    background: rgba(10, 9, 6, 0.65);
+    padding: 0.2rem 0.6rem;
+    border-radius: 1px;
+  }
+
+  /* Note */
+  .photo-stage__anchor-note {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: rgba(240, 235, 224, 0.38);
+    margin-top: 4px;
+    white-space: pre-line;
+    background: rgba(10, 9, 6, 0.48);
+    padding: 0.12rem 0.4rem;
+  }
+  
+  /* ── Full quote ── */
+  .photo-stage__quote {
+    position: fixed;
+    bottom: 1.8rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 400;
+    max-width: 620px;
+    width: 88%;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 1s ease;
+    pointer-events: none;
+  }
+  
+  .photo-stage__quote--visible {
+    opacity: 1;
+  }
+  
+  .photo-stage__quote-text {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 17px;
+    color: rgba(240, 235, 224, 0.42);
+    line-height: 1.85;
+    letter-spacing: 0.04em;
+  }
+
+  .photo-stage__quote-source {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: rgba(240, 235, 224, 0.15);
+    margin-top: 0.4rem;
+  }
+  
+  /* ── Mobile — hide anchors, larger quote ── */
+  @media (max-width: 680px) {
+    .photo-stage__anchor,
+    .photo-stage__svg,
+    .photo-stage__dot {
+      display: none;
+    }
+  
+    .photo-stage__photo {
+      width: 96vw;
+      height: 52vh;
+    }
+  
+    .photo-stage__quote {
+      bottom: 3rem;
+    }
+  }

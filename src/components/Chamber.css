@@ -1,0 +1,228 @@
+/* ─────────────────────────────────────────────
+   Chamber — immersive photo space
+   ───────────────────────────────────────────── */
+
+.chamber {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  overflow: hidden;
+}
+
+/* ── Parallax space — larger than viewport ── */
+.chamber__space {
+  position: absolute;
+  width: 220%;
+  height: 220%;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+
+/* ── Photo slots ── */
+.photo-slot {
+  position: absolute;
+  background-size: cover;
+  background-position: center;
+  border: none;
+  border-radius: 2px;
+  opacity: 0;
+  filter: brightness(0.38) grayscale(22%);
+  transition:
+    opacity  1.5s ease,
+    filter   0.55s ease,
+    transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: opacity, filter, transform;
+  overflow: hidden;
+}
+
+.photo-slot--visible {
+  opacity: 1;
+}
+
+.photo-slot--center {
+  filter: brightness(0.72) grayscale(0%);
+  transform: scale(1.025);
+  z-index: 20;
+}
+
+.photo-slot:not(.photo-slot--center):hover {
+  filter: brightness(0.55) grayscale(10%);
+  transform: scale(1.015);
+}
+
+.photo-slot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 40px rgba(10, 9, 6, 0.35);
+  pointer-events: none;
+}
+
+/* ── Text fragment ── */
+.chamber__fragment {
+  position: fixed;
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 400;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(0.88rem, 1.45vw, 1.08rem);
+  color: var(--cream-60);
+  letter-spacing: 0.055em;
+  line-height: 1.9;
+  text-align: center;
+  max-width: 540px;
+  width: 90%;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+  pointer-events: none;
+}
+
+.chamber__fragment--visible {
+  opacity: 1;
+}
+
+.chamber__cursor {
+  display: inline-block;
+  margin-left: 1px;
+  opacity: 1;
+  animation: blink 0.85s ease infinite;
+  color: var(--cream-40);
+}
+
+/* ── Chamber label (top center) ── */
+.chamber__label {
+  position: fixed;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 400;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.44em;
+  text-transform: uppercase;
+  color: var(--cream-25);
+  display: flex;
+  align-items: center;
+  gap: 1.2em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.chamber__label-fr {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: none;
+  color: var(--cream-15);
+}
+
+/* ── Dot navigation ── */
+.chamber__dots {
+  position: fixed;
+  bottom: 3.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 400;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.chamber__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  border: none;
+  background: var(--cream-15);
+  transition: background 0.4s ease, transform 0.4s ease;
+  padding: 0;
+}
+
+.chamber__dot--active {
+  background: rgba(240, 235, 224, 0.72);
+  transform: scale(1.5);
+}
+
+/* ── Home link (top left) ── */
+.chamber__home {
+  position: fixed;
+  top: 1.9rem;
+  left: 2.2rem;
+  z-index: 400;
+  background: none;
+  border: none;
+  padding: 0.3rem 0;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  color: var(--cream-25);
+  transition: color 0.45s ease;
+}
+
+.chamber__home:hover {
+  color: var(--cream-60);
+}
+
+/* ── Photo counter (bottom right) ── */
+.chamber__counter {
+  position: fixed;
+  bottom: 2rem;
+  right: 2.4rem;
+  z-index: 400;
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.2em;
+  color: var(--cream-25);
+  pointer-events: none;
+}
+
+.chamber__counter-current {
+  color: var(--cream-40);
+}
+
+.chamber__counter-sep {
+  margin: 0 0.3em;
+}
+
+/* ── Edge navigation hints ── */
+.chamber__edge {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 400;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  color: rgba(240, 235, 224, 0);
+  pointer-events: none;
+  transition: color 0.7s ease;
+}
+
+.chamber__edge--left  { left: 1.4rem; }
+.chamber__edge--right { right: 1.4rem; }
+
+.chamber__edge--glow {
+  color: rgba(240, 235, 224, 0.38);
+}
+
+/* ── Responsive ── */
+@media (max-width: 680px) {
+  .chamber__fragment {
+    bottom: 10%;
+    font-size: 0.82rem;
+  }
+
+  .chamber__home {
+    font-size: 0.85rem;
+  }
+
+  .chamber__label {
+    font-size: 0.44rem;
+  }
+}

@@ -1,0 +1,121 @@
+/* ─────────────────────────────────────────────
+   PassageList — constellation layout
+   ───────────────────────────────────────────── */
+
+.plist {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+}
+
+/* ── Each fragment — absolutely positioned star ── */
+.pstar {
+  position: absolute;
+  background: none;
+  border: none;
+  text-align: left;
+  max-width: 420px;
+  padding: 0.3rem 0;
+  opacity: 0;
+  animation: fade-up 1.4s ease both;
+  cursor: pointer;
+}
+
+/* Floating animation — added after entries complete.
+   opacity: 1 is required: overriding 'animation' resets
+   the fill-mode from fade-up, so opacity would snap back to 0. */
+.pstar--floating {
+  opacity: 1;
+  animation: float var(--float-dur, 5s) ease-in-out var(--float-delay, 0s) infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(var(--float-offset, -5px)); }
+}
+
+/* Source title */
+.pstar__source {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px !important;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(240, 235, 224, 0.22);
+  margin-bottom: 6px;
+  pointer-events: none;
+}
+
+/* Passage text */
+.pstar__text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 26px !important;
+  color: rgba(240, 235, 224, 0.52);
+  line-height: 1.6;
+  letter-spacing: 0.035em;
+  transition: color 0.45s ease;
+  pointer-events: none;
+  margin: 0;
+}
+
+.pstar:hover .pstar__text {
+  color: rgba(240, 235, 224, 0.72);
+}
+
+/* Dot connector — tiny pulse point left of text */
+.pstar::before {
+  content: '';
+  position: absolute;
+  left: -0.9rem;
+  top: calc(0.3rem + 0.55em);
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(240, 235, 224, 0.12);
+  transition: background 0.4s ease, transform 0.4s ease;
+}
+
+.pstar:hover::before {
+  background: rgba(240, 235, 224, 0.45);
+  transform: scale(1.8);
+}
+
+/* Ghost photo — appears above the fragment on hover */
+.pstar__ghost {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  width: 112px;
+  height: 76px;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateX(-50%) translateY(6px);
+  filter: brightness(0.42) grayscale(14%);
+  border: 1px solid rgba(240, 235, 224, 0.06);
+  pointer-events: none;
+}
+
+.pstar:hover .pstar__ghost {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Responsive ── */
+@media (max-width: 680px) {
+  .pstar {
+    max-width: 160px;
+  }
+
+  .pstar__text {
+    font-size: 0.72rem;
+  }
+
+  .pstar__ghost {
+    display: none;
+  }
+}

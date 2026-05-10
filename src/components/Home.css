@@ -1,0 +1,201 @@
+/* ─────────────────────────────────────────────
+   Home — landing screen
+   ───────────────────────────────────────────── */
+
+.home {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+/* ── Background photos ── */
+.home__bgs {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.home__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 2.2s ease;
+  filter: brightness(0.38) grayscale(16%);
+  will-change: opacity;
+}
+
+.home__bg--current {
+  opacity: 1;
+}
+
+.home__bg--prev {
+  opacity: 0;
+  transition: opacity 2.2s ease;
+}
+
+/* ── Center block ── */
+.home__center {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  transition: transform 0.12s ease-out;
+  will-change: transform;
+}
+
+.home__title {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 8.5vw, 7rem);
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  color: var(--cream);
+  line-height: 1;
+  opacity: 0;
+  animation: fade-up 2s ease 0.4s forwards;
+}
+
+.home__title-jp {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: var(--cream-25);
+  margin-top: 0.6rem;
+  opacity: 0;
+  animation: fade-up 2s ease 0.9s forwards;
+}
+
+.home__title-kr {
+  margin-left: 1.2em;
+  opacity: 0.6;
+}
+
+.home__divider {
+  width: 1px;
+  height: 0;
+  background: var(--cream-25);
+  margin: 1.6rem auto;
+  animation: grow-line 1.4s ease 1.5s forwards;
+}
+
+@keyframes grow-line {
+  from { height: 0; }
+  to   { height: 44px; }
+}
+
+.home__tagline {
+  font-family: var(--font-serif);
+  font-size: clamp(0.82rem, 1.3vw, 1rem);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--cream-40);
+  letter-spacing: 0.05em;
+  line-height: 1.8;
+  max-width: 360px;
+  margin: 0 auto;
+  opacity: 0;
+  animation: fade-up 2s ease 2s forwards;
+}
+
+/* ── Chamber words ── */
+.home__words {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.home__word {
+  position: absolute;
+  background: none;
+  border: none;
+  padding: 0.6rem 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: transparent;
+  pointer-events: all;
+  opacity: 0;
+  animation: fade-up 1.6s ease forwards;
+  transition:
+    color          0.6s ease,
+    letter-spacing 0.5s ease;
+}
+
+.home__word:nth-child(1) { left: 7%;  top: 40%; }
+.home__word:nth-child(2) { left: 50%; top: 74%; transform: translateX(-50%); }
+.home__word:nth-child(3) { right: 7%; top: 37%; }
+
+.home__word--ready {
+  color: var(--cream-25);
+}
+
+.home__word--hovered {
+  color: rgba(240, 235, 224, 0.78);
+  letter-spacing: 0.48em;
+}
+
+.home__word::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(240, 235, 224, 0);
+  transform: translate(-50%, -50%);
+  transition: width 0.65s ease, height 0.65s ease, border-color 0.65s ease;
+  pointer-events: none;
+}
+
+.home__word--hovered::after {
+  width: 90px;
+  height: 90px;
+  border-color: rgba(240, 235, 224, 0.14);
+}
+
+/* ── Enter hint ── */
+.home__enter {
+  position: absolute;
+  bottom: 2.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--cream-25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  animation: fade-up 2s ease 3s forwards;
+  pointer-events: none;
+}
+
+.home__enter-line {
+  display: block;
+  width: 1px;
+  height: 22px;
+  background: var(--cream-15);
+  animation: grow-line 1s ease 3.4s both;
+}
+
+/* ── Responsive ── */
+@media (max-width: 680px) {
+  .home__word:nth-child(1) { left: 5%;  top: 32%; }
+  .home__word:nth-child(2) { left: 50%; top: 78%; transform: translateX(-50%); }
+  .home__word:nth-child(3) { right: 5%; top: 30%; }
+
+  .home__title {
+    font-size: clamp(2.4rem, 12vw, 4rem);
+  }
+}

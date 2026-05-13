@@ -7,6 +7,26 @@
     inset: 0;
     z-index: 80;
   }
+
+  /* ── Entrée directionnelle — transform seul, pas d'opacité ── */
+  /* Les items sont révélés immédiatement (pas de stagger) pour que */
+  /* le glissement soit visible dès la première frame.              */
+  @keyframes enter-from-left {
+    from { transform: translateX(-90px); }
+    to   { transform: translateX(0); }
+  }
+  @keyframes enter-from-right {
+    from { transform: translateX(90px); }
+    to   { transform: translateX(0); }
+  }
+  @keyframes enter-from-bottom {
+    from { transform: translateY(90px); }
+    to   { transform: translateY(0); }
+  }
+
+  .floating-passages--from-left   { animation: enter-from-left   0.72s cubic-bezier(0.22, 0, 0.18, 1) both; }
+  .floating-passages--from-right  { animation: enter-from-right  0.72s cubic-bezier(0.22, 0, 0.18, 1) both; }
+  .floating-passages--from-bottom { animation: enter-from-bottom 0.72s cubic-bezier(0.22, 0, 0.18, 1) both; }
   
   /* ── Container for JS-injected items ── */
   .fp-container {
@@ -96,5 +116,29 @@
   }
   
   .fp-item:hover .fp-source {
+    color: rgba(240, 235, 224, 0.45);
+  }
+
+  /* Siblings dimmed when another item is hovered */
+  .fp-item--dimmed {
+    opacity: 0.18;
+    transition: opacity 0.4s ease;
+  }
+
+  /* Visited passage — dimmed to signal already seen */
+  .fp-item--visited .fp-text {
+    color: rgba(240, 235, 224, 0.11);
+    transition: color 0.4s ease;
+  }
+  .fp-item--visited .fp-source {
+    color: rgba(240, 235, 224, 0.06);
+    transition: color 0.4s ease;
+  }
+
+  /* Restore brightness on hover even if visited */
+  .fp-item--visited:hover .fp-text {
+    color: rgba(240, 235, 224, 0.72);
+  }
+  .fp-item--visited:hover .fp-source {
     color: rgba(240, 235, 224, 0.45);
   }

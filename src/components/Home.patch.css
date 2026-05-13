@@ -1,0 +1,114 @@
+/* ─────────────────────────────────────────────
+   Home.css — patch v2
+   Ajouter à la FIN de Home.css existant
+   ───────────────────────────────────────────── */
+
+/* ── Fond : zoom imperceptible lors de l'entrée chambre ── */
+.home__bg--entering {
+    filter: brightness(0.52) grayscale(8%);
+    transform: scale(1.04);
+    transition:
+      filter    0.42s ease,
+      transform 0.42s ease,
+      opacity   2.2s ease;
+  }
+  
+  /* ── Bloc titre : fondu vers le haut quand un mot s'active ── */
+  .home__center--exit {
+    opacity: 0;
+    transform: translateY(-10px) !important;
+    transition: opacity 0.38s ease, transform 0.38s ease;
+    pointer-events: none;
+  }
+  
+  /* ── Mot cliqué : s'étale et disparaît ── */
+  .home__word--expanding {
+    letter-spacing: 0.82em !important;
+    opacity: 0 !important;
+    color: rgba(240, 235, 224, 0.95) !important;
+    transition:
+      letter-spacing 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+      opacity        0.35s ease 0.08s,
+      color          0.2s ease !important;
+    pointer-events: none;
+  }
+  
+  /* ── Autres mots : rétrécissent et disparaissent ── */
+  .home__word--collapsing {
+    letter-spacing: 0.06em !important;
+    opacity: 0 !important;
+    transition:
+      letter-spacing 0.35s ease,
+      opacity        0.28s ease !important;
+    pointer-events: none;
+  }
+  
+  /* ── Hint bas : disparaît discrètement ── */
+  .home__enter--exit {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  
+  /* ─────────────────────────────────────────────
+     App.css — corrections SharedUI
+     Remplacer les règles .shared-home-link
+     dans App.css par celles-ci
+     ───────────────────────────────────────────── */
+  
+  /*
+    PROBLÈME ORIGINAL :
+    .shared-home-link avait display: none puis display: block
+    dans deux règles consécutives — la seconde écrasait la première
+    mais s'appliquait TOUJOURS, pas seulement en vue photo.
+  
+    CORRECTION :
+    On supprime le display: none / display: block du CSS.
+    La logique d'affichage est gérée par React dans SharedUI :
+    le bouton gauche est TOUJOURS rendu, son label et son
+    onClick changent selon la prop `view`.
+  */
+  
+  /* ── Bouton gauche — home ou ← home ── */
+  .shared-home-link,
+  .shared-back {
+    position: fixed;
+    top: 1.9rem;
+    left: 2rem;
+    z-index: 600;
+    background: none;
+    border: none;
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    color: var(--cream-25);
+    transition: color 0.45s ease;
+    display: block; /* toujours visible, logique dans React */
+  }
+  
+  .shared-home-link:hover,
+  .shared-back:hover {
+    color: var(--cream-60);
+  }
+  
+  /* ── Bouton droit — ← passages (vue photo seulement) ── */
+  .shared-back--photo {
+    position: fixed;
+    top: 1.9rem;
+    right: 2rem;
+    left: auto;       /* annule le left: 2rem hérité */
+    z-index: 600;
+    background: none;
+    border: none;
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    color: var(--cream-25);
+    transition: color 0.45s ease;
+  }
+  
+  .shared-back--photo:hover {
+    color: var(--cream-60);
+  }

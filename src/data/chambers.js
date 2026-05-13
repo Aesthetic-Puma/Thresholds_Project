@@ -264,22 +264,19 @@ export const chambers = [
 ];
 
 export const about = {
-  photo:  "/photos/auteur/signature.jpg",
-  name:   "Jean Viratel",
-  roles:  ["Full Stack Engineer", "Photographer", "Author"],
-  bio: `I write code the way I write fiction — searching for what lies beneath the surface.
-
-Based in France, I have worked as a full stack engineer since 2020, building systems for clients including SNCF. In parallel, I photograph the spaces between people and their worlds, and I write stories where the real quietly unravels.
-
-Élégies Oubliées, my debut collection of short fiction, was published in 2024. It explores the thresholds between what is visible and what persists in shadow.
-
-This portfolio is itself an object I built — a site that behaves the way my photographs do: it does not explain. It opens a door, and waits.`,
+  photo:    "/photos/auteur/signature.jpg",
+  name:     "Jean Viratel",
+  roles:    ["Photographer", "Writer", "Engineer"],
+  tagline:  "I work at the threshold between systems and stories — building software, photographing the spaces between people and their worlds, writing fiction where the real quietly unravels.",
   book: {
     title:     "Élégies Oubliées",
-    publisher: "Published 2024",
+    subtitle:  "Recueil de fictions courtes",
+    publisher: "2024",
     link:      "https://www.babelio.com/livres/Viratel-legies-oubliees/1893561",
     cover:     "/photos/auteur/book-cover.jpg",
+    desc:      "Twelve stories, set in the half-light between memory and presence. A collection about thresholds, in the literal and figurative sense — doorways, nightfalls, faces seen and not quite recognised. Each piece in this portfolio is in conversation with one of these stories.",
   },
-  contact: "contact@jeanviratel.com",
-  cv:      "/cv-jean-viratel.pdf",
+  contact:  "jviratel@gmail.com",
+  linkedin: "https://www.linkedin.com/in/jean-viratel/",
+  cv:       "/cv-jean-viratel.pdf",
 };

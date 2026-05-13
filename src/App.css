@@ -108,7 +108,7 @@
      background: none;
      border: none;
      font-family: var(--font-serif);
-     font-size: 0.9rem;
+     font-size: 1.05rem;
      font-weight: 300;
      letter-spacing: 0.15em;
      color: var(--cream-25);
@@ -127,7 +127,7 @@
      background: none;
      border: none;
      font-family: var(--font-serif);
-     font-size: 0.9rem;
+     font-size: 1.05rem;
      font-weight: 300;
      letter-spacing: 0.15em;
      color: var(--cream-25);
@@ -149,7 +149,7 @@
      background: none;
      border: none;
      font-family: var(--font-serif);
-     font-size: 0.9rem;
+     font-size: 1.05rem;
      font-weight: 300;
      letter-spacing: 0.15em;
      color: var(--cream-25);
@@ -209,3 +209,36 @@
      background: rgba(240, 235, 224, 0.62);
      transform: scale(1.5);
    }
+
+   /* ── Passage progress — iii / vi — photo view only ── */
+   .shared-progress {
+     position: fixed;
+     right: 2rem;
+     top: 50%;
+     transform: translateY(-50%);
+     z-index: 600;
+     font-family: var(--font-mono);
+     font-size: 9px;
+     letter-spacing: 0.28em;
+     color: rgba(240, 235, 224, 0.18);
+     pointer-events: none;
+     writing-mode: vertical-rl;
+   }
+
+   /* ── About trigger — bottom-right of home ── */
+   .about-trigger {
+     position: fixed;
+     bottom: 1.8rem;
+     right: 2rem;
+     z-index: 600;
+     background: none;
+     border: none;
+     font-family: var(--font-mono);
+     font-size: 11px;
+     letter-spacing: 0.38em;
+     text-transform: uppercase;
+     color: rgba(240, 235, 224, 0.14);
+     transition: color 0.45s ease;
+     cursor: none;
+   }
+   .about-trigger:hover { color: rgba(240, 235, 224, 0.45); }

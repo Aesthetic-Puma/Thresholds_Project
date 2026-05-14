@@ -15,10 +15,16 @@ export const chambers = [
 
   // ── CHAMBRE I — Space ──────────────────────
   {
-    id:      "space",
-    label:   "Space",
-    labelFr: "L'Espace",
-    navWord: "Space",
+    id:        "space",
+    label:     "Space",
+    labelFr:   "L'Espace",
+    navWord:   "Space",
+    videoSrcs: [
+      "/videos/space-london.mov",
+      "/videos/space-korean-street.mp4",
+      "/videos/space-street-piano.mp4",
+      "/videos/space-buildings.mp4",
+    ],
 
     passages: [
       {
@@ -98,10 +104,16 @@ export const chambers = [
 
   // ── CHAMBRE II — Time ──────────────────────
   {
-    id:      "time",
-    label:   "Time",
-    labelFr: "Le Temps",
-    navWord: "Time",
+    id:        "time",
+    label:     "Time",
+    labelFr:   "Le Temps",
+    navWord:   "Time",
+    videoSrcs: [
+      "/videos/time-bridge.mp4",
+      "/videos/time-monk.mp4",
+      "/videos/time-peacock.mp4",
+      "/videos/time-pagoda.mp4",
+    ],
 
     passages: [
       {
@@ -181,10 +193,16 @@ export const chambers = [
 
   // ── CHAMBRE III — The Other ────────────────
   {
-    id:      "other",
-    label:   "The Other",
-    labelFr: "L'Autre",
-    navWord: "The Other",
+    id:        "other",
+    label:     "The Other",
+    labelFr:   "L'Autre",
+    navWord:   "The Other",
+    videoSrcs: [
+      "/videos/other-palace.mp4",
+      "/videos/other-guards.mov",
+      "/videos/other-protest.mp4",
+      "/videos/other-police.mp4",
+    ],
 
     passages: [
       {

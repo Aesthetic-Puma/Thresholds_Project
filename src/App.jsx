@@ -9,25 +9,29 @@ import Dissolve          from "./components/Dissolve";
 import "./App.css";
 
 // ─────────────────────────────────────────────
-// App — root navigation state machine
+// App — root navigation state machine — v4
 //
 // Views:
-//   "home"     → landing, trois mots
+//   "home"     → landing
 //   "passages" → floating passage selection
 //   "photo"    → iris reveal + orbital anchors
 //   "about"    → page auteur
 //
-// Flux complet :
-//   home ──[clic mot]──► passages ──[clic fragment]──► photo
-//    ▲                       ▲                            │
-//    └──[Thresholds]─────────┘◄──────[← passages]────────┘
+// Transition v4 — home → passages :
+//   t=0     click → setExpandingWord + setEnterDir
+//                   word starts letter-spacing explosion
+//                   siblings collapse, home__center exits
+//   t=180   grain-bloom turns on (opacity 0 → 0.34)
+//                   — the world dissolves into emulsion
+//   t=460   view swaps home → passages
+//                   passages slides in from enterDir
+//   t=620   grain-bloom starts fading (0.34 → 0.08)
+//                   — the chamber resolves out of grain
+//   t=1100  grain-bloom off — only base grain remains
 //
-// Corrections v2 :
-//   - dissolveTo prend duration + fadeInDuration séparés
-//   - handleBackToList signal à PhotoStage de stopper
-//     les animations avant le dissolve
-//   - handleEnterChamber passe le mot cliqué pour
-//     l'animation d'expansion dans Home
+// Other transitions (any → home, any → about, photo → passages)
+// keep the original Dissolve overlay — it's the right tool
+// for those heavier cuts.
 // ─────────────────────────────────────────────
 
 const toRoman = (n) => {
@@ -38,6 +42,8 @@ const toRoman = (n) => {
   }, "");
 };
 
+const ENTRY_DIRS = ["left", "bottom", "right"];
+
 export default function App() {
   const [view, setView]             = useState("home");
   const [chamberIdx, setChamberIdx] = useState(0);
@@ -46,10 +52,12 @@ export default function App() {
   const [mousePos, setMousePos]     = useState({ x: 0, y: 0 });
   const [visited, setVisited]       = useState({});
 
-  // ── Mot cliqué sur la home — pour l'animation d'expansion
+  // ── Word click animation + chamber arrival direction
   const [expandingWord, setExpandingWord] = useState(null);
-  // Direction d'entrée de FloatingPassages (calée sur la position du mot cliqué)
-  const [enterDir, setEnterDir] = useState(null);
+  const [enterDir, setEnterDir]           = useState(null);
+
+  // ── Grain bloom — NEW transition layer for home → passages
+  const [grainState, setGrainState] = useState("idle"); // idle | bloom | fading
 
   useEffect(() => {
     const onMove = (e) => setMousePos({ x: e.clientX, y: e.clientY });
@@ -57,10 +65,7 @@ export default function App() {
     return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
-  // ── dissolveTo amélioré
-  // fadeOut  : durée du fondu au noir (ms)
-  // hold     : temps de maintien au noir avant callback (ms)
-  // fadeIn   : durée du retour (ms) — le Dissolve.css gère ça
+  // ── Generic dissolve helper (kept for photo/about transitions)
   const dissolveTo = useCallback((callback, fadeOut = 480, hold = 0) => {
     setDissolving(true);
     setTimeout(() => {
@@ -69,26 +74,37 @@ export default function App() {
     }, fadeOut + hold);
   }, []);
 
-  // ── home → passages ──
-  // Le mot cliqué s'étale (letter-spacing → ∞), les autres s'effacent.
-  // Pas de dissolve — FloatingPassages entre depuis la direction du mot.
-  //   Space (gauche)    → enterDir 'left'
-  //   Time (bas)        → enterDir 'bottom'
-  //   The Other (droite)→ enterDir 'right'
+  // ── home → passages — grain bloom orchestration
   const handleEnterChamber = useCallback((idx, wordId) => {
-    const dirs = ['left', 'bottom', 'right'];
+    if (expandingWord) return;
+
     setExpandingWord(wordId);
-    setEnterDir(dirs[idx] ?? 'left');
-    setTimeout(() => {
+    setEnterDir(ENTRY_DIRS[idx] ?? "left");
+
+    // t=180 — grain bloom in
+    const t1 = setTimeout(() => setGrainState("bloom"), 180);
+
+    // t=460 — view swap
+    const t2 = setTimeout(() => {
       setChamberIdx(idx);
       setPassageIdx(0);
       setView("passages");
       setExpandingWord(null);
-    }, 420);
-    setTimeout(() => setEnterDir(null), 420 + 700);
-  }, []);
+    }, 460);
 
-  // ── passages → photo ──
+    // t=620 — grain bloom starts fading
+    const t3 = setTimeout(() => setGrainState("fading"), 620);
+
+    // t=1100 — back to idle
+    const t4 = setTimeout(() => setGrainState("idle"), 1100);
+
+    // t=1180 — release enterDir (let the slide-in animation finish first)
+    const t5 = setTimeout(() => setEnterDir(null), 1180);
+
+    return () => { [t1, t2, t3, t4, t5].forEach(clearTimeout); };
+  }, [expandingWord]);
+
+  // ── passages → photo
   const handleSelectPassage = useCallback((idx) => {
     dissolveTo(() => {
       setPassageIdx(idx);
@@ -101,26 +117,30 @@ export default function App() {
     });
   }, [dissolveTo, chamberIdx]);
 
-  // ── photo → passages ──
-  // Dissolve légèrement plus long pour laisser PhotoStage
-  // nettoyer ses animations (mots volants, canvas grain)
+  // ── photo → passages
   const handleBackToList = useCallback(() => {
     dissolveTo(() => setView("passages"), 520);
   }, [dissolveTo]);
 
-  // ── any → home ──
+  // ── any → home (uses a softer grain-bloom return)
   const handleGoHome = useCallback(() => {
-    dissolveTo(() => setView("home"), 520);
-  }, [dissolveTo]);
+    setGrainState("bloom");
+    setTimeout(() => {
+      setView("home");
+      setEnterDir(null);
+      setGrainState("fading");
+    }, 320);
+    setTimeout(() => setGrainState("idle"), 900);
+  }, []);
 
-  // ── home → about ──
+  // ── home → about
   const handleGoAbout = useCallback(() => {
     dissolveTo(() => setView("about"));
   }, [dissolveTo]);
 
-  // ── switch chamber depuis dots ──
+  // ── chamber dot switch
   const handleSwitchChamber = useCallback((idx) => {
-    if (idx === chamberIdx) return; // évite le dissolve inutile
+    if (idx === chamberIdx) return;
     dissolveTo(() => {
       setChamberIdx(idx);
       setPassageIdx(0);
@@ -136,6 +156,17 @@ export default function App() {
       <Cursor mousePos={mousePos} />
       <div className="grain"    aria-hidden="true" />
       <div className="vignette" aria-hidden="true" />
+
+      {/* ── Grain bloom — overlay for home → passages transition ── */}
+      <div
+        className={[
+          "grain-bloom",
+          grainState === "bloom"  ? "grain-bloom--active" : "",
+          grainState === "fading" ? "grain-bloom--fading" : "",
+        ].join(" ")}
+        aria-hidden="true"
+      />
+
       <Dissolve active={dissolving} />
 
       {/* ── HOME ── */}
@@ -215,18 +246,6 @@ export default function App() {
 
 // ─────────────────────────────────────────────
 // SharedUI — UI persistante entre passages + photo
-//
-// Vue "passages" :
-//   gauche  → ← home
-//   centre  → label chambre
-//   bas     → dots
-//
-// Vue "photo" :
-//   gauche  → Thresholds (home)
-//   droite  → ← passages
-//   centre  → label chambre
-//   bas     → dots
-//   droite vertical → i / iv (progress)
 // ─────────────────────────────────────────────
 function SharedUI({
   view,
@@ -242,7 +261,6 @@ function SharedUI({
 
   return (
     <>
-      {/* ── Gauche : home link (toujours) ── */}
       <button
         className={isPhoto ? "shared-home-link" : "shared-back"}
         onClick={isPhoto ? onGoHome : onBack}
@@ -252,7 +270,6 @@ function SharedUI({
         {isPhoto ? site.title : "← home"}
       </button>
 
-      {/* ── Droite : ← passages (vue photo seulement) ── */}
       {isPhoto && (
         <button
           className="shared-back shared-back--photo"
@@ -264,7 +281,6 @@ function SharedUI({
         </button>
       )}
 
-      {/* ── Centre haut : label chambre ── */}
       <p className="shared-label" aria-hidden="true">
         {chambers[chamberIdx].label}
         <span className="shared-label__fr">
@@ -272,7 +288,6 @@ function SharedUI({
         </span>
       </p>
 
-      {/* ── Bas centre : dots de navigation ── */}
       <nav className="shared-dots" aria-label="Chamber navigation">
         {chambers.map((ch, i) => (
           <button
@@ -286,7 +301,6 @@ function SharedUI({
         ))}
       </nav>
 
-      {/* ── Droite vertical : progression i / iv (vue photo) ── */}
       {isPhoto && passageProgress && (
         <p
           className="shared-progress"

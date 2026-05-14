@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────
-   SEUILS — Global Styles
+   SEUILS — Global Styles — v4
    ───────────────────────────────────────────── */
 
    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Courier+Prime:ital@0;1&display=swap');
@@ -10,25 +10,29 @@
      padding: 0;
      box-sizing: border-box;
    }
-   
+
    :root {
      --cream:        #f0ebe0;
+     --cream-72:     rgba(240, 235, 224, 0.72);
      --cream-60:     rgba(240, 235, 224, 0.6);
      --cream-40:     rgba(240, 235, 224, 0.4);
+     --cream-30:     rgba(240, 235, 224, 0.30);
      --cream-25:     rgba(240, 235, 224, 0.25);
+     --cream-22:     rgba(240, 235, 224, 0.22);
      --cream-15:     rgba(240, 235, 224, 0.15);
+     --cream-10:     rgba(240, 235, 224, 0.10);
      --cream-08:     rgba(240, 235, 224, 0.08);
      --dark:         #0a0906;
      --dark-90:      rgba(10, 9, 6, 0.9);
-   
+
      --font-serif:   'Cormorant Garamond', Georgia, serif;
      --font-mono:    'Courier Prime', 'Courier New', monospace;
-   
+
      --transition-slow:   1.4s ease;
      --transition-medium: 0.8s ease;
      --transition-fast:   0.4s ease;
    }
-   
+
    html, body, #root {
      width: 100%;
      height: 100%;
@@ -39,26 +43,45 @@
      -webkit-font-smoothing: antialiased;
      -moz-osx-font-smoothing: grayscale;
    }
-   
+
    /* ── App wrapper ── */
    .app {
      position: fixed;
      inset: 0;
      overflow: hidden;
    }
-   
-   /* ── Grain overlay ── */
+
+   /* ─────────────────────────────────────────────
+      GRAIN — base layer + bloom for transitions
+      ───────────────────────────────────────────── */
+
    .grain {
      position: fixed;
      inset: 0;
      z-index: 600;
      pointer-events: none;
-     opacity: 0.038;
+     opacity: 0.052;                  /* was 0.038 — slightly more present */
      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
      background-size: 128px;
      animation: grain-shift 0.45s steps(2) infinite;
    }
-   
+
+   /* ── Grain BLOOM — overlays during home → passages transition ── */
+   .grain-bloom {
+     position: fixed;
+     inset: 0;
+     z-index: 605;
+     pointer-events: none;
+     opacity: 0;
+     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+     background-size: 96px;
+     animation: grain-shift 0.45s steps(2) infinite;
+     mix-blend-mode: overlay;
+     transition: opacity 0.18s ease-out;
+   }
+   .grain-bloom--active { opacity: 0.34; }
+   .grain-bloom--fading { opacity: 0.08; transition: opacity 0.7s ease-out; }
+
    @keyframes grain-shift {
      0%   { transform: translate(0, 0); }
      25%  { transform: translate(-2px, 1px); }
@@ -66,7 +89,7 @@
      75%  { transform: translate(-1px, 2px); }
      100% { transform: translate(2px, -1px); }
    }
-   
+
    /* ── Vignette ── */
    .vignette {
      position: fixed;
@@ -79,46 +102,25 @@
        rgba(10, 9, 6, 0.88) 100%
      );
    }
-   
+
    /* ── Utility: fade-up animation ── */
    @keyframes fade-up {
-     from {
-       opacity: 0;
-       transform: translateY(12px);
-     }
-     to {
-       opacity: 1;
-       transform: translateY(0);
-     }
+     from { opacity: 0; transform: translateY(12px); }
+     to   { opacity: 1; transform: translateY(0); }
    }
-   
+
    /* ── Utility: type cursor blink ── */
    @keyframes blink {
      0%, 100% { opacity: 1; }
-     50%       { opacity: 0; }
+     50%      { opacity: 0; }
    }
-   
-   /* ── SharedUI — persists across passagelist + photostage ── */
-   
-   .shared-back {
-     position: fixed;
-     top: 1.9rem;
-     left: 2rem;
-     z-index: 600;
-     background: none;
-     border: none;
-     font-family: var(--font-serif);
-     font-size: 1.05rem;
-     font-weight: 300;
-     letter-spacing: 0.15em;
-     color: var(--cream-25);
-     transition: color 0.45s ease;
-   }
-   
-   .shared-back:hover {
-     color: var(--cream-60);
-   }
-   
+
+   /* ─────────────────────────────────────────────
+      SHARED UI — persists across passagelist + photostage
+      All sizes bumped in v4 — the originals were too small.
+      ───────────────────────────────────────────── */
+
+   .shared-back,
    .shared-home-link {
      position: fixed;
      top: 1.9rem;
@@ -127,19 +129,20 @@
      background: none;
      border: none;
      font-family: var(--font-serif);
-     font-size: 1.05rem;
+     font-size: 1.1rem;              /* was 1.05rem */
      font-weight: 300;
-     letter-spacing: 0.15em;
-     color: var(--cream-25);
-     transition: color 0.45s ease;
-     display: none; /* shown only in photostage via conditional */
-   }
-   
-   /* Override — when photostage, back is hidden, home-link shown */
-   .shared-home-link {
+     letter-spacing: 0.16em;
+     color: var(--cream-30);
+     transition: color 0.45s ease, letter-spacing 0.45s ease;
+     cursor: none;
      display: block;
    }
-   
+   .shared-back:hover,
+   .shared-home-link:hover {
+     color: var(--cream-72);
+     letter-spacing: 0.22em;
+   }
+
    .shared-back--photo {
      position: fixed;
      top: 1.9rem;
@@ -149,14 +152,14 @@
      background: none;
      border: none;
      font-family: var(--font-serif);
-     font-size: 1.05rem;
+     font-size: 1.1rem;
      font-weight: 300;
-     letter-spacing: 0.15em;
-     color: var(--cream-25);
-     transition: color 0.45s ease;
+     letter-spacing: 0.16em;
+     color: var(--cream-30);
+     transition: color 0.45s ease, letter-spacing 0.45s ease;
    }
-   .shared-back--photo:hover { color: var(--cream-60); }
-   
+   .shared-back--photo:hover { color: var(--cream-72); letter-spacing: 0.22em; }
+
    .shared-label {
      position: fixed;
      top: 2rem;
@@ -164,8 +167,8 @@
      transform: translateX(-50%);
      z-index: 600;
      font-family: var(--font-mono);
-     font-size: 0.42rem;
-     letter-spacing: 0.44em;
+     font-size: 11px;                 /* was 0.42rem (~6.7px) — way too small */
+     letter-spacing: 0.42em;
      text-transform: uppercase;
      color: var(--cream-15);
      white-space: nowrap;
@@ -174,16 +177,16 @@
      align-items: baseline;
      gap: 0.8em;
    }
-   
+
    .shared-label__fr {
      font-family: var(--font-serif);
      font-style: italic;
-     font-size: 0.68rem;
-     letter-spacing: 0.08em;
+     font-size: 16px;                 /* was 0.68rem (~10.9px) */
+     letter-spacing: 0.06em;
      text-transform: none;
-     color: rgba(240, 235, 224, 0.08);
+     color: var(--cream-10);
    }
-   
+
    .shared-dots {
      position: fixed;
      bottom: 1.8rem;
@@ -191,22 +194,24 @@
      transform: translateX(-50%);
      z-index: 600;
      display: flex;
-     gap: 10px;
+     gap: 12px;                       /* was 10 */
      align-items: center;
    }
-   
+
    .shared-dot {
-     width: 4px;
-     height: 4px;
+     width: 5px;                      /* was 4 */
+     height: 5px;
      border-radius: 50%;
      border: none;
-     background: rgba(240, 235, 224, 0.12);
+     background: rgba(240, 235, 224, 0.14);
      padding: 0;
      transition: background 0.4s, transform 0.4s;
+     cursor: none;
    }
-   
+   .shared-dot:hover { background: rgba(240, 235, 224, 0.32); }
+
    .shared-dot--active {
-     background: rgba(240, 235, 224, 0.62);
+     background: rgba(240, 235, 224, 0.65);
      transform: scale(1.5);
    }
 
@@ -218,9 +223,9 @@
      transform: translateY(-50%);
      z-index: 600;
      font-family: var(--font-mono);
-     font-size: 9px;
-     letter-spacing: 0.28em;
-     color: rgba(240, 235, 224, 0.18);
+     font-size: 10px;                 /* was 9 */
+     letter-spacing: 0.3em;
+     color: var(--cream-22);
      pointer-events: none;
      writing-mode: vertical-rl;
    }
@@ -228,17 +233,41 @@
    /* ── About trigger — bottom-right of home ── */
    .about-trigger {
      position: fixed;
-     bottom: 1.8rem;
+     bottom: 2rem;
      right: 2rem;
      z-index: 600;
      background: none;
      border: none;
      font-family: var(--font-mono);
-     font-size: 11px;
-     letter-spacing: 0.38em;
+     font-size: 13px;                 /* was 11 */
+     letter-spacing: 0.4em;
      text-transform: uppercase;
-     color: rgba(240, 235, 224, 0.14);
-     transition: color 0.45s ease;
+     color: var(--cream-22);
+     transition: color 0.45s ease, letter-spacing 0.45s ease;
      cursor: none;
+     padding: 0.6rem 0.8rem;
    }
-   .about-trigger:hover { color: rgba(240, 235, 224, 0.45); }
+   .about-trigger:hover {
+     color: var(--cream-60);
+     letter-spacing: 0.5em;
+   }
+
+   /* ─────────────────────────────────────────────
+      MOBILE — global adjustments
+      ───────────────────────────────────────────── */
+   @media (max-width: 680px) {
+     .shared-back,
+     .shared-home-link,
+     .shared-back--photo {
+       font-size: 0.95rem;
+       top: 1.4rem;
+       left: 1.4rem;
+     }
+     .shared-back--photo { left: auto; right: 1.4rem; }
+
+     .shared-label    { font-size: 9px; letter-spacing: 0.35em; gap: 0.5em; }
+     .shared-label__fr { font-size: 13px; }
+
+     .about-trigger { font-size: 11px; bottom: 1.4rem; right: 1.4rem; }
+     .shared-progress { right: 1rem; font-size: 9px; }
+   }

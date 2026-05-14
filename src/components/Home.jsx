@@ -2,15 +2,17 @@ import { useState, useEffect, useRef } from "react";
 import "./Home.css";
 
 // ─────────────────────────────────────────────
-// Home — landing screen v3
+// Home — landing screen v4
 //
-// Nouveautés :
-//   - Rectangles portrait vidéo (200×356px) au hover
-//   - Direction glissement cohérente avec position du mot
-//   - Délai 160ms anti-accidentel
-//   - video.currentTime = 0 à chaque hover
-//   - Pause différée après fade-out
-//   - expandingWord pour animation sortie → chambre
+// Changes vs v3:
+//   - Word font-size 0.82 → 1.0rem (+22%)
+//   - Word letter-spacing 0.32 → 0.34em
+//   - Hover ring 120 → 142px (more breathing room)
+//   - Word--expanding letter-spacing 0.82 → 1.0em (more dramatic)
+//   - Video teaser rect 200×356 → 220×392
+//   - Teaser adds: per-rect grain layer + corner crop mark
+//   - Teaser label: roman numeral (I/II/III) + chamber name + FR italic
+//   - Bottom hint font 0.55rem → 11px
 // ─────────────────────────────────────────────
 
 const BG_PHOTOS = [
@@ -19,6 +21,8 @@ const BG_PHOTOS = [
   "/photos/temps/musee-orange.jpg",
   "/photos/autre/couple-flou-fantome.jpg",
 ];
+
+const ROMAN = ["I", "II", "III"];
 
 export default function Home({
   site,
@@ -32,10 +36,12 @@ export default function Home({
   const [ready, setReady]     = useState(false);
   const [hovered, setHovered] = useState(null);
 
-  const titleRef    = useRef(null);
-  const videoRefs   = useRef({});
-  const hoverTimer  = useRef(null);
-  const pauseTimers = useRef({});
+  const titleRef       = useRef(null);
+  const videoRefs      = useRef({});
+  const hoverTimer     = useRef(null);
+  const pauseTimers    = useRef({});
+  const currentVidIdx  = useRef({});  // { [ch.id]: number } — index en cours par chambre
+  const hoveredRef     = useRef(null); // miroir de hovered pour les callbacks onEnded
 
   useEffect(() => {
     const t = setTimeout(() => setReady(true), 2400);
@@ -60,6 +66,27 @@ export default function Home({
     el.style.transform = `translate(${dx}px, ${dy}px)`;
   }, [mousePos]);
 
+  // Garde hoveredRef synchronisé pour les callbacks onEnded (évite les closures périmées)
+  hoveredRef.current = hovered;
+
+  // ── Sélection aléatoire sans répétition
+  const playRandom = (ch) => {
+    const srcs = ch.videoSrcs;
+    if (!srcs?.length) return;
+    const video = videoRefs.current[ch.id];
+    if (!video) return;
+    const prev = currentVidIdx.current[ch.id] ?? -1;
+    let next = prev;
+    if (srcs.length > 1) {
+      while (next === prev) next = Math.floor(Math.random() * srcs.length);
+    } else {
+      next = 0;
+    }
+    currentVidIdx.current[ch.id] = next;
+    video.src = srcs[next];
+    video.play().catch(() => {});
+  };
+
   // ── Play / pause selon hovered
   useEffect(() => {
     chambers.forEach((ch) => {
@@ -67,15 +94,13 @@ export default function Home({
       if (!video) return;
       if (hovered === ch.id) {
         clearTimeout(pauseTimers.current[ch.id]);
-        video.currentTime = 0;
-        video.play().catch(() => {});
+        playRandom(ch);
       } else {
-        pauseTimers.current[ch.id] = setTimeout(() => {
-          video.pause();
-        }, 650);
+        pauseTimers.current[ch.id] = setTimeout(() => video.pause(), 650);
       }
     });
-  }, [hovered, chambers]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hovered]);
 
   useEffect(() => {
     return () => {
@@ -97,17 +122,17 @@ export default function Home({
   };
 
   return (
-    <div className="home">
+    <div className="home" data-screen-label="Home">
 
-      {/* ── Fond photos ── */}
+      {/* ── Background photos ── */}
       <div className="home__bgs" aria-hidden="true">
         {BG_PHOTOS.map((src, i) => (
           <div
             key={src}
             className={[
               "home__bg",
-              i === bgIdx   ? "home__bg--current" : "",
-              i === prevIdx ? "home__bg--prev"    : "",
+              i === bgIdx   ? "home__bg--current"  : "",
+              i === prevIdx ? "home__bg--prev"     : "",
               isExpanding   ? "home__bg--entering" : "",
             ].join(" ")}
             style={{ backgroundImage: `url(${src})` }}
@@ -115,8 +140,8 @@ export default function Home({
         ))}
       </div>
 
-      {/* ── Rectangles portrait vidéo ── */}
-      {chambers.map((ch) => (
+      {/* ── Video teaser rectangles ── */}
+      {chambers.map((ch, i) => (
         <div
           key={ch.id}
           className={[
@@ -126,21 +151,26 @@ export default function Home({
           ].join(" ")}
           aria-hidden="true"
         >
-          {ch.videoSrc && (
+          {ch.videoSrcs?.length > 0 && (
             <video
               ref={(el) => { videoRefs.current[ch.id] = el; }}
-              src={ch.videoSrc}
               muted
-              loop
               playsInline
               preload="none"
+              onEnded={() => {
+                if (hoveredRef.current !== ch.id) return;
+                playRandom(ch);
+              }}
             />
           )}
           <div className="home__vid-vignette" />
-          <span className="home__vid-label">
-            {ch.label}
+          <div className="home__vid-grain" />
+          <div className="home__vid-label">
+            <span className="home__vid-label-num">
+              {ROMAN[i]} &thinsp;·&thinsp; {ch.label}
+            </span>
             <em className="home__vid-label-fr">{ch.labelFr}</em>
-          </span>
+          </div>
         </div>
       ))}
 

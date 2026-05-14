@@ -1,5 +1,11 @@
 /* ─────────────────────────────────────────────
-   FloatingPassages — drifting passage selection
+   FloatingPassages — drifting passage selection — v4
+
+   Changes vs v3:
+   - fp-source 11 → 12px, letter-spacing 0.22 → 0.24em
+   - fp-text 22 → 23px, line-height 1.65 → 1.7
+   - fp-center__label 0.42rem → 11px (was unreadable on retina)
+   - fp-center__hint 0.65rem → 13px
    ───────────────────────────────────────────── */
 
    .floating-passages {
@@ -8,33 +14,31 @@
     z-index: 80;
   }
 
-  /* ── Entrée directionnelle — transform seul, pas d'opacité ── */
-  /* Les items sont révélés immédiatement (pas de stagger) pour que */
-  /* le glissement soit visible dès la première frame.              */
+  /* ── Entrée directionnelle — wrapper slides, items handle their own fade ── */
   @keyframes enter-from-left {
-    from { transform: translateX(-90px); }
+    from { transform: translateX(-100px); }
     to   { transform: translateX(0); }
   }
   @keyframes enter-from-right {
-    from { transform: translateX(90px); }
+    from { transform: translateX(100px); }
     to   { transform: translateX(0); }
   }
   @keyframes enter-from-bottom {
-    from { transform: translateY(90px); }
+    from { transform: translateY(100px); }
     to   { transform: translateY(0); }
   }
 
-  .floating-passages--from-left   { animation: enter-from-left   0.72s cubic-bezier(0.22, 0, 0.18, 1) both; }
-  .floating-passages--from-right  { animation: enter-from-right  0.72s cubic-bezier(0.22, 0, 0.18, 1) both; }
-  .floating-passages--from-bottom { animation: enter-from-bottom 0.72s cubic-bezier(0.22, 0, 0.18, 1) both; }
-  
+  .floating-passages--from-left   { animation: enter-from-left   0.82s cubic-bezier(0.22, 0, 0.18, 1) both; }
+  .floating-passages--from-right  { animation: enter-from-right  0.82s cubic-bezier(0.22, 0, 0.18, 1) both; }
+  .floating-passages--from-bottom { animation: enter-from-bottom 0.82s cubic-bezier(0.22, 0, 0.18, 1) both; }
+
   /* ── Container for JS-injected items ── */
   .fp-container {
     position: absolute;
     inset: 0;
-    pointer-events: none; /* items handle their own events */
+    pointer-events: none;
   }
-  
+
   /* ── Center label ── */
   .fp-center {
     position: fixed;
@@ -45,25 +49,26 @@
     text-align: center;
     pointer-events: none;
   }
-  
+
   .fp-center__label {
     display: block;
     font-family: var(--font-mono);
-    font-size: 0.42rem;
+    font-size: 11px;                /* was 0.42rem (~6.7px) */
     letter-spacing: 0.44em;
     text-transform: uppercase;
-    color: rgba(240, 235, 224, 0.08);
+    color: var(--cream-10);
   }
-  
+
   .fp-center__hint {
     display: block;
     font-family: var(--font-serif);
     font-style: italic;
-    font-size: 0.65rem;
-    color: rgba(240, 235, 224, 0.06);
-    margin-top: 0.3rem;
+    font-size: 13px;                /* was 0.65rem (~10.4px) */
+    color: var(--cream-08);
+    margin-top: 0.4rem;
+    letter-spacing: 0.02em;
   }
-  
+
   /* ── Floating item ── */
   .fp-item {
     position: fixed;
@@ -77,21 +82,22 @@
     opacity: 0;
     transition: opacity 0.6s ease;
     pointer-events: all;
+    cursor: none;
   }
-  
+
   .fp-item--visible {
     opacity: 1;
   }
-  
+
   /* Source nouvelle */
   .fp-source {
     display: block;
     font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.22em;
+    font-size: 12px;                /* was 11 */
+    letter-spacing: 0.24em;         /* was 0.22 */
     text-transform: uppercase;
-    color: rgba(240, 235, 224, 0.28);
-    margin-bottom: 5px;
+    color: var(--cream-30);
+    margin-bottom: 7px;
     pointer-events: none;
     white-space: nowrap;
   }
@@ -101,22 +107,22 @@
     font-family: var(--font-serif);
     font-style: italic;
     font-weight: 300;
-    font-size: 22px;
-    color: rgba(240, 235, 224, 0.52);
-    line-height: 1.65;
+    font-size: 23px;                /* was 22 */
+    color: rgba(240, 235, 224, 0.55);
+    line-height: 1.7;               /* was 1.65 */
     letter-spacing: 0.04em;
     transition: color 0.4s ease;
     pointer-events: none;
     white-space: pre-line;
     word-break: keep-all;
   }
-  
+
   .fp-item:hover .fp-text {
-    color: rgba(240, 235, 224, 0.72);
+    color: rgba(240, 235, 224, 0.85);
   }
-  
+
   .fp-item:hover .fp-source {
-    color: rgba(240, 235, 224, 0.45);
+    color: rgba(240, 235, 224, 0.55);
   }
 
   /* Siblings dimmed when another item is hovered */
@@ -137,8 +143,17 @@
 
   /* Restore brightness on hover even if visited */
   .fp-item--visited:hover .fp-text {
-    color: rgba(240, 235, 224, 0.72);
+    color: rgba(240, 235, 224, 0.85);
   }
   .fp-item--visited:hover .fp-source {
-    color: rgba(240, 235, 224, 0.45);
+    color: rgba(240, 235, 224, 0.55);
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 680px) {
+    .fp-item { width: 230px; }
+    .fp-text { font-size: 17px; line-height: 1.65; }
+    .fp-source { font-size: 10px; }
+    .fp-center__label { font-size: 9px; }
+    .fp-center__hint { font-size: 11px; }
   }

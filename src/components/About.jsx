@@ -1,31 +1,66 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./About.css";
 
+// ─────────────────────────────────────────────
+// About — v4
+//
+// Changes vs v3:
+//   - Header restructured: name + roles in a row (flex baseline),
+//     tagline below at clamp(18-22px) max-width 600 → reads better mobile
+//   - 1px scroll progress bar on the left edge
+//   - Nav-label dims on scroll
+//   - All small mono labels 9→11px, stack 8→10px
+//   - Pull-quote 18→20px, padding-left 1.4→1.6rem
+//   - Contact links 17→19px, hover spreads letter-spacing
+//   - Book link 9→11px with letter-spacing on hover
+// ─────────────────────────────────────────────
+
 export default function About({ about, site, onClose }) {
+  const scrollRef = useRef(null);
+  const [progress, setProgress] = useState(0);
+
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const max = el.scrollHeight - el.clientHeight;
+    setProgress(max > 0 ? el.scrollTop / max : 0);
+  };
+
   return (
-    <div className="about">
+    <div className="about" data-screen-label="About">
+
+      {/* ── Scroll progress (1px left edge) ── */}
+      <div className="about__progress" aria-hidden="true">
+        <div
+          className="about__progress-bar"
+          style={{ height: `${progress * 100}%` }}
+        />
+      </div>
 
       {/* ── Nav ── */}
       <button className="about__close" onClick={onClose} data-cursor-large>
         ← {site.title}
       </button>
-      <p className="about__nav-label" aria-hidden="true">
+      <p
+        className={`about__nav-label${progress > 0.04 ? " about__nav-label--dim" : ""}`}
+        aria-hidden="true"
+      >
         About <span className="about__nav-label-fr">{site.titleFr}</span>
       </p>
 
       {/* ── Scroll body ── */}
-      <div className="about__scroll">
+      <div className="about__scroll" ref={scrollRef} onScroll={handleScroll}>
         <div className="about__inner">
 
           {/* ── Header ── */}
           <header className="about__header">
-            <div className="about__header-left">
+            <div className="about__header-top">
               <h1 className="about__name">{about.name}</h1>
               <p className="about__roles">{about.roles.join(" · ")}</p>
             </div>
@@ -189,7 +224,12 @@ export default function About({ about, site, onClose }) {
         </div>
       </div>
 
-      <div className="about__scroll-hint" aria-hidden="true">scroll ↓</div>
+      <div
+        className={`about__scroll-hint${progress > 0.04 ? " about__scroll-hint--dim" : ""}`}
+        aria-hidden="true"
+      >
+        scroll ↓
+      </div>
     </div>
   );
 }

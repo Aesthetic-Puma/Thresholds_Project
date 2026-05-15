@@ -32,6 +32,29 @@
   .floating-passages--from-right  { animation: enter-from-right  0.82s cubic-bezier(0.22, 0, 0.18, 1) both; }
   .floating-passages--from-bottom { animation: enter-from-bottom 0.82s cubic-bezier(0.22, 0, 0.18, 1) both; }
 
+  /* ── Filigrane — photo appariée, respire derrière le texte ── */
+  .fp-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1.6s ease;
+  }
+
+  /* Écho : très discret */
+  .fp-bg--echo {
+    filter: brightness(0.18) grayscale(22%) contrast(1.06);
+    transition: opacity 1.4s ease;
+  }
+
+  /* Ancre : légèrement plus présent */
+  .fp-bg--anchor {
+    filter: brightness(0.26) grayscale(14%) contrast(1.08);
+    transition: opacity 1.0s ease;
+  }
+
   /* ── Container for JS-injected items ── */
   .fp-container {
     position: absolute;
@@ -53,19 +76,19 @@
   .fp-center__label {
     display: block;
     font-family: var(--font-mono);
-    font-size: 11px;                /* was 0.42rem (~6.7px) */
+    font-size: 13px;
     letter-spacing: 0.44em;
     text-transform: uppercase;
-    color: var(--cream-10);
+    color: var(--cream-22);
   }
 
   .fp-center__hint {
     display: block;
     font-family: var(--font-serif);
     font-style: italic;
-    font-size: 13px;                /* was 0.65rem (~10.4px) */
-    color: var(--cream-08);
-    margin-top: 0.4rem;
+    font-size: 17px;
+    color: var(--cream-30);
+    margin-top: 0.5rem;
     letter-spacing: 0.02em;
   }
 
@@ -93,8 +116,8 @@
   .fp-source {
     display: block;
     font-family: var(--font-mono);
-    font-size: 12px;                /* was 11 */
-    letter-spacing: 0.24em;         /* was 0.22 */
+    font-size: 12px;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
     color: var(--cream-30);
     margin-bottom: 7px;
@@ -102,14 +125,14 @@
     white-space: nowrap;
   }
 
-  /* Passage excerpt */
+  /* Passage excerpt — base (echo) */
   .fp-text {
     font-family: var(--font-serif);
     font-style: italic;
     font-weight: 300;
-    font-size: 23px;                /* was 22 */
-    color: rgba(240, 235, 224, 0.55);
-    line-height: 1.7;               /* was 1.65 */
+    font-size: 19px;
+    color: rgba(240, 235, 224, 0.40);
+    line-height: 1.7;
     letter-spacing: 0.04em;
     transition: color 0.4s ease;
     pointer-events: none;
@@ -117,17 +140,43 @@
     word-break: keep-all;
   }
 
+  /* ── ANCRE — porteur, plus grand, plus présent ── */
+  .fp-item--anchor .fp-text {
+    font-size: 28px;
+    color: rgba(240, 235, 224, 0.72);
+    line-height: 1.45;
+  }
+
+  .fp-item--anchor .fp-source {
+    color: rgba(240, 235, 224, 0.50);
+    font-size: 11px;
+    letter-spacing: 0.28em;
+  }
+
+  /* ── Hover states ── */
   .fp-item:hover .fp-text {
-    color: rgba(240, 235, 224, 0.85);
+    color: rgba(240, 235, 224, 0.92);
   }
 
   .fp-item:hover .fp-source {
-    color: rgba(240, 235, 224, 0.55);
+    color: rgba(240, 235, 224, 0.60);
   }
 
-  /* Siblings dimmed when another item is hovered */
+  /* Siblings dimmed when an ECHO is hovered */
   .fp-item--dimmed {
     opacity: 0.18;
+    transition: opacity 0.4s ease;
+  }
+
+  /* Echoes dimmed hard when an ANCHOR is hovered */
+  .fp-item--echo-dimmed {
+    opacity: 0.06;
+    transition: opacity 0.4s ease;
+  }
+
+  /* Other anchors — soft dim when an anchor is hovered */
+  .fp-item--anchor-dimmed {
+    opacity: 0.28;
     transition: opacity 0.4s ease;
   }
 
@@ -147,6 +196,19 @@
   }
   .fp-item--visited:hover .fp-source {
     color: rgba(240, 235, 224, 0.55);
+  }
+
+  /* ── Other chamber — annotation reward (stillness révélée) ── */
+  .fp-annotation {
+    display: block;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: rgba(240, 235, 224, 0.38);
+    margin-top: 5px;
+    pointer-events: none;
+    /* opacity piloté par JS — pas de transition CSS */
   }
 
   /* ── Mobile ── */

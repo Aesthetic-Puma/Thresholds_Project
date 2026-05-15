@@ -264,20 +264,20 @@ function SharedUI({
       <button
         className={isPhoto ? "shared-home-link" : "shared-back"}
         onClick={isPhoto ? onGoHome : onBack}
-        aria-label={isPhoto ? "Return to home" : "← home"}
+        aria-label="Return to home"
         data-cursor-large
       >
-        {isPhoto ? site.title : "← home"}
+        {site.title}
       </button>
 
       {isPhoto && (
         <button
           className="shared-back shared-back--photo"
           onClick={onBack}
-          aria-label="← passages"
+          aria-label="Return to passages"
           data-cursor-large
         >
-          ← passages
+          passages
         </button>
       )}
 

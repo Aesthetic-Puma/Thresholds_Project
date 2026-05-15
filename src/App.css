@@ -128,19 +128,20 @@
      z-index: 600;
      background: none;
      border: none;
-     font-family: var(--font-serif);
-     font-size: 1.1rem;              /* was 1.05rem */
-     font-weight: 300;
-     letter-spacing: 0.16em;
-     color: var(--cream-30);
+     font-family: var(--font-mono);
+     font-size: 11px;
+     font-weight: 400;
+     letter-spacing: 0.38em;
+     text-transform: uppercase;
+     color: var(--cream-22);
      transition: color 0.45s ease, letter-spacing 0.45s ease;
      cursor: none;
      display: block;
    }
    .shared-back:hover,
    .shared-home-link:hover {
-     color: var(--cream-72);
-     letter-spacing: 0.22em;
+     color: var(--cream-60);
+     letter-spacing: 0.48em;
    }
 
    .shared-back--photo {
@@ -151,14 +152,16 @@
      z-index: 600;
      background: none;
      border: none;
-     font-family: var(--font-serif);
-     font-size: 1.1rem;
-     font-weight: 300;
-     letter-spacing: 0.16em;
-     color: var(--cream-30);
+     font-family: var(--font-mono);
+     font-size: 11px;
+     font-weight: 400;
+     letter-spacing: 0.38em;
+     text-transform: uppercase;
+     color: var(--cream-22);
      transition: color 0.45s ease, letter-spacing 0.45s ease;
+     cursor: none;
    }
-   .shared-back--photo:hover { color: var(--cream-72); letter-spacing: 0.22em; }
+   .shared-back--photo:hover { color: var(--cream-60); letter-spacing: 0.48em; }
 
    .shared-label {
      position: fixed;

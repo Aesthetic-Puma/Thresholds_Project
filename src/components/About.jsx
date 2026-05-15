@@ -1,20 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./About.css";
 
-// ─────────────────────────────────────────────
-// About — v4
-//
-// Changes vs v3:
-//   - Header restructured: name + roles in a row (flex baseline),
-//     tagline below at clamp(18-22px) max-width 600 → reads better mobile
-//   - 1px scroll progress bar on the left edge
-//   - Nav-label dims on scroll
-//   - All small mono labels 9→11px, stack 8→10px
-//   - Pull-quote 18→20px, padding-left 1.4→1.6rem
-//   - Contact links 17→19px, hover spreads letter-spacing
-//   - Book link 9→11px with letter-spacing on hover
-// ─────────────────────────────────────────────
-
 export default function About({ about, site, onClose }) {
   const scrollRef = useRef(null);
   const [progress, setProgress] = useState(0);
@@ -45,7 +31,7 @@ export default function About({ about, site, onClose }) {
 
       {/* ── Nav ── */}
       <button className="about__close" onClick={onClose} data-cursor-large>
-        ← {site.title}
+        {site.title}
       </button>
       <p
         className={`about__nav-label${progress > 0.04 ? " about__nav-label--dim" : ""}`}
@@ -61,54 +47,113 @@ export default function About({ about, site, onClose }) {
           {/* ── Header ── */}
           <header className="about__header">
             <div className="about__header-top">
-              <h1 className="about__name">{about.name}</h1>
-              <p className="about__roles">{about.roles.join(" · ")}</p>
+              <div className="about__portrait-wrap">
+                <img
+                  src={about.photo}
+                  alt={about.name}
+                  className="about__portrait"
+                  onError={(e) => { e.currentTarget.style.display = "none"; }}
+                />
+              </div>
+              <div>
+                <h1 className="about__name">{about.name}</h1>
+                <p className="about__roles">{about.roles.join(" · ")}</p>
+              </div>
             </div>
-            <blockquote className="about__tagline">
-              {about.tagline}
-            </blockquote>
           </header>
 
           <div className="about__divider" />
 
-          {/* ── I — Photography ── */}
+          {/* ── Statement — full width ── */}
+          <div className="about__statement">
+            <p>
+              I work at the threshold between systems and stories — building software,
+              photographing the spaces between people and their worlds, writing fiction
+              where the real quietly unravels.
+            </p>
+            <p>
+              The same attention to the seam between what is shown and what is hidden
+              runs through all three. Whether the material is silver, ink, or code,
+              the question is the same: where does a system let something through?
+            </p>
+            <p>
+              <em>Thresholds</em> is not a portfolio of three disciplines.
+              It is one inquiry, conducted in three registers.
+            </p>
+          </div>
+
+          {/* ── I — The Question ── */}
           <section className="about__section">
             <div className="about__label-col">
-              <span className="about__section-num">I — Photography</span>
-              <span className="about__section-sub">La chambre noire</span>
+              <span className="about__section-num">I — The Question</span>
             </div>
             <div className="about__content-col">
               <p>
-                I photograph in <em>black and white, mostly</em> — at the edge of cities
-                I do not belong to. Korea, Venice, the corners of Paris where the present
-                has not yet caught up with itself.
+                Photography taught me to wait. Every image in this work concerns a
+                threshold: a body becoming a silhouette, a doorway becoming a question.
+                I do not stage. I wait until the world admits something.
               </p>
               <p>
-                The work collected in <em>Thresholds</em> is concerned with the moment a
-                body becomes a silhouette, a doorway becomes a question. I do not stage.
-                I wait until the world admits something.
+                Fiction extends that attention into language. The stories in{" "}
+                <em>{about.book.title}</em> operate close to the photographs — same
+                vocabulary, different medium. The book is not beside this portfolio;
+                it is the material from which this portfolio is made. Every passage
+                a reader encounters in a chamber is in conversation with one of
+                its twelve stories.
+              </p>
+              <p>
+                Engineering sharpened the same instinct in a different register.
+                A worker who must read a screen in three seconds, an interface where
+                ambiguity has a cost — these are the threshold question, posed in the
+                field. That work was not a detour. It was apprenticeship in the stakes
+                of the seam.
               </p>
             </div>
           </section>
 
-          {/* ── II — Writing ── */}
+          {/* ── II — Why Here ── */}
           <section className="about__section">
             <div className="about__label-col">
-              <span className="about__section-num">II — Writing</span>
-              <span className="about__section-sub">l'écriture</span>
+              <span className="about__section-num">II — Why Here</span>
             </div>
             <div className="about__content-col">
               <p>
-                I write short fiction that operates close to the photographs — same
-                vocabulary, different medium. The stories often turn on a single threshold:
-                a door not quite closed, a memory that may not have happened, a stranger
-                seen too clearly to be real.
+                A Master in Creative Technology is not a departure from engineering.
+                It is its formalisation.
               </p>
               <p>
-                My debut collection, <em>{about.book.title}</em>, was published in 2024.
+                I have always worked at the boundary between system and meaning. A
+                programme where technical rigour and artistic practice are not competing
+                disciplines but complementary methods is the context in which this
+                inquiry can go further.
               </p>
+              <blockquote className="about__pull-quote">
+                The question I am bringing is not new. The tools to ask it properly are.
+              </blockquote>
+            </div>
+          </section>
 
-              {/* Book block */}
+          {/* ── III — Selected Works ── */}
+          <section className="about__section">
+            <div className="about__label-col">
+              <span className="about__section-num">III — Selected Works</span>
+            </div>
+            <div className="about__content-col">
+
+              {/* Thresholds */}
+              <div className="about__work">
+                <span className="about__work-title">Thresholds</span>
+                <span className="about__work-meta">Photography · Writing · Code &thinsp;—&thinsp; 2025</span>
+                <p>
+                  A photography and fiction portfolio built as a single interactive
+                  experience. Three chambers — <em>Space</em>, <em>Time</em>,{" "}
+                  <em>The Other</em> — each with its own interaction model designed
+                  to carry its conceptual weight. Built from the ground up: React,
+                  a custom animation system, no external motion library.
+                </p>
+              </div>
+
+              {/* Élégies Oubliées */}
               <div className="about__book">
                 <div className="about__book-cover-wrap">
                   <img
@@ -130,65 +175,34 @@ export default function About({ about, site, onClose }) {
                     className="about__book-link"
                     data-cursor-large
                   >
-                    Lire sur Babelio →
+                    Read on Babelio →
                   </a>
                 </div>
               </div>
-            </div>
-          </section>
 
-          {/* ── III — Engineering ── */}
-          <section className="about__section">
-            <div className="about__label-col">
-              <span className="about__section-num">III — Engineering</span>
-              <span className="about__section-sub">le code</span>
-            </div>
-            <div className="about__content-col">
-              <p>
-                I have built software since 2020 — systems where a design error has real
-                consequences. That constraint sharpened my attention to the seam between
-                interface and user, the same seam I look for in photographs.
-              </p>
+              {/* Engineering */}
               <div className="about__timeline">
                 <div className="about__tl-entry">
                   <span className="about__tl-year">SNCF</span>
                   <div>
                     <span className="about__tl-role">Transport systems · millions of daily users</span>
                     <p className="about__tl-note">
-                      The cheminot who needs to understand the screen in three seconds
-                      was my first school in UX — interfaces where ambiguity costs a missed train.
+                      The worker who must understand a screen in three seconds was
+                      my first school in UX at real stakes — interfaces where
+                      ambiguity costs a missed train.
                     </p>
                     <span className="about__tl-stack">React · Java · REST · Agile</span>
                   </div>
                 </div>
               </div>
+
             </div>
           </section>
 
-          {/* ── IV — Now ── */}
-          <section className="about__section">
-            <div className="about__label-col">
-              <span className="about__section-num">IV — Now</span>
-              <span className="about__section-sub">le présent</span>
-            </div>
-            <div className="about__content-col">
-              <p>
-                I am pursuing a Master in Creative Technology — not as a departure from
-                engineering, but as its formalisation. I have always worked at the boundary
-                between system and meaning.
-              </p>
-              <blockquote className="about__pull-quote">
-                The same attention to the seam between what is shown and what is hidden
-                — whether the medium is silver, ink, or code.
-              </blockquote>
-              <p className="about__pull-attr">— Note d'intention</p>
-            </div>
-          </section>
-
-          {/* ── V — Contact ── */}
+          {/* ── IV — Contact ── */}
           <section className="about__section about__section--last">
             <div className="about__label-col">
-              <span className="about__section-num">V — Contact</span>
+              <span className="about__section-num">IV — Contact</span>
             </div>
             <div className="about__content-col">
               <div className="about__links">

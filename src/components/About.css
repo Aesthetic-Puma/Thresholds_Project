@@ -63,15 +63,16 @@
   z-index: 710;
   background: none;
   border: none;
-  font-family: var(--font-serif);
-  font-size: 1.0rem;                /* was 0.9rem */
-  font-weight: 300;
-  letter-spacing: 0.16em;
-  color: var(--cream-30);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--cream-22);
   transition: color 0.45s ease, letter-spacing 0.45s ease;
   cursor: none;
 }
-.about__close:hover { color: var(--cream-72); letter-spacing: 0.22em; }
+.about__close:hover { color: var(--cream-60); letter-spacing: 0.48em; }
 
 .about__nav-label {
   position: fixed;
@@ -116,18 +117,37 @@
   padding: 6rem 3rem 5rem;
 }
 
-/* ── Header — name top, tagline below ── */
+/* ── Header — name + roles only ── */
 .about__header {
-  padding-bottom: 3.5rem;
+  padding-bottom: 2rem;
   animation: fade-up 0.9s 0.05s ease both;
 }
 
 .about__header-top {
   display: flex;
-  align-items: baseline;
-  gap: 1.4rem;
+  align-items: center;
+  gap: 2.2rem;
   flex-wrap: wrap;
   margin-bottom: 2rem;
+}
+
+.about__portrait-wrap {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid rgba(240, 235, 224, 0.10);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.55);
+}
+
+.about__portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  filter: grayscale(100%) brightness(0.88);
+  display: block;
 }
 
 .about__name {
@@ -167,6 +187,53 @@
   width: 100%;
   height: 1px;
   background: rgba(240, 235, 224, 0.08);
+}
+
+/* ── Statement — full width opening ── */
+.about__statement {
+  padding: 3rem 0 2.5rem;
+}
+.about__statement p {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(20px, 1.8vw, 24px);
+  color: rgba(240, 235, 224, 0.65);
+  line-height: 1.88;
+  letter-spacing: 0.02em;
+  max-width: 720px;
+  margin-bottom: 1.4rem;
+  text-wrap: pretty;
+}
+.about__statement p:last-child { margin-bottom: 0; }
+.about__statement p em {
+  color: rgba(240, 235, 224, 0.92);
+  font-style: italic;
+}
+
+/* ── Work entry (within Selected Works) ── */
+.about__work {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid rgba(240, 235, 224, 0.05);
+}
+.about__work-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 22px;
+  color: rgba(240, 235, 224, 0.88);
+  letter-spacing: 0.02em;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+.about__work-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--cream-30);
+  display: block;
+  margin-bottom: 1rem;
 }
 
 /* ── Sections — two columns ── */
@@ -227,12 +294,11 @@
 /* ── Book block ── */
 .about__book {
   display: grid;
-  grid-template-columns: 150px 1fr;  /* was 140 */
+  grid-template-columns: 150px 1fr;
   gap: 2rem;
   align-items: start;
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid rgba(240, 235, 224, 0.05);
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .about__book-cover-wrap {
@@ -454,6 +520,7 @@
 @media (max-width: 720px) {
   .about__inner       { padding: 5.5rem 1.5rem 4rem; max-width: 100%; }
 
+  .about__portrait-wrap { width: 66px; height: 66px; }
   .about__name        { font-size: 2.2rem; }
   .about__roles       { font-size: 10px; letter-spacing: 0.32em; }
   .about__tagline     { font-size: 17px; line-height: 1.75; }

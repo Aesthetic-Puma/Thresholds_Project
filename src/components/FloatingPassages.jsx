@@ -14,7 +14,30 @@ const COLS             = 3;
 
 // ── Space chamber — panning canvas
 const SPACE_SPREAD   = 0.72;  // × vw — distance des colonnes latérales
-const SPACE_MAX_PAN  = 0.42;  // × vw — amplitude max du pan (réduite)
+const SPACE_MAX_PAN   = 0.42;  // × vw — amplitude horizontale
+const SPACE_MAX_PAN_Y = 0.18;  // × vh — amplitude verticale, plus douce
+
+// ── Time chamber — layout 2 colonnes, axe vertical = axe temporel
+const getTimeLayout = (passages) => {
+  const TIME_COLS = 2;
+  const totalRows = Math.ceil(passages.length / TIME_COLS);
+  return passages.map((p, i) => ({
+    col: i % TIME_COLS,
+    row: Math.floor(i / TIME_COLS),
+    totalRows,
+  }));
+};
+
+// ── Other chamber — anchors au centre, échos en orbite radiale
+const getOtherLayout = (passages) => {
+  let anchorIdx = 0, echoIdx = 0;
+  const echoCount = passages.filter((p) => !p.anchor).length;
+  return passages.map((p) => {
+    if (p.anchor) return { type: "anchor", ai: anchorIdx++ };
+    const baseAngle = (echoIdx / echoCount) * Math.PI * 2 - Math.PI / 4;
+    return { type: "echo", baseAngle, ei: echoIdx++ };
+  });
+};
 
 // ── Time chamber — stratigraphie des âges (signal : flou, pas opacité)
 const TIME_NATURAL_AGES  = [0, 0, 1, 1, 2, 2];
@@ -103,7 +126,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
 
     container.innerHTML = "";
     itemsRef.current    = [];
-    panRef.current      = { current: 0, target: 0 };
+    panRef.current      = { current: 0, target: 0, currentY: 0, targetY: 0 };
     mouseSpeedRef.current = 0;
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
 
@@ -124,9 +147,8 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
       : null;
 
     const spaceLayout = isSpace ? getSpaceLayout(chamber.passages) : null;
-    const rows = isSpace ? undefined : Math.ceil(n / COLS);
-    const zw   = isSpace ? undefined : vw / COLS;
-    const zh   = isSpace ? undefined : vh / (rows || 1);
+    const timeLayout  = isTime  ? getTimeLayout(chamber.passages)  : null;
+    const otherLayout = isOther ? getOtherLayout(chamber.passages) : null;
 
     chamber.passages.forEach((passage, i) => {
       let cx, cy, floatAmpX, floatAmpY, floatSpd, floatSpdY;
@@ -135,7 +157,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         const { col, colRow } = spaceLayout[i];
         const COL_CENTERS = [-SPACE_SPREAD * vw, 0, SPACE_SPREAD * vw];
         const ROW_Y       = [vh * 0.36, vh * 0.63];
-        const jx = (Math.random() - 0.5) * vw * 0.22;
+        const jx = (Math.random() - 0.5) * vw * 0.10;
         const jy = (Math.random() - 0.5) * vh * 0.18;
         cx        = vw / 2 + COL_CENTERS[col] + jx;
         cy        = Math.max(MARGIN + 50, Math.min(vh - MARGIN - 50, ROW_Y[colRow] + jy));
@@ -145,12 +167,14 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         floatSpdY = FLOAT_SPEED_MIN + Math.random() * (FLOAT_SPEED_MAX - FLOAT_SPEED_MIN);
 
       } else if (isTime) {
-        const col   = i % COLS;
-        const row   = Math.floor(i / COLS);
-        const baseX = col * zw + zw / 2;
-        const baseY = row * zh + zh / 2;
-        const jx    = (Math.random() - 0.5) * zw * 0.28;
-        const jy    = (Math.random() - 0.5) * zh * 0.28;
+        const { col: tCol, row: tRow, totalRows: tRows } = timeLayout[i];
+        const colW  = vw / 2;
+        const topY  = vh * 0.16;
+        const botY  = vh * 0.84;
+        const baseX = tCol * colW + colW / 2;
+        const baseY = tRows > 1 ? topY + (tRow / (tRows - 1)) * (botY - topY) : vh / 2;
+        const jx    = (Math.random() - 0.5) * colW * 0.32;
+        const jy    = (Math.random() - 0.5) * ((botY - topY) / tRows) * 0.45;
         cx        = Math.max(MARGIN + ITEM_WIDTH / 2, Math.min(vw - MARGIN - ITEM_WIDTH / 2, baseX + jx));
         cy        = Math.max(MARGIN + 50, Math.min(vh - MARGIN - 50, baseY + jy));
         floatAmpX = (FLOAT_AMP_X_MIN + Math.random() * (FLOAT_AMP_X_MAX - FLOAT_AMP_X_MIN)) * TIME_FLOAT_SCALE;
@@ -159,14 +183,20 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         floatSpdY = (FLOAT_SPEED_MIN + Math.random() * (FLOAT_SPEED_MAX - FLOAT_SPEED_MIN)) * 0.62;
 
       } else {
-        const col   = i % COLS;
-        const row   = Math.floor(i / COLS);
-        const baseX = col * zw + zw / 2;
-        const baseY = row * zh + zh / 2;
-        const jx    = (Math.random() - 0.5) * zw * 0.32;
-        const jy    = (Math.random() - 0.5) * zh * 0.32;
-        cx        = Math.max(MARGIN + ITEM_WIDTH / 2, Math.min(vw - MARGIN - ITEM_WIDTH / 2, baseX + jx));
-        cy        = Math.max(MARGIN + 50, Math.min(vh - MARGIN - 50, baseY + jy));
+        const oLayout = otherLayout[i];
+        if (oLayout.type === "anchor") {
+          const offsetX = oLayout.ai === 0 ? -vw * 0.17 : vw * 0.17;
+          const offsetY = oLayout.ai === 0 ? -vh * 0.09 : vh * 0.07;
+          cx = vw / 2 + offsetX + (Math.random() - 0.5) * vw * 0.06;
+          cy = vh / 2 + offsetY + (Math.random() - 0.5) * vh * 0.05;
+        } else {
+          const angle  = oLayout.baseAngle + (Math.random() * 0.4 - 0.2);
+          const radius = vw * 0.31 + (Math.random() - 0.5) * vw * 0.10;
+          cx = vw / 2 + Math.cos(angle) * radius;
+          cy = vh / 2 + Math.sin(angle) * radius * 0.62;
+        }
+        cx        = Math.max(MARGIN + ITEM_WIDTH / 2, Math.min(vw - MARGIN - ITEM_WIDTH / 2, cx));
+        cy        = Math.max(MARGIN + 50, Math.min(vh - MARGIN - 50, cy));
         floatAmpX = FLOAT_AMP_X_MIN + Math.random() * (FLOAT_AMP_X_MAX - FLOAT_AMP_X_MIN);
         floatAmpY = FLOAT_AMP_Y_MIN + Math.random() * (FLOAT_AMP_Y_MAX - FLOAT_AMP_Y_MIN);
         floatSpd  = FLOAT_SPEED_MIN + Math.random() * (FLOAT_SPEED_MAX - FLOAT_SPEED_MIN);
@@ -199,6 +229,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
       const el = document.createElement("button");
       el.className = `fp-item ${isAnchor ? "fp-item--anchor" : "fp-item--echo"}`;
 
+      if (isSpace && spaceLayout[i].col !== 1) el.classList.add("fp-item--far");
       if (!isTime && !isOther && visitedSet?.has(i)) el.classList.add("fp-item--visited");
 
       el.style.left = `${cx}px`;
@@ -305,6 +336,8 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         floatAmp: floatAmpX, floatSpd, floatPhX,
         floatAmpY, floatSpdY, floatPhY,
         idx: i, isAnchor,
+        panFactorX: 1,
+        panFactorY: isSpace ? (isAnchor ? 1.3 : 0.65) : 1,
         // Time
         baseBlur, currentBlur, targetBlur,
         baseOpacity, currentOpacity, targetOpacity,
@@ -329,13 +362,17 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
       const isTimeMode  = isTimeRef.current;
       const isOtherMode = isOtherRef.current;
 
-      // Pan Space — vitesse réduite
+      // Pan Space — X + Y, parallax divergent par profondeur
       if (isSpaceMode) {
         const vwNow      = window.innerWidth;
-        const normalized = mousePosRef.current.x / vwNow;
+        const vhNow      = window.innerHeight;
+        const normX      = mousePosRef.current.x / vwNow;
+        const normY      = mousePosRef.current.y / vhNow;
         const lerpFactor = h !== -1 ? 0.008 : 0.018;
-        panRef.current.target  = (0.5 - normalized) * 2 * SPACE_MAX_PAN * vwNow;
-        panRef.current.current += (panRef.current.target - panRef.current.current) * lerpFactor;
+        panRef.current.target   = (0.5 - normX) * 2 * SPACE_MAX_PAN   * vwNow;
+        panRef.current.current += (panRef.current.target  - panRef.current.current)  * lerpFactor;
+        panRef.current.targetY  = (0.5 - normY) * 2 * SPACE_MAX_PAN_Y * vhNow;
+        panRef.current.currentY += (panRef.current.targetY - panRef.current.currentY) * lerpFactor;
       }
 
       // Other : pré-calcul stillness + item le plus proche
@@ -420,13 +457,14 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         }
 
         // ── Standard / Space / Time
-        const panX = isSpaceMode ? panRef.current.current : 0;
+        const panX = isSpaceMode ? panRef.current.current  * item.panFactorX : 0;
+        const panY = isSpaceMode ? panRef.current.currentY * item.panFactorY : 0;
         const shouldAnimate = isSpaceMode || isTimeMode || h === -1 || item.idx === h;
         if (shouldAnimate) {
           const dx = Math.sin(tRef.current * item.floatSpd  + item.floatPhX) * item.floatAmp;
           const dy = Math.cos(tRef.current * item.floatSpdY + item.floatPhY) * item.floatAmpY;
           item.el.style.left = `${item.cx + dx + panX}px`;
-          item.el.style.top  = `${item.cy + dy}px`;
+          item.el.style.top  = `${item.cy + dy + panY}px`;
         }
 
         // Time — opacité + flou : le souvenir se brouille avec le temps
@@ -474,7 +512,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
              : "choose a passage";
 
   return (
-    <div className={`floating-passages${enterDir ? ` floating-passages--from-${enterDir}` : ""}`}>
+    <div className={`floating-passages floating-passages--${chamber.id}${enterDir ? ` floating-passages--from-${enterDir}` : ""}`}>
       <div className="fp-center" aria-hidden="true">
         <span className="fp-center__label">{chamber.label}</span>
         <span className="fp-center__hint">{hint}</span>

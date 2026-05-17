@@ -221,6 +221,35 @@
     /* opacity piloté par JS — pas de transition CSS */
   }
 
+  /* ── Atmosphère par chambre ── */
+
+  /* Time — voile ambre : temps = patine, chaleur fossile
+     Couleurs claires à alpha modéré — seul moyen d'ajouter de la lumière sur fond #0a0906 */
+  .floating-passages--time {
+    background: radial-gradient(ellipse at 50% 55%, rgba(200, 110, 20, 0.24) 0%, rgba(140, 75, 10, 0.08) 65%, transparent 100%);
+  }
+
+  /* Other — voile indigo : l'autre = nuit, regard du dehors, distance */
+  .floating-passages--other {
+    background: radial-gradient(ellipse at 50% 48%, rgba(40, 55, 215, 0.26) 0%, rgba(25, 35, 150, 0.08) 65%, transparent 100%);
+  }
+
+  /* ── Typographie par chambre ── */
+
+  /* Space — les mots se distribuent dans l'espace, tracking élargi */
+  .floating-passages--space .fp-text { letter-spacing: 0.06em; }
+
+  /* Space — items des colonnes latérales légèrement réduits : profondeur */
+  .floating-passages--space .fp-item--far {
+    transform: translate(-50%, -50%) scale(0.88);
+  }
+
+  /* Time — source plus mesurée, précision de l'horloge */
+  .floating-passages--time .fp-source { letter-spacing: 0.30em; }
+
+  /* Other — proximité, intimité de la rencontre — tracking resserré */
+  .floating-passages--other .fp-text { letter-spacing: 0.02em; }
+
   /* ── Mobile ── */
   @media (max-width: 680px) {
     .fp-item { width: 230px; }

@@ -203,6 +203,13 @@ export default function App() {
             visitedSet={visited[chamberIdx]}
             enterDir={enterDir}
           />
+          {visited[chamberIdx]?.size > 0 && (
+            <ReturnIndicator
+              key={chamberIdx}
+              visitedCount={visited[chamberIdx].size}
+              total={chamber.passages.length}
+            />
+          )}
           <SharedUI
             view="passages"
             chamberIdx={chamberIdx}
@@ -241,6 +248,25 @@ export default function App() {
       )}
 
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// ReturnIndicator — brief memory signal on passages re-entry
+// ─────────────────────────────────────────────
+function ReturnIndicator({ visitedCount, total }) {
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(false), 2200);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <p
+      className={`return-indicator${visible ? "" : " return-indicator--hidden"}`}
+      aria-hidden="true"
+    >
+      return · {toRoman(visitedCount)} / {toRoman(total)}
+    </p>
   );
 }
 

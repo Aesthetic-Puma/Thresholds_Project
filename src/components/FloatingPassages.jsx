@@ -478,6 +478,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
       <div className="fp-center" aria-hidden="true">
         <span className="fp-center__label">{chamber.label}</span>
         <span className="fp-center__hint">{hint}</span>
+        <span className="fp-center__action">click a passage to enter</span>
       </div>
       <div ref={containerRef} className="fp-container" aria-label={`Passages for ${chamber.label}`} />
     </div>

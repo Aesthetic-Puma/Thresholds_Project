@@ -275,6 +275,28 @@
     animation: fade-up 2s ease 2s forwards;
   }
 
+  .home__context {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--cream-10);
+    line-height: 1.7;
+    max-width: 420px;
+    margin: 1.4rem auto 0;
+    text-align: center;
+    opacity: 0;
+    animation: fade-up 2s ease 2.6s forwards;
+  }
+  .home__context em {
+    font-style: italic;
+    font-family: var(--font-serif);
+    font-size: 12px;
+    text-transform: none;
+    letter-spacing: 0.04em;
+    color: var(--cream-15);
+  }
+
   /* ─────────────────────────────────────────────
      MOTS DE NAVIGATION
      ───────────────────────────────────────────── */

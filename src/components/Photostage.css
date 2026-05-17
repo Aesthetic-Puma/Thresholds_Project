@@ -220,14 +220,22 @@
     color: rgba(240, 235, 224, 0.2);
   }
 
-  /* Subtle pulse hint below source */
+  /* Click-to-reveal hint — pulsing after text settles */
   .ps-reading__source::after {
-    content: '· · ·';
+    content: 'click anywhere to reveal';
     display: block;
-    margin-top: 1.8rem;
-    letter-spacing: 0.6em;
-    color: rgba(240, 235, 224, 0.12);
-    animation: blink 2.4s ease-in-out infinite;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    margin-top: 2.6rem;
+    color: rgba(240, 235, 224, 0.30);
+    animation: ps-hint-pulse 2.8s ease-in-out 2s infinite;
+  }
+
+  @keyframes ps-hint-pulse {
+    0%, 100% { opacity: 0.9; }
+    50%      { opacity: 0.25; }
   }
 
   /* Keywords inside the passage — brighter + dotted underline */

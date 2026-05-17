@@ -233,6 +233,22 @@
      writing-mode: vertical-rl;
    }
 
+   /* ── Return indicator — brief memory signal on passages re-entry ── */
+   .return-indicator {
+     position: fixed;
+     top: 1.9rem;
+     right: 2rem;
+     z-index: 600;
+     font-family: var(--font-mono);
+     font-size: 10px;
+     letter-spacing: 0.28em;
+     text-transform: uppercase;
+     color: var(--cream-22);
+     pointer-events: none;
+     transition: opacity 0.8s ease;
+   }
+   .return-indicator--hidden { opacity: 0; }
+
    /* ── About trigger — bottom-right of home ── */
    .about-trigger {
      position: fixed;

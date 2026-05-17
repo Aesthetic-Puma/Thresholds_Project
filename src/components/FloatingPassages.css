@@ -79,7 +79,7 @@
     font-size: 13px;
     letter-spacing: 0.44em;
     text-transform: uppercase;
-    color: var(--cream-22);
+    color: var(--cream-30);
   }
 
   .fp-center__hint {
@@ -87,9 +87,19 @@
     font-family: var(--font-serif);
     font-style: italic;
     font-size: 17px;
-    color: var(--cream-30);
+    color: var(--cream-40);
     margin-top: 0.5rem;
     letter-spacing: 0.02em;
+  }
+
+  .fp-center__action {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--cream-15);
+    margin-top: 0.65rem;
   }
 
   /* ── Floating item ── */
@@ -142,13 +152,13 @@
 
   /* ── ANCRE — porteur, plus grand, plus présent ── */
   .fp-item--anchor .fp-text {
-    font-size: 28px;
-    color: rgba(240, 235, 224, 0.72);
-    line-height: 1.45;
+    font-size: 32px;
+    color: rgba(240, 235, 224, 0.82);
+    line-height: 1.4;
   }
 
   .fp-item--anchor .fp-source {
-    color: rgba(240, 235, 224, 0.50);
+    color: rgba(240, 235, 224, 0.55);
     font-size: 11px;
     letter-spacing: 0.28em;
   }

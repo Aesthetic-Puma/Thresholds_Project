@@ -199,10 +199,53 @@ export default function About({ about, site, onClose }) {
             </div>
           </section>
 
-          {/* ── IV — Contact ── */}
+          {/* ── IV — Process Notes ── */}
+          <section className="about__section">
+            <div className="about__label-col">
+              <span className="about__section-num">IV — Process</span>
+            </div>
+            <div className="about__content-col">
+              <p>
+                Three critical notebooks written alongside this work — on the thesis,
+                on passage curation, on the 18 image–text pairings.
+                Each chamber is in conversation with one of these analyses.
+              </p>
+              <div className="about__links">
+                <a
+                  href="/process/Cahier Critique - Thresholds.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="about__link about__link--dim"
+                  data-cursor-large
+                >
+                  I — Thresholds →
+                </a>
+                <a
+                  href="/process/Cahier Critique II - Passages.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="about__link about__link--dim"
+                  data-cursor-large
+                >
+                  II — Passages →
+                </a>
+                <a
+                  href="/process/Cahier Critique III - Appariement.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="about__link about__link--dim"
+                  data-cursor-large
+                >
+                  III — Pairings →
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* ── V — Contact ── */}
           <section className="about__section about__section--last">
             <div className="about__label-col">
-              <span className="about__section-num">IV — Contact</span>
+              <span className="about__section-num">V — Contact</span>
             </div>
             <div className="about__content-col">
               <div className="about__links">

@@ -193,6 +193,11 @@ export default function Home({
             <span key={i}>{line}<br /></span>
           ))}
         </p>
+        <p className="home__context" aria-hidden="true">
+          three chambers in conversation with{" "}
+          <em>Élégies Oubliées</em>
+          {" · "}portfolio for a research master in creative technology{" · "}2026
+        </p>
       </div>
 
       {/* ── Mots navigation ── */}

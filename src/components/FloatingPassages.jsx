@@ -17,6 +17,18 @@ const SPACE_SPREAD   = 0.72;  // × vw — distance des colonnes latérales
 const SPACE_MAX_PAN   = 0.42;  // × vw — amplitude horizontale
 const SPACE_MAX_PAN_Y = 0.18;  // × vh — amplitude verticale, plus douce
 
+// ── Space chamber — drift-decay (P.1 — blancs iseriens)
+//    Chaque passage a une fraîcheur (0…1) qui décroit à mesure qu'il quitte
+//    le centre du viewport. Sous seuil, les tokens listés dans `passage.blanks`
+//    deviennent transparents (avec un cadratin résiduel). Au retour au centre,
+//    ils réapparaissent, plus lentement — c'est le geste du "se souvenir".
+//    Le chemin de pan du visiteur écrit le texte.
+const SPACE_FRESH_RADIUS      = 1000; // px — au-delà, la fraîcheur tombe à 0
+const SPACE_FRESH_LERP        = 0.012; // décroissance lente — le texte ne flicker pas
+const SPACE_LOST_THRESHOLD    = 0.35;  // < ce seuil → tokens lost
+const SPACE_RESTORE_THRESHOLD = 0.55;  // > ce seuil → tokens restorés (hystérésis)
+const SPACE_REMEMBER_MS       = 1800;  // durée de la transition lente à la restauration
+
 // ── Time chamber — layout 2 colonnes, axe vertical = axe temporel
 const getTimeLayout = (passages) => {
   const TIME_COLS = 2;
@@ -66,10 +78,37 @@ const OTHER_ANNOTATE_RADIUS  = 260;
 const OTHER_ANNOT_LERP       = 0.007;
 
 // ─────────────────────────────────────────────
+// Tokenize a passage `short` into <span class="fp-token">word</span>,
+// marking tokens whose 0-based index is in `blanksIdxArr` as `fp-token--blank`.
+// Whitespace and punctuation attached to words are preserved.
+// ─────────────────────────────────────────────
+function tokenizeShort(text, blanksIdxArr) {
+  const blanks = new Set(blanksIdxArr || []);
+  const parts  = text.split(/(\s+)/);
+  let wi   = 0;
+  let html = "";
+  for (const p of parts) {
+    if (p === "") continue;
+    if (/^\s+$/.test(p)) {
+      html += p;
+    } else {
+      const isBlank = blanks.has(wi);
+      html += `<span class="fp-token${isBlank ? " fp-token--blank" : ""}" data-ti="${wi}">${p}</span>`;
+      wi++;
+    }
+  }
+  return html;
+}
 
-export default function FloatingPassages({ chamber, onSelect, visitedSet, enterDir }) {
+// ─────────────────────────────────────────────
+
+export default function FloatingPassages({ chamber, onSelect, visitedSet, enterDir, thresholdActive }) {
   const containerRef    = useRef(null);
   const itemsRef        = useRef([]);
+  const thresholdRef    = useRef(false);
+
+  // Sync threshold prop → ref (RAF loop l'utilise pour figer pan/freshness/retreat)
+  useEffect(() => { thresholdRef.current = !!thresholdActive; }, [thresholdActive]);
   const rafRef          = useRef(null);
   const tRef            = useRef(0);
   const hoveredRef      = useRef(-1);
@@ -125,6 +164,10 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
     if (!container) return;
 
     container.innerHTML = "";
+    // Clear any pending remember-timers from a previous build (Space)
+    itemsRef.current.forEach((it) => {
+      if (it.rememberTimer) clearTimeout(it.rememberTimer);
+    });
     itemsRef.current    = [];
     panRef.current      = { current: 0, target: 0, currentY: 0, targetY: 0 };
     mouseSpeedRef.current = 0;
@@ -245,7 +288,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
 
       el.innerHTML = `
         <span class="fp-source">${passage.source}</span>
-        <p class="fp-text">${passage.short}</p>
+        <p class="fp-text">${isSpace ? tokenizeShort(passage.short, passage.blanks) : passage.short}</p>
       `;
 
       // ── Annotation Other
@@ -330,6 +373,20 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         onSelect(i);
       });
 
+      // ── Space drift-decay : fraîcheur initiale = fonction de la distance au centre.
+      //    Items éloignés du centre commencent déjà décayés (classe posée avant
+      //    appendChild pour éviter une transition d'entrée indésirable).
+      let initFreshness = 1;
+      let initLost      = false;
+      if (isSpace) {
+        const dxc = cx - vw / 2;
+        const dyc = cy - vh / 2;
+        const dC  = Math.hypot(dxc, dyc);
+        initFreshness = Math.max(0, Math.min(1, 1 - dC / SPACE_FRESH_RADIUS));
+        initLost      = initFreshness < SPACE_LOST_THRESHOLD;
+        if (initLost) el.classList.add("fp-item--decayed");
+      }
+
       container.appendChild(el);
       itemsRef.current.push({
         el, cx, cy,
@@ -350,6 +407,10 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         annotEl,
         annotOpacity:   0,
         annotTarget:    0,
+        // Space drift-decay
+        freshness:       initFreshness,
+        lostState:       initLost,
+        rememberTimer:   null,
       });
     });
 
@@ -363,7 +424,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
       const isOtherMode = isOtherRef.current;
 
       // Pan Space — X + Y, parallax divergent par profondeur
-      if (isSpaceMode) {
+      if (isSpaceMode && !thresholdRef.current) {
         const vwNow      = window.innerWidth;
         const vhNow      = window.innerHeight;
         const normX      = mousePosRef.current.x / vwNow;
@@ -377,7 +438,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
 
       // Other : pré-calcul stillness + item le plus proche
       let otherNearestIdx = -1, otherNearestDist = Infinity;
-      if (isOtherMode) {
+      if (isOtherMode && !thresholdRef.current) {
         mouseSpeedRef.current *= OTHER_SPEED_DECAY;
         const speed   = mouseSpeedRef.current;
         const isStill = speed < OTHER_SPEED_THRESHOLD &&
@@ -405,14 +466,14 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
           }
           const mx    = mousePosRef.current.x;
           const my    = mousePosRef.current.y;
-          const speed = mouseSpeedRef.current;
+          const speed = thresholdRef.current ? 0 : mouseSpeedRef.current;
 
           // Cible de retraite : décroissance lente vers le repos
           item.retreatTargetX *= OTHER_TARGET_DECAY;
           item.retreatTargetY *= OTHER_TARGET_DECAY;
 
-          // Impulsion si curseur rapide et proche
-          if (speed > OTHER_SPEED_THRESHOLD) {
+          // Impulsion si curseur rapide et proche — désactivée en mode seuil
+          if (!thresholdRef.current && speed > OTHER_SPEED_THRESHOLD) {
             const ddx  = item.cx - mx;
             const ddy  = item.cy - my;
             const dist = Math.sqrt(ddx * ddx + ddy * ddy) || 1;
@@ -446,8 +507,10 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
           item.el.style.left = `${item.cx + fdx + item.retreatX}px`;
           item.el.style.top  = `${item.cy + fdy + item.retreatY}px`;
 
-          // Annotation — récompense de la stillness
-          const isNearest = item.idx === otherNearestIdx && otherNearestDist < OTHER_ANNOTATE_RADIUS;
+          // Annotation — récompense de la stillness ; éteinte en mode seuil
+          const isNearest = !thresholdRef.current
+            && item.idx === otherNearestIdx
+            && otherNearestDist < OTHER_ANNOTATE_RADIUS;
           item.annotTarget = isNearest ? 1 : 0;
           if (item.annotEl) {
             item.annotOpacity += (item.annotTarget - item.annotOpacity) * OTHER_ANNOT_LERP;
@@ -460,11 +523,49 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         const panX = isSpaceMode ? panRef.current.current  * item.panFactorX : 0;
         const panY = isSpaceMode ? panRef.current.currentY * item.panFactorY : 0;
         const shouldAnimate = isSpaceMode || isTimeMode || h === -1 || item.idx === h;
+        let newLeft = item.cx;
+        let newTop  = item.cy;
         if (shouldAnimate) {
           const dx = Math.sin(tRef.current * item.floatSpd  + item.floatPhX) * item.floatAmp;
           const dy = Math.cos(tRef.current * item.floatSpdY + item.floatPhY) * item.floatAmpY;
-          item.el.style.left = `${item.cx + dx + panX}px`;
-          item.el.style.top  = `${item.cy + dy + panY}px`;
+          newLeft = item.cx + dx + panX;
+          newTop  = item.cy + dy + panY;
+          item.el.style.left = `${newLeft}px`;
+          item.el.style.top  = `${newTop}px`;
+        }
+
+        // ── Space drift-decay : fraîcheur → tokens lost / restorés
+        //    Plus l'item s'éloigne du centre du viewport, plus il perd ses mots.
+        //    Le visiteur écrit le texte avec son pan.
+        //    En mode seuil de sortie, la fraîcheur est gelée : la disposition demeure.
+        if (isSpaceMode && !thresholdRef.current) {
+          const distX  = newLeft - window.innerWidth  / 2;
+          const distY  = newTop  - window.innerHeight / 2;
+          const dist   = Math.hypot(distX, distY);
+          const target = Math.max(0, Math.min(1, 1 - dist / SPACE_FRESH_RADIUS));
+          item.freshness += (target - item.freshness) * SPACE_FRESH_LERP;
+
+          const wasLost = item.lostState;
+          if (wasLost && item.freshness > SPACE_RESTORE_THRESHOLD) {
+            // Retour — transition lente (1.6s), classe `--remembering`
+            item.lostState = false;
+            item.el.classList.remove("fp-item--decayed");
+            item.el.classList.add("fp-item--remembering");
+            if (item.rememberTimer) clearTimeout(item.rememberTimer);
+            item.rememberTimer = setTimeout(() => {
+              item.el.classList.remove("fp-item--remembering");
+              item.rememberTimer = null;
+            }, SPACE_REMEMBER_MS);
+          } else if (!wasLost && item.freshness < SPACE_LOST_THRESHOLD) {
+            // Perte — transition normale (0.9s)
+            item.lostState = true;
+            item.el.classList.add("fp-item--decayed");
+            item.el.classList.remove("fp-item--remembering");
+            if (item.rememberTimer) {
+              clearTimeout(item.rememberTimer);
+              item.rememberTimer = null;
+            }
+          }
         }
 
         // Time — opacité + flou : le souvenir se brouille avec le temps
@@ -495,7 +596,13 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
 
   useEffect(() => {
     build();
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      // Clear any pending Space remember-timers
+      itemsRef.current.forEach((it) => {
+        if (it.rememberTimer) clearTimeout(it.rememberTimer);
+      });
+    };
   }, [build]);
 
   // ── Mise à jour des classes visited sans rebuild (ni Time ni Other)
@@ -512,7 +619,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
              : "choose a passage";
 
   return (
-    <div className={`floating-passages floating-passages--${chamber.id}${enterDir ? ` floating-passages--from-${enterDir}` : ""}`}>
+    <div className={`floating-passages floating-passages--${chamber.id}${enterDir ? ` floating-passages--from-${enterDir}` : ""}${thresholdActive ? " floating-passages--threshold" : ""}`}>
       <div className="fp-center" aria-hidden="true">
         <span className="fp-center__label">{chamber.label}</span>
         <span className="fp-center__hint">{hint}</span>

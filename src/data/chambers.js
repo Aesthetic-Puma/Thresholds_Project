@@ -39,6 +39,10 @@ export const chambers = [
           { word: "right place", note: "not a place\na presence",         px: 48, py: 42 },
           { word: "person",      note: "the living hand\nagainst marble",  px: 65, py: 72 },
         ],
+        // P.1 — tokens dans `short` qui disparaissent quand le passage dérive hors centre (Space).
+        // Indices 0-based séparés par espace. Curation manuelle : choisir des mots dont l'absence
+        // ouvre le sens plutôt qu'elle ne le ferme. Modifier librement.
+        blanks: [2],   // "right"
       },
       // ── ANCRE 02
       {
@@ -53,6 +57,7 @@ export const chambers = [
           { word: "scattered",          note: "the series\ncollapsing",       px: 55, py: 60 },
           { word: "fragmented reality", note: "one self\nin pieces",           px: 75, py: 78 },
         ],
+        blanks: [4, 15],  // "herself" · "fragmented"
       },
       // ── ÉCHO 03
       {
@@ -67,6 +72,7 @@ export const chambers = [
           { word: "dissolved",           note: "the steps\nabsorbing him",    px: 28, py: 55 },
           { word: "ever-shifting",       note: "the geometry\nin motion",     px: 72, py: 74 },
         ],
+        blanks: [1],   // "solitary"
       },
       // ── ÉCHO 04
       {
@@ -81,6 +87,7 @@ export const chambers = [
           { word: "more distant",          note: "the alley\nfading",          px: 55, py: 52 },
           { word: "clung to it desperately", note: "the light\nof the phone",  px: 68, py: 74 },
         ],
+        blanks: [5, 14],  // "elsewhere" · "desperately."
       },
       // ── ÉCHO 05
       {
@@ -95,6 +102,7 @@ export const chambers = [
           { word: "in the distance", note: "the seated man\nfacing the unknown", px: 28, py: 52 },
           { word: "enormous",       note: "the scale\ninverted",                  px: 52, py: 74 },
         ],
+        blanks: [11],  // "enormous,"
       },
       // ── ÉCHO 06
       {
@@ -109,6 +117,7 @@ export const chambers = [
           { word: "perpetual outsider", note: "not his wall\nnot his city",  px: 65, py: 55 },
           { word: "assertion",         note: "he walks on\nanyway",          px: 48, py: 78 },
         ],
+        blanks: [14],  // "perpetual"
       },
     ],
   },

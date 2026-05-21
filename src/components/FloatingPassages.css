@@ -250,6 +250,103 @@
   /* Other — proximité, intimité de la rencontre — tracking resserré */
   .floating-passages--other .fp-text { letter-spacing: 0.02em; }
 
+
+  /* ─────────────────────────────────────────────
+     SPACE — drift-decay (P.1)
+     Tokens iseriens : disparaissent quand le passage
+     dérive hors du centre du viewport. Leur place
+     reste : le mot devient transparent, un cadratin
+     monospace s'affiche en surimpression, faible.
+     Le visiteur écrit le texte avec son pan.
+     ───────────────────────────────────────────── */
+
+  .fp-token {
+    position: relative;
+  }
+
+  .fp-token--blank {
+    transition: color 0.9s ease;
+  }
+
+  .fp-token--blank::after {
+    content: "—";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -52%);
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 0.7em;
+    letter-spacing: 0;
+    color: rgba(240, 235, 224, 0.32);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.9s ease;
+  }
+
+  /* État perdu — le mot s'efface, le cadratin émerge */
+  .fp-item--decayed .fp-token--blank {
+    color: transparent;
+  }
+  .fp-item--decayed .fp-token--blank::after {
+    opacity: 1;
+  }
+
+  /* Retour — transition lente : "se souvenir" prend du temps */
+  .fp-item--remembering .fp-token--blank,
+  .fp-item--remembering .fp-token--blank::after {
+    transition-duration: 1.6s;
+  }
+
+
+  /* ─────────────────────────────────────────────
+     P.3 — SEUIL DE SORTIE
+     État de retrait : le chrome disparaît, les tints
+     atmosphériques par chambre sont masqués par un
+     overlay sombre, les items deviennent inertes.
+     Seules subsistent les positions des passages
+     telles que le visiteur les a laissées.
+     ───────────────────────────────────────────── */
+
+  .floating-passages--threshold::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--dark, #0a0906);
+    pointer-events: none;
+    animation: fp-threshold-mask-in 1.6s cubic-bezier(0.55, 0, 0.10, 1) forwards;
+    z-index: 81;
+  }
+  @keyframes fp-threshold-mask-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .floating-passages--threshold .fp-center {
+    opacity: 0;
+    transition: opacity 1.4s ease;
+    pointer-events: none;
+  }
+
+  .floating-passages--threshold .fp-item {
+    pointer-events: none;
+    cursor: default;
+  }
+
+  /* Désactive les états de hover/dim hérités : la disposition demeure telle quelle */
+  .floating-passages--threshold .fp-item--dimmed,
+  .floating-passages--threshold .fp-item--echo-dimmed,
+  .floating-passages--threshold .fp-item--anchor-dimmed {
+    opacity: inherit;
+  }
+
+  /* Annotations Other — éteintes dans le seuil */
+  .floating-passages--threshold .fp-annotation {
+    opacity: 0 !important;
+    transition: opacity 1.4s ease;
+  }
+
+
   /* ── Mobile ── */
   @media (max-width: 680px) {
     .fp-item { width: 230px; }

@@ -59,6 +59,15 @@ export default function App() {
   // ── Grain bloom — NEW transition layer for home → passages
   const [grainState, setGrainState] = useState("idle"); // idle | bloom | fading
 
+  // ── P.3 — Seuil de sortie
+  //    `revealed[chamberIdx] === true` dès qu'une photo a été dévoilée.
+  //    Sur tentative de sortie (back/home/dot/Escape) depuis la vue passages,
+  //    on diffère l'action via setThreshold ; le visiteur se retrouve avec
+  //    sa disposition, sans la photo, sans les ancres, sans le chrome.
+  //    Click / Escape / 20 s exécutent l'action différée.
+  const [revealed,  setRevealed]  = useState({});       // { [idx]: true }
+  const [threshold, setThreshold] = useState(null);     // null | { exitAction }
+
   useEffect(() => {
     const onMove = (e) => setMousePos({ x: e.clientX, y: e.clientY });
     window.addEventListener("mousemove", onMove);
@@ -114,6 +123,8 @@ export default function App() {
         existing.add(idx);
         return { ...prev, [chamberIdx]: existing };
       });
+      // P.3 — marquer cette chambre comme ayant révélé au moins une photo
+      setRevealed((prev) => prev[chamberIdx] ? prev : { ...prev, [chamberIdx]: true });
     });
   }, [dissolveTo, chamberIdx]);
 
@@ -147,6 +158,62 @@ export default function App() {
       setView("passages");
     });
   }, [dissolveTo, chamberIdx]);
+
+  // ── P.3 — exit gate
+  //    Diffère l'action de sortie via le seuil si la chambre courante a
+  //    révélé au moins une photo. Sinon, exécute immédiatement.
+  const exitChamberWithThreshold = useCallback((exitAction) => {
+    if (revealed[chamberIdx] && view === "passages" && !threshold) {
+      setThreshold({ exitAction });
+    } else {
+      exitAction();
+    }
+  }, [revealed, chamberIdx, view, threshold]);
+
+  const dismissThreshold = useCallback(() => {
+    setThreshold((cur) => {
+      if (!cur) return null;
+      // exécute l'action différée après avoir clos le seuil
+      setTimeout(() => cur.exitAction(), 0);
+      return null;
+    });
+  }, []);
+
+  // Auto-dismiss 20 s
+  useEffect(() => {
+    if (!threshold) return;
+    const t = setTimeout(dismissThreshold, 20000);
+    return () => clearTimeout(t);
+  }, [threshold, dismissThreshold]);
+
+  // Click anywhere / Escape — ferme le seuil. Délai initial pour ignorer
+  // le clic qui a déclenché le seuil.
+  useEffect(() => {
+    if (!threshold) return;
+    let clickArmed = false;
+    const armTimer = setTimeout(() => { clickArmed = true; }, 350);
+    const onClick = () => { if (clickArmed) dismissThreshold(); };
+    const onKey = (e) => {
+      if (e.key === "Escape" || e.key === " " || e.key === "Enter") dismissThreshold();
+    };
+    window.addEventListener("click", onClick);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      clearTimeout(armTimer);
+      window.removeEventListener("click", onClick);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [threshold, dismissThreshold]);
+
+  // P.3 — Escape depuis la vue passages → déclenche le seuil de sortie.
+  useEffect(() => {
+    if (view !== "passages" || threshold) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") exitChamberWithThreshold(handleGoHome);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [view, threshold, exitChamberWithThreshold, handleGoHome]);
 
   const chamber = chambers[chamberIdx];
 
@@ -202,23 +269,29 @@ export default function App() {
             onSelect={handleSelectPassage}
             visitedSet={visited[chamberIdx]}
             enterDir={enterDir}
+            thresholdActive={!!threshold}
           />
-          {visited[chamberIdx]?.size > 0 && (
+          {visited[chamberIdx]?.size > 0 && !threshold && (
             <ReturnIndicator
               key={chamberIdx}
               visitedCount={visited[chamberIdx].size}
               total={chamber.passages.length}
             />
           )}
-          <SharedUI
-            view="passages"
-            chamberIdx={chamberIdx}
-            chambers={chambers}
-            onGoHome={handleGoHome}
-            onSwitchChamber={handleSwitchChamber}
-            onBack={handleGoHome}
-            site={SITE}
-          />
+          {!threshold && (
+            <SharedUI
+              view="passages"
+              chamberIdx={chamberIdx}
+              chambers={chambers}
+              onGoHome={() => exitChamberWithThreshold(handleGoHome)}
+              onSwitchChamber={(idx) => {
+                if (idx === chamberIdx) return;
+                exitChamberWithThreshold(() => handleSwitchChamber(idx));
+              }}
+              onBack={() => exitChamberWithThreshold(handleGoHome)}
+              site={SITE}
+            />
+          )}
         </>
       )}
 

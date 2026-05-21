@@ -1,15 +1,20 @@
 /* ─────────────────────────────────────────────
    PhotoStage — iris reveal + orbital anchors
+   v2 — three differentiated reveal modes
    ───────────────────────────────────────────── */
 
    .photo-stage {
     position: fixed;
     inset: 0;
     z-index: 85;
-    overflow: visible; /* anchors can go outside */
+    overflow: visible;
   }
   
-  /* ── Photo — iris reveal + darkroom development ── */
+  /* ─────────────────────────────────────────────
+     PHOTO — base
+     Individual chamber overrides below
+     ───────────────────────────────────────────── */
+  
   .photo-stage__photo {
     position: fixed;
     left: 50%;
@@ -21,22 +26,35 @@
     object-position: center;
     z-index: 88;
     display: block;
-
-    /* Start closed, overexposed */
-    clip-path: circle(0% at 50% 50%);
-    filter: brightness(4) sepia(0.85) contrast(0.45);
-    transition:
-      clip-path 1.2s cubic-bezier(0.4, 0, 0.2, 1),
-      filter    2.8s cubic-bezier(0.55, 0, 0.15, 1);
-  }
-
-  /* Iris open + image develops */
-  .photo-stage__photo--open {
-    clip-path: circle(72% at 50% 50%);
-    filter: brightness(1) sepia(0) contrast(1);
   }
   
-  /* ── SVG lines ── */
+  /* ── Space — iris (clip-path circle), unchanged ── */
+  .photo-stage__photo--chamber-space {
+    clip-path: circle(0% at 50% 50%);
+    filter: brightness(4) sepia(0.85) contrast(0.45);
+    /* transitions injected inline by JS via photoStyle */
+  }
+  
+  /* ── Time — blur dissolve, no iris ── */
+  .photo-stage__photo--chamber-time {
+    clip-path: circle(100% at 50% 50%);  /* always full — blur does the work */
+    filter: brightness(0.25) blur(14px) sepia(0.22) contrast(0.9);
+    /* transition injected inline */
+  }
+  
+  /* ── Other — iris driven by JS gate RAF ── */
+  .photo-stage__photo--chamber-other {
+    clip-path: circle(0% at 50% 50%);
+    filter: brightness(4) sepia(0.85) contrast(0.45);
+    /* NO css transition on clip-path — JS drives it frame by frame */
+    /* filter transition injected inline once gate activates */
+  }
+  
+  
+  /* ─────────────────────────────────────────────
+     SVG LINES
+     ───────────────────────────────────────────── */
+  
   .photo-stage__svg {
     position: fixed;
     inset: 0;
@@ -58,7 +76,11 @@
     to   { stroke: rgba(240, 235, 224, 0.2); }
   }
   
-  /* ── Dots on photo ── */
+  
+  /* ─────────────────────────────────────────────
+     DOTS
+     ───────────────────────────────────────────── */
+  
   .photo-stage__dot {
     position: fixed;
     width: 5px;
@@ -81,7 +103,11 @@
     }
   }
   
-  /* ── Orbit word labels ── */
+  
+  /* ─────────────────────────────────────────────
+     ANCHOR LABELS
+     ───────────────────────────────────────────── */
+  
   .photo-stage__anchor {
     position: fixed;
     z-index: 400;
@@ -92,13 +118,12 @@
     animation: anchor-in 0.8s ease forwards;
     opacity: 0;
   }
-
+  
   @keyframes anchor-in {
     from { opacity: 0; transform: translate(-50%, -50%) translateY(6px); }
     to   { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
   }
-
-  /* Word */
+  
   .photo-stage__anchor-word {
     display: block;
     font-family: var(--font-serif);
@@ -113,8 +138,7 @@
     padding: 0.2rem 0.6rem;
     border-radius: 1px;
   }
-
-  /* Note */
+  
   .photo-stage__anchor-note {
     display: block;
     font-family: var(--font-mono);
@@ -127,7 +151,11 @@
     padding: 0.12rem 0.4rem;
   }
   
-  /* ── Full quote ── */
+  
+  /* ─────────────────────────────────────────────
+     QUOTE / CAPTION
+     ───────────────────────────────────────────── */
+  
   .photo-stage__quote {
     position: fixed;
     bottom: 1.8rem;
@@ -155,7 +183,7 @@
     line-height: 1.85;
     letter-spacing: 0.04em;
   }
-
+  
   .photo-stage__quote-source {
     display: block;
     font-family: var(--font-mono);
@@ -166,11 +194,11 @@
     margin-top: 0.4rem;
   }
   
+  
   /* ─────────────────────────────────────────────
-     Passage reading phase
+     PASSAGE READING PHASE
      ───────────────────────────────────────────── */
-
-  /* Full-screen overlay shown before photo */
+  
   .ps-reading {
     position: fixed;
     inset: 0;
@@ -182,11 +210,11 @@
     pointer-events: none;
     transition: opacity 0.75s ease;
   }
-
+  
   .ps-reading--out {
     opacity: 0;
   }
-
+  
   .ps-reading__body {
     text-align: center;
     max-width: 700px;
@@ -194,12 +222,12 @@
     transform: translateY(10px);
     transition: opacity 0.9s ease, transform 0.9s ease;
   }
-
+  
   .ps-reading__body--in {
     opacity: 1;
     transform: translateY(0);
   }
-
+  
   .ps-reading__text {
     font-family: var(--font-serif);
     font-style: italic;
@@ -210,7 +238,7 @@
     letter-spacing: 0.04em;
     margin: 0 0 1.4rem;
   }
-
+  
   .ps-reading__source {
     display: block;
     font-family: var(--font-mono);
@@ -219,10 +247,10 @@
     text-transform: uppercase;
     color: rgba(240, 235, 224, 0.2);
   }
-
-  /* Click-to-reveal hint — pulsing after text settles */
+  
+  /* Click hint — reads from data-hint attribute */
   .ps-reading__source::after {
-    content: 'click anywhere to reveal';
+    content: attr(data-hint);
     display: block;
     font-family: var(--font-mono);
     font-size: 10px;
@@ -232,20 +260,33 @@
     color: rgba(240, 235, 224, 0.30);
     animation: ps-hint-pulse 2.8s ease-in-out 2s infinite;
   }
-
+  
+  /* ── Time — hint appears later, pulse is slower ── */
+  .ps-reading--time .ps-reading__source::after {
+    animation-delay: 3.6s;
+    animation-duration: 4s;
+    color: rgba(240, 235, 224, 0.22);
+  }
+  
+  /* ── Other — hint is slightly different rhythm ── */
+  .ps-reading--other .ps-reading__source::after {
+    animation-delay: 2.4s;
+    animation-duration: 3.2s;
+  }
+  
   @keyframes ps-hint-pulse {
     0%, 100% { opacity: 0.9; }
-    50%      { opacity: 0.25; }
+    50%      { opacity: 0.2; }
   }
-
-  /* Keywords inside the passage — brighter + dotted underline */
+  
+  /* Keywords — brighter + dotted underline */
   .ps-kw {
     color: rgba(240, 235, 224, 0.96);
     border-bottom: 1px dotted rgba(240, 235, 224, 0.5);
     padding-bottom: 1px;
   }
-
-  /* Keyword flying from text position to orbital anchor */
+  
+  /* Flying keyword */
   .ps-fly {
     position: fixed;
     z-index: 500;
@@ -256,11 +297,42 @@
     color: rgba(240, 235, 224, 0.92);
     pointer-events: none;
     white-space: nowrap;
-    transition: transform 1.4s cubic-bezier(0.4, 0, 0.15, 1),
-                color     1.2s ease;
+    transition:
+      transform 1.4s cubic-bezier(0.4, 0, 0.15, 1),
+      color     1.2s ease;
   }
-
-  /* ── Mobile — hide anchors, larger quote ── */
+  
+  
+  /* ─────────────────────────────────────────────
+     OTHER — STILLNESS CUE
+     Appears when clip is nearly closed after migration
+     ───────────────────────────────────────────── */
+  
+  .ps-stillness-cue {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 402;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    color: rgba(240, 235, 224, 0.22);
+    pointer-events: none;
+    animation: ps-still-pulse 3s ease-in-out infinite;
+  }
+  
+  @keyframes ps-still-pulse {
+    0%, 100% { opacity: 0.7; }
+    50%      { opacity: 0.15; }
+  }
+  
+  
+  /* ─────────────────────────────────────────────
+     MOBILE
+     ───────────────────────────────────────────── */
+  
   @media (max-width: 680px) {
     .photo-stage__anchor,
     .photo-stage__svg,
@@ -275,5 +347,13 @@
   
     .photo-stage__quote {
       bottom: 3rem;
+    }
+  
+    .ps-reading {
+      padding: 3rem 2rem;
+    }
+  
+    .ps-reading__text {
+      font-size: 19px;
     }
   }

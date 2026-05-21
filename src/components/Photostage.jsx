@@ -4,7 +4,67 @@ import "./PhotoStage.css";
 const ORBIT_PAD_X = 95;
 const ORBIT_PAD_Y = 55;
 
-// ── Split passage.full into plain text + keyword segments
+// ─────────────────────────────────────────────
+// REVEAL CONFIG — three chambers, three modes
+//
+// space : iris (clip-path circle) — geometric shutter
+// time  : blur dissolve — the memory surfaces, no geometry
+// other : iris + cursor-reactive closing — stillness required
+// ─────────────────────────────────────────────
+const REVEAL = {
+  space: {
+    // Standard iris — unchanged
+    useIris:       true,
+    useBlur:       false,
+    useCursorGate: false,
+    filterIn:      "brightness(4) sepia(0.85) contrast(0.45)",
+    filterOpen:    "brightness(1) sepia(0)    contrast(1)",
+    clipIn:        "circle(0%  at 50% 50%)",
+    clipOpen:      "circle(72% at 50% 50%)",
+    clipTiming:    "1.2s cubic-bezier(0.4, 0, 0.2, 1)",
+    filterTiming:  "2.8s cubic-bezier(0.55, 0, 0.15, 1)",
+    // How long the passage text stays before click-to-reveal hint appears
+    hintDelay:     1800,
+  },
+  time: {
+    // Blur dissolve — no iris, image emerges from grain
+    useIris:       false,
+    useBlur:       true,
+    useCursorGate: false,
+    filterIn:      "brightness(0.25) blur(14px) sepia(0.22) contrast(0.9)",
+    filterOpen:    "brightness(1)    blur(0px)  sepia(0)    contrast(1)",
+    clipIn:        "circle(100% at 50% 50%)",  // already full — blur does the work
+    clipOpen:      "circle(100% at 50% 50%)",
+    clipTiming:    "0s",
+    filterTiming:  "3.8s cubic-bezier(0.55, 0, 0.10, 1)",
+    // Passage text lingers longer — recalling a memory takes time
+    hintDelay:     2800,
+  },
+  other: {
+    // Iris + cursor gate — stillness opens, movement closes
+    useIris:       true,
+    useBlur:       false,
+    useCursorGate: true,
+    filterIn:      "brightness(4) sepia(0.85) contrast(0.45)",
+    filterOpen:    "brightness(1) sepia(0)    contrast(1)",
+    clipIn:        "circle(0%  at 50% 50%)",
+    clipOpen:      "circle(72% at 50% 50%)",
+    clipTiming:    "1.6s cubic-bezier(0.4, 0, 0.2, 1)",
+    filterTiming:  "3.2s cubic-bezier(0.55, 0, 0.15, 1)",
+    hintDelay:     1800,
+    // Cursor gate constants
+    speedThreshold: 2.2,    // px/frame — above this = too fast
+    retreatRate:    0.038,  // how fast the clip collapses per fast frame
+    openRate:       0.006,  // how fast it opens when still
+    minRadius:      0,      // % — fully closed
+    maxRadius:      72,     // % — fully open
+  },
+};
+
+// ─────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────
+
 function parseText(text, anchors) {
   if (!anchors?.length) return [{ type: "text", content: text }];
   const hits = anchors
@@ -28,7 +88,6 @@ function parseText(text, anchors) {
   return segs;
 }
 
-// ── Keyword that flies from passage text position to its orbital anchor
 function FlyingWord({ data, delay }) {
   const [active, setActive] = useState(false);
   useEffect(() => {
@@ -57,18 +116,11 @@ function FlyingWord({ data, delay }) {
 }
 
 // ─────────────────────────────────────────────
-// PhotoStage — passage reading → keyword migration → photo
+// PhotoStage — differentiated by chamber.id
 //
-// Phase 'passage' (0–2200ms):
-//   Full passage text, keywords highlighted in the sentence.
-//
-// At 2200ms:
-//   Text fades. Keywords measure their screen rect, then fly
-//   via CSS transform to their orbital anchor positions (wx/wy).
-//   Iris begins opening simultaneously.
-//
-// Phase 'photo' (4000ms+):
-//   Flying keywords cleared. Settled anchor labels + lines appear.
+// space : iris reveal (unchanged)
+// time  : blur dissolve, slower passage phase
+// other : iris + cursor gate (stillness required to open)
 // ─────────────────────────────────────────────
 
 export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) {
@@ -80,16 +132,25 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
   const [flying,   setFlying]   = useState(null);
   const [lines,    setLines]    = useState(false);
 
+  // Other — cursor gate
+  const [clipRadius, setClipRadius] = useState(0);  // 0–72 %
+  const clipRadiusRef = useRef(0);
+  const mouseSpeedRef = useRef(0);
+  const prevMouseRef  = useRef({ x: 0, y: 0, t: 0 });
+  const gateRafRef    = useRef(null);
+  const gateActiveRef = useRef(false); // true once migration triggered for Other
+
   const photoRef = useRef(null);
   const kwRefs   = useRef([]);
   const tids     = useRef([]);
 
   const passage = chamber.passages[passageIdx];
+  const cfg     = REVEAL[chamber.id] ?? REVEAL.space;
 
   const at     = (fn, ms) => { const id = setTimeout(fn, ms); tids.current.push(id); };
   const clearT = () => { tids.current.forEach(clearTimeout); tids.current = []; };
 
-  // ── Compute orbital + dot positions from photo element
+  // ── Anchor positions
   const getAnchors = useCallback(() => {
     const el = photoRef.current;
     if (!el || !passage?.anchors?.length) return null;
@@ -115,7 +176,7 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
     }));
   }, [passage]);
 
-  // ── Trigger migration on click (or Space/Enter)
+  // ── Migration (passage → photo phase) — shared core
   const triggerMigration = useCallback(() => {
     if (phase !== "passage") return;
     clearT();
@@ -136,11 +197,60 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
         })
       );
     }
-    requestAnimationFrame(() => requestAnimationFrame(() => setIrisOpen(true)));
-    at(() => { setPhase("photo"); setLines(true); setFlying(null); }, 1800);
-  }, [phase, passage, getAnchors]);
 
-  // ── Main timeline — resets on each new passage
+    if (cfg.useCursorGate) {
+      // Other — don't open iris here; the gate RAF drives clipRadius
+      gateActiveRef.current = true;
+    } else {
+      requestAnimationFrame(() => requestAnimationFrame(() => setIrisOpen(true)));
+    }
+
+    at(() => { setPhase("photo"); setLines(true); setFlying(null); }, 1800);
+  }, [phase, passage, getAnchors, cfg]);
+
+  // ── Other — cursor gate RAF
+  //    Runs only in photo phase for The Other.
+  //    Tracks mouse speed; slow/still → open, fast → close.
+  useEffect(() => {
+    if (chamber.id !== "other") return;
+
+    const onMove = (e) => {
+      const now  = performance.now();
+      const prev = prevMouseRef.current;
+      const dt   = now - prev.t;
+      if (dt > 0 && dt < 200) {
+        const dx = e.clientX - prev.x;
+        const dy = e.clientY - prev.y;
+        mouseSpeedRef.current = Math.sqrt(dx * dx + dy * dy) / dt * 16;
+      }
+      prevMouseRef.current = { x: e.clientX, y: e.clientY, t: now };
+    };
+    window.addEventListener("mousemove", onMove);
+
+    const loop = () => {
+      if (gateActiveRef.current) {
+        const speed   = mouseSpeedRef.current;
+        const isStill = speed < cfg.speedThreshold;
+        const current = clipRadiusRef.current;
+        const target  = isStill ? cfg.maxRadius : cfg.minRadius;
+        const rate    = isStill ? cfg.openRate  : cfg.retreatRate;
+        const next    = current + (target - current) * rate;
+        clipRadiusRef.current = next;
+        setClipRadius(next);
+        // Decay speed
+        mouseSpeedRef.current *= 0.88;
+      }
+      gateRafRef.current = requestAnimationFrame(loop);
+    };
+    gateRafRef.current = requestAnimationFrame(loop);
+
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      if (gateRafRef.current) cancelAnimationFrame(gateRafRef.current);
+    };
+  }, [chamber.id, cfg]);
+
+  // ── Main timeline
   useEffect(() => {
     clearT();
     kwRefs.current = [];
@@ -148,16 +258,16 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
     setTextIn(false); setTextOut(false);
     setIrisOpen(false); setAnchors([]);
     setFlying(null); setLines(false);
+    clipRadiusRef.current = 0;
+    setClipRadius(0);
+    gateActiveRef.current = false;
 
-    new Image().src = passage.src; // preload
-
-    // Text fades in
+    new Image().src = passage.src;
     at(() => setTextIn(true), 80);
-
     return clearT;
   }, [passage]);
 
-  // Recompute anchors on resize
+  // ── Resize
   useEffect(() => {
     const handler = () => {
       if (phase === "photo") {
@@ -169,7 +279,7 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
     return () => window.removeEventListener("resize", handler);
   }, [phase, getAnchors]);
 
-  // Keyboard — Escape back, Space/Enter advance
+  // ── Keyboard
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") onBackToList();
@@ -183,21 +293,72 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
 
   const segs = parseText(passage.full, passage.anchors);
 
+  // ── Compute photo style based on chamber mode
+  const photoStyle = (() => {
+    if (cfg.useCursorGate) {
+      // Other — clip driven by gate RAF, filter driven by irisOpen state
+      // We use clipRadius state (0–72) for the circle
+      const r = Math.max(0, Math.min(cfg.maxRadius, clipRadius));
+      return {
+        clipPath:   `circle(${r.toFixed(2)}% at 50% 50%)`,
+        filter:     gateActiveRef.current
+          ? cfg.filterOpen
+          : cfg.filterIn,
+        transition: `filter ${cfg.filterTiming}`,
+        // No CSS transition on clip-path for Other — JS drives it
+      };
+    }
+
+    if (cfg.useBlur) {
+      // Time — no clip-path change, only filter transition
+      return {
+        clipPath:   cfg.clipOpen,
+        filter:     irisOpen ? cfg.filterOpen : cfg.filterIn,
+        transition: `filter ${cfg.filterTiming}`,
+      };
+    }
+
+    // Space (default) — clip-path iris + filter
+    return {
+      clipPath:   irisOpen ? cfg.clipOpen : cfg.clipIn,
+      filter:     irisOpen ? cfg.filterOpen : cfg.filterIn,
+      transition: `clip-path ${cfg.clipTiming}, filter ${cfg.filterTiming}`,
+    };
+  })();
+
+  // ── Hint text for passage phase — varies by chamber
+  const hintText = {
+    space: "click anywhere to reveal",
+    time:  "stay with it — click when ready",
+    other: "move slowly — stillness will open it",
+  }[chamber.id] ?? "click anywhere to reveal";
+
+  // ── Other: after migration, show stillness cue
+  const showStillnessCue = cfg.useCursorGate && phase === "photo" && clipRadius < 20;
+
   return (
     <div className="photo-stage">
 
-      {/* ── Photo — always in DOM for getBoundingClientRect ── */}
+      {/* ── Photo */}
       <img
         ref={photoRef}
         src={passage.src}
         alt={passage.alt}
-        className={`photo-stage__photo ${irisOpen ? "photo-stage__photo--open" : ""}`}
+        className={`photo-stage__photo photo-stage__photo--chamber-${chamber.id}`}
+        style={photoStyle}
       />
 
-      {/* ── Passage reading overlay — click anywhere to reveal ── */}
+      {/* ── Other — stillness cue */}
+      {showStillnessCue && (
+        <p className="ps-stillness-cue" aria-live="polite">
+          be still
+        </p>
+      )}
+
+      {/* ── Passage reading overlay */}
       {phase === "passage" && (
         <div
-          className={`ps-reading ${textOut ? "ps-reading--out" : ""}`}
+          className={`ps-reading ${textOut ? "ps-reading--out" : ""} ps-reading--${chamber.id}`}
           onClick={triggerMigration}
           style={{ pointerEvents: textIn ? "auto" : "none", cursor: "none" }}
         >
@@ -219,17 +380,22 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
               )}
               &rdquo;
             </p>
-            <span className="ps-reading__source">{passage.source}</span>
+            <span
+              className="ps-reading__source"
+              data-hint={hintText}
+            >
+              {passage.source}
+            </span>
           </div>
         </div>
       )}
 
-      {/* ── Flying keywords ── */}
+      {/* ── Flying keywords */}
       {flying?.map((fw, i) => (
         <FlyingWord key={i} data={fw} delay={i * 0.18} />
       ))}
 
-      {/* ── SVG lines — photo phase ── */}
+      {/* ── SVG lines — photo phase */}
       {lines && anchors.length > 0 && (
         <svg className="photo-stage__svg" aria-hidden="true">
           {anchors.map((a, i) => (
@@ -244,7 +410,7 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
         </svg>
       )}
 
-      {/* ── Dots on photo — photo phase ── */}
+      {/* ── Dots — photo phase */}
       {lines && anchors.map((a, i) => (
         <div
           key={i}
@@ -254,7 +420,7 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
         />
       ))}
 
-      {/* ── Settled anchor labels — photo phase ── */}
+      {/* ── Anchor labels — photo phase */}
       {phase === "photo" && anchors.map((a, i) => (
         <div
           key={i}
@@ -267,7 +433,7 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
         </div>
       ))}
 
-      {/* ── Source caption — photo phase ── */}
+      {/* ── Source caption — photo phase */}
       {phase === "photo" && (
         <div className="photo-stage__quote photo-stage__quote--visible">
           <span className="photo-stage__quote-source">

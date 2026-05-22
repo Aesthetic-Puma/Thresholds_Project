@@ -185,7 +185,6 @@ export default function Home({
         <h1 className="home__title">{site.title.toUpperCase()}</h1>
         <p className="home__title-jp" aria-label={site.titleJp}>
           {site.titleJp}
-          <span className="home__title-kr">{site.titleKr}</span>
         </p>
         <div className="home__divider" aria-hidden="true" />
         <p className="home__tagline">

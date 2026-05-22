@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import "./PhotoStage.css";
 
-const ORBIT_PAD_X = 95;
-const ORBIT_PAD_Y = 55;
+const ORBIT_PAD_X = 55;
+const ORBIT_PAD_Y = 35;
 
 // ─────────────────────────────────────────────
 // REVEAL CONFIG — three chambers, three modes
@@ -80,7 +80,7 @@ const REVEAL = {
     fleeDecay:          0.88,
     fleeSpring:         0.005,
     stillSpeedMax:      1.6,
-    emergenceRadius:    260,   // < cette distance, le mot le plus proche peut émerger
+    emergenceRadius:    500,   // < cette distance, le mot le plus proche peut émerger
     maskRadiusPx:       140,   // taille du "creux" dans la photo
     maskDimMax:         0.55,  // assombrissement max autour du mot
   },
@@ -458,7 +458,7 @@ function AnchorsFlee({ anchors, photoRef, cfg }) {
   );
 }
 
-function AnchorLayer({ chamberId, anchors, photoRef, cfg }) {
+function AnchorLayer({ anchors, photoRef, cfg }) {
   if (!anchors?.length) return null;
   const mode = cfg.anchorMode;
   if (mode === "drift")    return <AnchorsDrift    anchors={anchors} cfg={cfg} />;
@@ -703,7 +703,7 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
         <div
           className={`ps-reading ${textOut ? "ps-reading--out" : ""} ps-reading--${chamber.id}`}
           onClick={triggerMigration}
-          style={{ pointerEvents: textIn ? "auto" : "none", cursor: "none" }}
+          style={{ pointerEvents: (textIn && !textOut) ? "auto" : "none", cursor: "none" }}
         >
           <div className={`ps-reading__body ${textIn ? "ps-reading__body--in" : ""}`}>
             <p className="ps-reading__text">

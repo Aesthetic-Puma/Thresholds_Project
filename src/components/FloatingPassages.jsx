@@ -13,7 +13,6 @@ const MARGIN           = 80;
 const COLS             = 3;
 
 // ── Space chamber — panning canvas
-const SPACE_SPREAD   = 0.72;  // × vw — distance des colonnes latérales
 const SPACE_MAX_PAN   = 0.42;  // × vw — amplitude horizontale
 const SPACE_MAX_PAN_Y = 0.18;  // × vh — amplitude verticale, plus douce
 
@@ -146,17 +145,18 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
     return () => window.removeEventListener("mousemove", onMove);
   }, [chamber.id]);
 
-  // ── Disposition Space : anchors au centre, échos sur les flancs
-  const getSpaceLayout = (passages) => {
-    let anchorRow = 0, echoLeft = 0, echoRight = 0, echoTotal = 0;
-    const echoSplit = Math.floor(passages.filter((p) => !p.anchor).length / 2);
-    return passages.map((p) => {
-      if (p.anchor) return { col: 1, colRow: anchorRow++ };
-      const useLeft = echoTotal < echoSplit;
-      echoTotal++;
-      return useLeft ? { col: 0, colRow: echoLeft++ } : { col: 2, colRow: echoRight++ };
-    });
-  };
+  // ── Disposition Space : slots fixes sur canvas élargi
+  //    Canvas étendu de −0.15 vw à 1.15 vw (hors-champ = découverte par pan).
+  //    2 ancres visibles au repos, 4 échos dispersés — 2 off-screen chaque côté.
+  //    Séparation minimale garantie : pas d'overlap à aucune valeur de pan.
+  const getSpaceLayout = () => [
+    { cxR: 0.25, cyR: 0.34, far: false },   // ancre 0  — gauche-centre
+    { cxR: 0.62, cyR: 0.61, far: false },   // ancre 1  — droite-centre
+    { cxR: -0.13, cyR: 0.54, far: true  },  // écho 0   — hors-champ gauche
+    { cxR: 0.44, cyR: 0.20, far: false },   // écho 1   — centre-haut
+    { cxR: 1.11, cyR: 0.44, far: true  },   // écho 2   — hors-champ droite
+    { cxR: 0.85, cyR: 0.75, far: false },   // écho 3   — droite visible
+  ];
 
   // ── Build items + boucle d'animation
   const build = useCallback(() => {
@@ -189,7 +189,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
       ? JSON.parse(localStorage.getItem(LS_TIME_KEY) || "{}")
       : null;
 
-    const spaceLayout = isSpace ? getSpaceLayout(chamber.passages) : null;
+    const spaceLayout = isSpace ? getSpaceLayout() : null;
     const timeLayout  = isTime  ? getTimeLayout(chamber.passages)  : null;
     const otherLayout = isOther ? getOtherLayout(chamber.passages) : null;
 
@@ -197,13 +197,11 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
       let cx, cy, floatAmpX, floatAmpY, floatSpd, floatSpdY;
 
       if (isSpace) {
-        const { col, colRow } = spaceLayout[i];
-        const COL_CENTERS = [-SPACE_SPREAD * vw, 0, SPACE_SPREAD * vw];
-        const ROW_Y       = [vh * 0.36, vh * 0.63];
-        const jx = (Math.random() - 0.5) * vw * 0.10;
-        const jy = (Math.random() - 0.5) * vh * 0.18;
-        cx        = vw / 2 + COL_CENTERS[col] + jx;
-        cy        = Math.max(MARGIN + 50, Math.min(vh - MARGIN - 50, ROW_Y[colRow] + jy));
+        const { cxR, cyR } = spaceLayout[i];
+        const jx = (Math.random() - 0.5) * vw * 0.04;
+        const jy = (Math.random() - 0.5) * vh * 0.06;
+        cx        = vw * cxR + jx;
+        cy        = Math.max(MARGIN + 50, Math.min(vh - MARGIN - 50, vh * cyR + jy));
         floatAmpX = 1.5 + Math.random() * 2;
         floatAmpY = FLOAT_AMP_Y_MIN + Math.random() * (FLOAT_AMP_Y_MAX - FLOAT_AMP_Y_MIN);
         floatSpd  = FLOAT_SPEED_MIN + Math.random() * (FLOAT_SPEED_MAX - FLOAT_SPEED_MIN);
@@ -272,7 +270,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
       const el = document.createElement("button");
       el.className = `fp-item ${isAnchor ? "fp-item--anchor" : "fp-item--echo"}`;
 
-      if (isSpace && spaceLayout[i].col !== 1) el.classList.add("fp-item--far");
+      if (isSpace && spaceLayout[i].far) el.classList.add("fp-item--far");
       if (!isTime && !isOther && visitedSet?.has(i)) el.classList.add("fp-item--visited");
 
       el.style.left = `${cx}px`;

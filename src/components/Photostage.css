@@ -357,6 +357,58 @@
 
 
   /* ─────────────────────────────────────────────
+     ANCHOR LAYER — ps-anchor (refactor 2025)
+     Trois sous-modes : drift (Space), temporal (Time), flee (Other)
+     ───────────────────────────────────────────── */
+
+  .ps-anchor {
+    position: fixed;
+    z-index: 400;
+    max-width: 200px;
+    pointer-events: none;
+    text-align: center;
+  }
+
+  .ps-anchor__word {
+    display: block;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 17px;
+    color: rgba(240, 235, 224, 0.88);
+    letter-spacing: 0.05em;
+    line-height: 1.35;
+    white-space: pre-line;
+    background: rgba(10, 9, 6, 0.60);
+    padding: 0.2rem 0.6rem;
+    border-radius: 1px;
+  }
+
+  /* Space — dérive lente, entrée animée */
+  .ps-anchor--drift {
+    transform: translate(-50%, -50%);
+    animation: anchor-in 0.8s ease forwards;
+    opacity: 0;
+  }
+
+  /* Time — arrivée séquentielle avec transitions */
+  .ps-anchor--temporal {
+    transform: translate(-50%, -50%);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .ps-anchor--temporal-idle  { opacity: 0; }
+  .ps-anchor--temporal-in    { opacity: 0.88; transform: translate(-50%, -50%) translateY(-5px); }
+  .ps-anchor--temporal-hold  { opacity: 0.88; transform: translate(-50%, -50%); }
+  .ps-anchor--temporal-out   { opacity: 0;    transform: translate(-50%, -50%) translateY(5px); }
+  .ps-anchor--temporal-trail { opacity: var(--trail-opacity, 0.18); transform: translate(-50%, -50%); }
+
+  /* Other — opacité et position pilotées par JS (physique de fuite) */
+  .ps-anchor--flee {
+    /* left=0, top=0 + translate3d en inline style depuis le rAF */
+    will-change: transform, opacity;
+  }
+
+  /* ─────────────────────────────────────────────
      MOBILE
      ───────────────────────────────────────────── */
 

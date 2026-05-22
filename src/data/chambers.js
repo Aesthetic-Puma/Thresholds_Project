@@ -2,7 +2,6 @@ export const SITE = {
   title:      "Thresholds",
   titleFr:    "Seuils",
   titleJp:    "敷居",
-  titleKr:    "문턱",
   subtitle:   "Photography · Writing · Code",
   author:     "Jean Viratel",
   tagline:    "Here, nothing stands quite straight.\nEvery image is a door left ajar.",

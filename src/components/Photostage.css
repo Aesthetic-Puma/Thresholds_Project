@@ -104,8 +104,9 @@
   /* ─────────────────────────────────────────────
      TIME — TEMPORAL
      Apparition une à une aux points des tiers.
-     Cadence portée par le JS. Flou de sortie qui
-     reprend la grammaire visuelle de Time.
+     Cadence portée par le JS. Trail pondéré par
+     le weight de l'ancre : les mots-image laissent
+     plus de sédiment visuel.
      ───────────────────────────────────────────── */
 
   .ps-anchor--temporal {
@@ -130,27 +131,23 @@
     filter: blur(6px);
   }
 
-  .ps-anchor--temporal-in {
-    opacity: 0.95;
+  .ps-anchor--temporal-in,
+  .ps-anchor--temporal-hold {
+    opacity: var(--hold-opacity, 0.95);
     filter: blur(0);
     transition-duration: 0.7s;
-  }
-
-  .ps-anchor--temporal-hold {
-    opacity: 0.95;
-    filter: blur(0);
   }
 
   .ps-anchor--temporal-out {
     opacity: 0;
     filter: blur(8px);
-    transition-duration: 1.4s;
+    transition-duration: 1.2s;
   }
 
-  /* Trace — le mot a été montré ; il reste très faible */
+  /* Trace — le mot a été montré ; opacité et flou pondérés par --trail-opacity / --trail-blur */
   .ps-anchor--temporal-trail {
     opacity: var(--trail-opacity, 0.18);
-    filter: blur(2px);
+    filter: blur(var(--trail-blur, 2px));
     transition-duration: 2s;
   }
 
@@ -357,58 +354,6 @@
 
 
   /* ─────────────────────────────────────────────
-     ANCHOR LAYER — ps-anchor (refactor 2025)
-     Trois sous-modes : drift (Space), temporal (Time), flee (Other)
-     ───────────────────────────────────────────── */
-
-  .ps-anchor {
-    position: fixed;
-    z-index: 400;
-    max-width: 200px;
-    pointer-events: none;
-    text-align: center;
-  }
-
-  .ps-anchor__word {
-    display: block;
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-weight: 400;
-    font-size: 17px;
-    color: rgba(240, 235, 224, 0.88);
-    letter-spacing: 0.05em;
-    line-height: 1.35;
-    white-space: pre-line;
-    background: rgba(10, 9, 6, 0.60);
-    padding: 0.2rem 0.6rem;
-    border-radius: 1px;
-  }
-
-  /* Space — dérive lente, entrée animée */
-  .ps-anchor--drift {
-    transform: translate(-50%, -50%);
-    animation: anchor-in 0.8s ease forwards;
-    opacity: 0;
-  }
-
-  /* Time — arrivée séquentielle avec transitions */
-  .ps-anchor--temporal {
-    transform: translate(-50%, -50%);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .ps-anchor--temporal-idle  { opacity: 0; }
-  .ps-anchor--temporal-in    { opacity: 0.88; transform: translate(-50%, -50%) translateY(-5px); }
-  .ps-anchor--temporal-hold  { opacity: 0.88; transform: translate(-50%, -50%); }
-  .ps-anchor--temporal-out   { opacity: 0;    transform: translate(-50%, -50%) translateY(5px); }
-  .ps-anchor--temporal-trail { opacity: var(--trail-opacity, 0.18); transform: translate(-50%, -50%); }
-
-  /* Other — opacité et position pilotées par JS (physique de fuite) */
-  .ps-anchor--flee {
-    /* left=0, top=0 + translate3d en inline style depuis le rAF */
-    will-change: transform, opacity;
-  }
-
-  /* ─────────────────────────────────────────────
      P.3 — ÉTAT TRANSCENDANTAL (Time)
      Après le premier cycle d'arrivée séquentielle
      des ancres, le fragment complet revient seul à
@@ -449,8 +394,31 @@
      ───────────────────────────────────────────── */
 
   @media (max-width: 680px) {
-    .ps-anchor {
-      display: none;  /* l'archisème n'a pas de sens sur écran tactile */
+    /* Drift et flee sans souris : masqués */
+    .ps-anchor--drift,
+    .ps-anchor--flee {
+      display: none;
+    }
+
+    /* Temporal : cadence préservée, empilé sous la photo sur mobile */
+    .ps-anchor--temporal {
+      left: 50% !important;
+      top: auto !important;
+      bottom: 5.6rem !important;
+      transform: translate(-50%, 0) !important;
+      max-width: 86vw;
+    }
+    .ps-anchor--temporal .ps-anchor__word {
+      font-size: 17px;
+      background: rgba(10, 9, 6, 0.78);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+    /* Sur mobile on ne montre que l'actif — trail/idle/out superposés seraient illisibles */
+    .ps-anchor--temporal-idle,
+    .ps-anchor--temporal-out,
+    .ps-anchor--temporal-trail {
+      opacity: 0 !important;
     }
 
     .photo-stage__photo {

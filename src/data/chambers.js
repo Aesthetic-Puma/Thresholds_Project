@@ -166,9 +166,9 @@ export const chambers = [
         short:  "Stories take time to get their teeth into us.",
         full:   "Stories take time to get their teeth into us.",
         anchors: [
-          { word: "take time",       note: "the smoke\nbeginning",           px: 35, py: 28 },
-          { word: "get their teeth", note: "a face\ngoing under",            px: 62, py: 52 },
-          { word: "into us",         note: "the exposure\nstretching",       px: 50, py: 78 },
+          { word: "take time",       weight: 0.6, note: "the smoke\nbeginning",           px: 35, py: 28 },
+          { word: "get their teeth", weight: 1.0, note: "a face\ngoing under",            px: 62, py: 52 },
+          { word: "into us",         weight: 0.4, note: "the exposure\nstretching",       px: 50, py: 78 },
         ],
       },
       // ── ANCRE 02
@@ -180,9 +180,9 @@ export const chambers = [
         short:  "You will always be my favourite memory.",
         full:   "You will always be my favourite memory.",
         anchors: [
-          { word: "always",   note: "the columns\nunmoving",    px: 50, py: 25 },
-          { word: "favourite", note: "the red\nof memory",     px: 72, py: 72 },
-          { word: "memory",   note: "eyes closed\nto the past", px: 28, py: 55 },
+          { word: "always",    weight: 0.6, note: "the columns\nunmoving",    px: 50, py: 25 },
+          { word: "favourite", weight: 1.0, note: "the red\nof memory",      px: 72, py: 72 },
+          { word: "memory",    weight: 0.8, note: "eyes closed\nto the past", px: 28, py: 55 },
         ],
       },
       // ── ÉCHO 03
@@ -194,9 +194,9 @@ export const chambers = [
         short:  "A frozen image from simpler times, when the world was still comprehensible.",
         full:   "A frozen image from simpler times, when the world was still comprehensible.",
         anchors: [
-          { word: "frozen image",   note: "painted on the wall\nnever ending",        px: 22, py: 35 },
-          { word: "simpler times",  note: "the window\nwhere someone lives",           px: 72, py: 52 },
-          { word: "comprehensible", note: "the frozen couple\nagainst the living",     px: 50, py: 74 },
+          { word: "frozen image",   weight: 1.0, note: "painted on the wall\nnever ending",    px: 22, py: 35 },
+          { word: "simpler times",  weight: 0.7, note: "the window\nwhere someone lives",       px: 72, py: 52 },
+          { word: "comprehensible", weight: 0.5, note: "the frozen couple\nagainst the living", px: 50, py: 74 },
         ],
       },
       // ── ÉCHO 04
@@ -208,9 +208,9 @@ export const chambers = [
         short:  "Was it a dream, or a reality she could not escape?",
         full:   "Was it a dream, or a reality she could not escape?",
         anchors: [
-          { word: "dream",   note: "the bubbles\nevaporating",  px: 55, py: 25 },
-          { word: "reality", note: "the man\nfacing away",      px: 28, py: 55 },
-          { word: "escape",  note: "the scene\ndissolving",     px: 65, py: 74 },
+          { word: "dream",   weight: 1.0, note: "the bubbles\nevaporating", px: 55, py: 25 },
+          { word: "reality", weight: 0.6, note: "the man\nfacing away",     px: 28, py: 55 },
+          { word: "escape",  weight: 0.8, note: "the scene\ndissolving",    px: 65, py: 74 },
         ],
       },
       // ── ÉCHO 05
@@ -222,9 +222,9 @@ export const chambers = [
         short:  "This place is not really a café. It is an in-between space.",
         full:   "This place is not really a café. It is an in-between space.",
         anchors: [
-          { word: "not really",      note: "the doorframe\nbetween two worlds", px: 15, py: 38 },
-          { word: "café",            note: "a woman\nher blurred double",        px: 55, py: 35 },
-          { word: "in-between space", note: "neither inside\nnor outside",       px: 50, py: 72 },
+          { word: "not really",       weight: 0.4, note: "the doorframe\nbetween two worlds", px: 15, py: 38 },
+          { word: "café",             weight: 0.6, note: "a woman\nher blurred double",        px: 55, py: 35 },
+          { word: "in-between space", weight: 1.0, note: "neither inside\nnor outside",        px: 50, py: 72 },
         ],
       },
       // ── ÉCHO 06
@@ -236,9 +236,9 @@ export const chambers = [
         short:  "Her silhouette turned into a blaze.",
         full:   "Her silhouette turned into a blaze.",
         anchors: [
-          { word: "silhouette", note: "three hands\none flame",   px: 50, py: 25 },
-          { word: "turned",     note: "the collective\nritual",   px: 28, py: 55 },
-          { word: "blaze",      note: "the flame\nalready lit",   px: 68, py: 74 },
+          { word: "silhouette", weight: 1.0, note: "three hands\none flame", px: 50, py: 25 },
+          { word: "turned",     weight: 0.5, note: "the collective\nritual",  px: 28, py: 55 },
+          { word: "blaze",      weight: 1.0, note: "the flame\nalready lit",  px: 68, py: 74 },
         ],
       },
     ],

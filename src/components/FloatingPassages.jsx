@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import "./FloatingPassages.css";
 
 // ── Float tuning — standard chambers
@@ -28,16 +28,41 @@ const SPACE_LOST_THRESHOLD    = 0.35;  // < ce seuil → tokens lost
 const SPACE_RESTORE_THRESHOLD = 0.55;  // > ce seuil → tokens restorés (hystérésis)
 const SPACE_REMEMBER_MS       = 1800;  // durée de la transition lente à la restauration
 
-// ── Time chamber — layout 2 colonnes, axe vertical = axe temporel
+// ── Time chamber — stratigraphie : axe Y = âge.
+//    Top = surface (frais), bas = sédiment (ancien).
+//    L'ordre source dans chambers.js ne décide plus du placement —
+//    TIME_NATURAL_AGES le fait. Chaque item expose une `depth` (0…1)
+//    consommée par le rendu pour cumuler les signaux d'âge.
 const getTimeLayout = (passages) => {
+  const indexed = passages.map((p, i) => ({
+    i,
+    age: TIME_NATURAL_AGES[i] ?? 0,
+  }));
+  indexed.sort((a, b) => a.age - b.age || a.i - b.i);
+
   const TIME_COLS = 2;
   const totalRows = Math.ceil(passages.length / TIME_COLS);
-  return passages.map((p, i) => ({
-    col: i % TIME_COLS,
-    row: Math.floor(i / TIME_COLS),
-    totalRows,
-  }));
+
+  return passages.map((_, originalIdx) => {
+    const stratPos = indexed.findIndex((x) => x.i === originalIdx);
+    const col      = stratPos % TIME_COLS;
+    const row      = Math.floor(stratPos / TIME_COLS);
+    return {
+      col,
+      row,
+      totalRows,
+      depth: totalRows > 1 ? row / (totalRows - 1) : 0,
+    };
+  });
 };
+
+// ── Time chamber — voix centrale, cycle toutes les 7.6s
+const TIME_VOICE = [
+  "stories take time",
+  "some passages remember less",
+  "do not click yet",
+  "wait — it surfaces",
+];
 
 // ── Other chamber — anchors au centre, échos en orbite radiale
 const getOtherLayout = (passages) => {
@@ -52,7 +77,7 @@ const getOtherLayout = (passages) => {
 
 // ── Time chamber — stratigraphie des âges (signal : flou, pas opacité)
 const TIME_NATURAL_AGES  = [0, 0, 1, 1, 2, 2];
-const TIME_BASE_BLUR     = [0, 0.65, 1.5, 2.4];   // px — flou par niveau d'âge (0→3)
+const TIME_BASE_BLUR     = [0, 1.8, 3.5, 5.5];   // px — flou par niveau d'âge (0→3)
 const TIME_OPACITY_REST  = 0.82;                    // opacité uniforme — le flou porte le temps
 const TIME_FULL_BLUR     = 0;                       // hover : mémoire nette
 const TIME_FULL_OPACITY  = 0.95;
@@ -104,6 +129,7 @@ function tokenizeShort(text, blanksIdxArr) {
 export default function FloatingPassages({ chamber, onSelect, visitedSet, enterDir, thresholdActive }) {
   const containerRef    = useRef(null);
   const itemsRef        = useRef([]);
+  const [voiceIdx, setVoiceIdx] = useState(0);
   const thresholdRef    = useRef(false);
 
   // Sync threshold prop → ref (RAF loop l'utilise pour figer pan/freshness/retreat)
@@ -195,6 +221,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
 
     chamber.passages.forEach((passage, i) => {
       let cx, cy, floatAmpX, floatAmpY, floatSpd, floatSpdY;
+      let tDepth = 0; // stratigraphie Time — accessible après la création de el
 
       if (isSpace) {
         const { cxR, cyR } = spaceLayout[i];
@@ -208,14 +235,18 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         floatSpdY = FLOAT_SPEED_MIN + Math.random() * (FLOAT_SPEED_MAX - FLOAT_SPEED_MIN);
 
       } else if (isTime) {
-        const { col: tCol, row: tRow, totalRows: tRows } = timeLayout[i];
+        const { col: tCol, row: tRow, totalRows: tRows, depth } = timeLayout[i];
+        tDepth = depth;
         const colW  = vw / 2;
-        const topY  = vh * 0.16;
-        const botY  = vh * 0.84;
+        const topY  = vh * 0.12;
+        const botY  = vh * 0.88;
         const baseX = tCol * colW + colW / 2;
         const baseY = tRows > 1 ? topY + (tRow / (tRows - 1)) * (botY - topY) : vh / 2;
-        const jx    = (Math.random() - 0.5) * colW * 0.32;
-        const jy    = (Math.random() - 0.5) * ((botY - topY) / tRows) * 0.45;
+        // Jitter augmenté en profondeur — le sédiment ne s'aligne pas
+        const jitterX = colW * (0.18 + tDepth * 0.20);
+        const jitterY = ((botY - topY) / tRows) * (0.30 + tDepth * 0.25);
+        const jx = (Math.random() - 0.5) * jitterX;
+        const jy = (Math.random() - 0.5) * jitterY;
         cx        = Math.max(MARGIN + ITEM_WIDTH / 2, Math.min(vw - MARGIN - ITEM_WIDTH / 2, baseX + jx));
         cy        = Math.max(MARGIN + 50, Math.min(vh - MARGIN - 50, baseY + jy));
         floatAmpX = (FLOAT_AMP_X_MIN + Math.random() * (FLOAT_AMP_X_MAX - FLOAT_AMP_X_MIN)) * TIME_FLOAT_SCALE;
@@ -259,7 +290,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         const visitCount = timeVisits[i] || 0;
         const totalAge   = Math.min(naturalAge + visitCount, TIME_BASE_BLUR.length - 1);
         baseBlur       = TIME_BASE_BLUR[totalAge];
-        currentBlur    = 4;   // tous les passages entrent très flous
+        currentBlur    = 9;   // tous les passages entrent très flous
         targetBlur     = 0;   // sera mis à jour par le timeout d'entrée
         baseOpacity    = TIME_OPACITY_REST;
         currentOpacity = 0;
@@ -276,12 +307,19 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
       el.style.left = `${cx}px`;
       el.style.top  = `${cy}px`;
 
+      // Variables CSS de strate (Time uniquement) — consommées par le rendu CSS
+      if (isTime) {
+        el.style.setProperty("--strat-depth",    tDepth.toFixed(3));
+        el.style.setProperty("--strat-scale",    (1 - tDepth * 0.12).toFixed(3));
+        el.style.setProperty("--strat-saturate", (1 - tDepth * 0.40).toFixed(3));
+      }
+
       if (isTime || isOther) {
         el.style.opacity    = "0";
         el.style.transition = "none"; // empêche le CSS transition d'interférer avec le lerp JS
       }
       if (isTime) {
-        el.style.filter = "blur(4px)"; // état initial — résolue par le rAF
+        el.style.filter = "blur(9px)"; // état initial — résolue par le rAF
       }
 
       el.innerHTML = `
@@ -603,6 +641,55 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
     };
   }, [build]);
 
+  // ── Time — vieillissement en session.
+  //    Toutes les ~28s, les passages non-survolés et non protégés gagnent
+  //    un cran de patine. Démontre la mémoire de la chambre en direct.
+  useEffect(() => {
+    if (chamber.id !== "time") return;
+    const STEP_MS    = 28000;
+    const STEP_BLUR  = 0.20;
+    const PROTECT_MS = 60000;
+    const touchedAt  = new Map();
+
+    const onOver = (e) => {
+      const t  = e.target.closest(".fp-item");
+      if (!t) return;
+      const it = itemsRef.current.find((x) => x.el === t);
+      if (it) touchedAt.set(it.idx, performance.now());
+    };
+    const root = containerRef.current;
+    root?.addEventListener("mouseover", onOver);
+
+    const itv = setInterval(() => {
+      const now = performance.now();
+      const cap = TIME_BASE_BLUR[TIME_BASE_BLUR.length - 1];
+      itemsRef.current.forEach((it) => {
+        if (it.idx === hoveredRef.current) return;
+        const last = touchedAt.get(it.idx) || 0;
+        if (now - last < PROTECT_MS) return;
+        const next = Math.min(it.baseBlur + STEP_BLUR, cap);
+        it.baseBlur   = next;
+        it.targetBlur = next;
+      });
+    }, STEP_MS);
+
+    return () => {
+      clearInterval(itv);
+      root?.removeEventListener("mouseover", onOver);
+    };
+  }, [chamber.id]);
+
+  // ── Time — voix centrale, cycle toutes les 7.6s
+  useEffect(() => {
+    if (chamber.id !== "time") return;
+    setVoiceIdx(0);
+    const itv = setInterval(
+      () => setVoiceIdx((i) => (i + 1) % TIME_VOICE.length),
+      7600
+    );
+    return () => clearInterval(itv);
+  }, [chamber.id]);
+
   // ── Mise à jour des classes visited sans rebuild (ni Time ni Other)
   useEffect(() => {
     itemsRef.current.forEach((item) => {
@@ -620,8 +707,16 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
     <div className={`floating-passages floating-passages--${chamber.id}${enterDir ? ` floating-passages--from-${enterDir}` : ""}${thresholdActive ? " floating-passages--threshold" : ""}`}>
       <div className="fp-center" aria-hidden="true">
         <span className="fp-center__label">{chamber.label}</span>
-        <span className="fp-center__hint">{hint}</span>
-        <span className="fp-center__action">click a passage to enter</span>
+        {chamber.id === "time" ? (
+          <span key={voiceIdx} className="fp-center__voice">
+            {TIME_VOICE[voiceIdx]}
+          </span>
+        ) : (
+          <>
+            <span className="fp-center__hint">{hint}</span>
+            <span className="fp-center__action">click a passage to enter</span>
+          </>
+        )}
       </div>
       <div ref={containerRef} className="fp-container" aria-label={`Passages for ${chamber.label}`} />
     </div>

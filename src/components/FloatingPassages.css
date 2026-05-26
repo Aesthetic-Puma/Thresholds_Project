@@ -247,6 +247,78 @@
   /* Time — source plus mesurée, précision de l'horloge */
   .floating-passages--time .fp-source { letter-spacing: 0.30em; }
 
+  /* ─────────────────────────────────────────────
+     TIME — stratigraphie
+     - scale décroissant en profondeur (perspective sédimentaire)
+     - saturation décroissante (le souvenir perd ses couleurs)
+     - source qui s'efface en profondeur (la signature s'oublie)
+     ───────────────────────────────────────────── */
+
+  .floating-passages--time .fp-item {
+    transform: translate(-50%, -50%) scale(var(--strat-scale, 1));
+    transform-origin: 50% 50%;
+  }
+
+  .floating-passages--time .fp-text {
+    filter: saturate(var(--strat-saturate, 1));
+  }
+
+  .floating-passages--time .fp-source {
+    opacity: calc(1 - var(--strat-depth, 0) * 0.55);
+  }
+
+  /* ── Ménisque — bande horizontale diffuse, sans trait tracé.
+        Respire de 8 px sur 42 s — senti, pas vu. ─────────────────── */
+  .floating-passages--time::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background:
+      radial-gradient(
+        ellipse 130% 28px at 50% 50%,
+        rgba(240, 235, 224, 0.055) 0%,
+        rgba(240, 235, 224, 0.028) 35%,
+        transparent 72%
+      ),
+      radial-gradient(
+        ellipse 90% 90px at 50% 50%,
+        rgba(240, 235, 224, 0.012) 0%,
+        transparent 100%
+      );
+    filter: blur(0.6px);
+    animation: limen-tide 42s ease-in-out infinite;
+  }
+
+  @keyframes limen-tide {
+    0%, 100% { transform: translateY(-4px); }
+    50%      { transform: translateY(4px);  }
+  }
+
+  /* ─────────────────────────────────────────────
+     Voix de la chambre — remplace les hints UI dans TIME.
+     Phrase qui mue toutes les 7.6s, fade in/out propre.
+     ───────────────────────────────────────────── */
+
+  .fp-center__voice {
+    display: block;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    color: var(--cream-40);
+    margin-top: 0.55rem;
+    animation: fp-voice-cycle 7.6s ease-in-out forwards;
+  }
+
+  @keyframes fp-voice-cycle {
+    0%   { opacity: 0; transform: translateY(2px); }
+    18%  { opacity: 1; transform: translateY(0); }
+    82%  { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-2px); }
+  }
+
   /* Other — proximité, intimité de la rencontre — tracking resserré */
   .floating-passages--other .fp-text { letter-spacing: 0.02em; }
 

@@ -53,7 +53,7 @@ const REVEAL = {
     anchorMode:         "temporal",
     anchorInMs:         700,
     anchorOutMs:        1400,
-    anchorHoldMs:       [1900, 2400, 2100, 2600, 1800, 2300], // cadence irrégulière
+    anchorHoldMs:       [1500, 1800, 1600, 1900, 1400, 1700], // cadence resserrée
     anchorLoopPauseMs:  3200,
     anchorTrailOpacity: 0.18,  // résidu après passage du mot
   },
@@ -318,12 +318,12 @@ function AnchorsTemporal({ anchors, photoRef, cfg, onTranscendent }) {
         const pos = thirds[i];
         if (!pos) return null;
         const isActive = i === activeIdx;
-        // En état transcendantal : tous les mots en trail simultanément.
         const cls = transcendent
           ? "ps-anchor--temporal-trail"
           : (isActive
               ? `ps-anchor--temporal-${phase}`
               : (i < activeIdx ? "ps-anchor--temporal-trail" : "ps-anchor--temporal-idle"));
+        const w = a.weight ?? 1;
         return (
           <div
             key={i}
@@ -331,7 +331,10 @@ function AnchorsTemporal({ anchors, photoRef, cfg, onTranscendent }) {
             style={{
               left: pos.x,
               top:  pos.y,
-              "--trail-opacity": cfg.anchorTrailOpacity,
+              // Trail pondéré : les mots-image laissent plus de sédiment
+              "--trail-opacity": (cfg.anchorTrailOpacity * w).toFixed(3),
+              "--trail-blur":    `${(2 + (1 - w) * 2).toFixed(2)}px`,
+              "--hold-opacity":  (0.95 - (1 - w) * 0.15).toFixed(3),
             }}
             aria-hidden="true"
           >
@@ -680,11 +683,20 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") onBackToList();
-      if (e.key === " " || e.key === "Enter") triggerMigration();
+      if ((e.key === " " || e.key === "Enter") && phase === "passage") {
+        triggerMigration();
+      }
+      // Time uniquement : re-déclencher l'état transcendantal (geste pratiqué)
+      if (chamber.id === "time" && phase === "photo" &&
+          (e.key === " " || e.key === "t" || e.key === "T")) {
+        e.preventDefault();
+        setTranscendentActive(true);
+        setTimeout(() => setTranscendentActive(false), 3200);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onBackToList, triggerMigration]);
+  }, [onBackToList, triggerMigration, chamber.id, phase]);
 
   if (!passage) return null;
 

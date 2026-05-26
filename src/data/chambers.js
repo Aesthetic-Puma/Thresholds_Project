@@ -41,7 +41,10 @@ export const chambers = [
         // P.1 — tokens dans `short` qui disparaissent quand le passage dérive hors centre (Space).
         // Indices 0-based séparés par espace. Curation manuelle : choisir des mots dont l'absence
         // ouvre le sens plutôt qu'elle ne le ferme. Modifier librement.
-        blanks: [2],   // "right"
+        // tokens : [0:Sometimes,] [1:the] [2:right] [3:place] [4:is] [5:a] [6:person.]
+        // "right" qualifie ; "person." résout. Sans eux : "Sometimes, the ___ place is a ___."
+        // Le visiteur doit produire le qualificatif ET la résolution — l'équivalence reste ouverte.
+        blanks: [2, 6],
       },
       // ── ANCRE 02
       {
@@ -56,7 +59,11 @@ export const chambers = [
           { word: "scattered",          note: "the series\ncollapsing",       px: 55, py: 60 },
           { word: "fragmented reality", note: "one self\nin pieces",           px: 75, py: 78 },
         ],
-        blanks: [4, 15],  // "herself" · "fragmented"
+        // [0:Dozens] [1:of] [2:copies] [3:of] [4:herself] [5:lay] [6:scattered] [7:across]
+        // [8:the] [9:floor,] [10:like] [11:shattered] [12:replicas] [13:of] [14:a] [15:fragmented] [16:reality.]
+        // "herself" (sujet de la multiplication) · "scattered" (action) · "fragmented" (qualité du réel).
+        // Sans ces trois : qui est copié ? dans quel état ? quel réel ? Le mannequin sans personne.
+        blanks: [4, 6, 15],
       },
       // ── ÉCHO 03
       {
@@ -71,7 +78,10 @@ export const chambers = [
           { word: "dissolved",           note: "the steps\nabsorbing him",    px: 28, py: 55 },
           { word: "ever-shifting",       note: "the geometry\nin motion",     px: 72, py: 74 },
         ],
-        blanks: [1],   // "solitary"
+        // [0:His] [1:solitary] [2:silhouette] [3:dissolved] [4:into] [5:the] [6:ever-shifting] [7:urban] [8:architecture.]
+        // "solitary" (l'affect) · "dissolved" (l'action) · "ever-shifting" (la ville).
+        // Trois pivots : état du sujet, mouvement, qualité du décor. L'escalier reste, le geste se fait.
+        blanks: [1, 3, 6],
       },
       // ── ÉCHO 04
       {
@@ -86,7 +96,11 @@ export const chambers = [
           { word: "more distant",          note: "the alley\nfading",          px: 55, py: 52 },
           { word: "clung to it desperately", note: "the light\nof the phone",  px: 68, py: 74 },
         ],
-        blanks: [5, 14],  // "elsewhere" · "desperately."
+        // [0:The] [1:promise] [2:of] [3:a] [4:paradise] [5:elsewhere] [6:grew] [7:more] [8:distant,]
+        // [9:yet] [10:he] [11:clung] [12:to] [13:it] [14:desperately.]
+        // "paradise" (ce qui est promis) · "distant," (le devenir) · "desperately." (l'affect du tenir).
+        // Le triangle promesse / éloignement / cramponnement perd ses trois sommets.
+        blanks: [4, 8, 14],
       },
       // ── ÉCHO 05
       {
@@ -101,7 +115,11 @@ export const chambers = [
           { word: "in the distance", note: "the seated man\nfacing the unknown", px: 28, py: 52 },
           { word: "enormous",       note: "the scale\ninverted",                  px: 52, py: 74 },
         ],
-        blanks: [11],  // "enormous,"
+        // [0:A] [1:dark] [2:mass] [3:moved] [4:in] [5:the] [6:distance.] [7:It] [8:must] [9:have]
+        // [10:been] [11:enormous,] [12:given] [13:how] [14:far] [15:away] [16:it] [17:was.]
+        // "dark" (la qualité visuelle) · "moved" (l'action) · "enormous," (l'échelle).
+        // L'homme assis face à la vitrine doit recomposer la masse, son mouvement, sa taille.
+        blanks: [1, 3, 11],
       },
       // ── ÉCHO 06
       {
@@ -116,7 +134,11 @@ export const chambers = [
           { word: "perpetual outsider", note: "not his wall\nnot his city",  px: 65, py: 55 },
           { word: "assertion",         note: "he walks on\nanyway",          px: 48, py: 78 },
         ],
-        blanks: [14],  // "perpetual"
+        // [0:Every] [1:step] [2:was] [3:an] [4:escape,] [5:but] [6:also] [7:an] [8:assertion]
+        // [9:of] [10:his] [11:status] [12:as] [13:a] [14:perpetual] [15:outsider.]
+        // "escape," (un terme du dialecte) · "perpetual" (la durée). On garde "assertion" et "outsider".
+        // La dialectique reste suspendue : pas les deux termes effacés, mais l'un et le qualifiant de l'autre.
+        blanks: [4, 14],
       },
     ],
   },

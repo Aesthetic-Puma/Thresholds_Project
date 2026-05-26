@@ -191,7 +191,7 @@
 
   .photo-stage__quote {
     position: fixed;
-    bottom: 1.8rem;
+    bottom: 3.4rem;
     left: 50%;
     transform: translateX(-50%);
     z-index: 400;
@@ -407,6 +407,42 @@
     /* left=0, top=0 + translate3d en inline style depuis le rAF */
     will-change: transform, opacity;
   }
+
+  /* ─────────────────────────────────────────────
+     P.3 — ÉTAT TRANSCENDANTAL (Time)
+     Après le premier cycle d'arrivée séquentielle
+     des ancres, le fragment complet revient seul à
+     l'écran. Les mots-clés ne sont pas soulignés ici :
+     le visiteur relit avec ce qu'il a construit.
+     ───────────────────────────────────────────── */
+
+  .ps-transcendent {
+    position: fixed;
+    inset: 0;
+    z-index: 401;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    animation: ps-transcendent-in 0.9s ease forwards;
+  }
+  @keyframes ps-transcendent-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .ps-transcendent__text {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 22px;
+    color: rgba(240, 235, 224, 0.38);
+    line-height: 2;
+    letter-spacing: 0.04em;
+    text-align: center;
+    max-width: 640px;
+    width: 88%;
+  }
+
 
   /* ─────────────────────────────────────────────
      MOBILE

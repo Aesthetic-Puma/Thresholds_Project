@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Process Notes — Thresholds</title>
+  <style>
+    /* ─────────────────────────────────────────────
+       CSS variables (inline — pas de dépendance
+       à refined-styles.css pour portabilité jury)
+       ───────────────────────────────────────────── */
+    :root {
+      --dark:       #0a0906;
+      --cream:      #f0ebe0;
+      --cream-72:   rgba(240,235,224,0.72);
+      --cream-60:   rgba(240,235,224,0.60);
+      --cream-40:   rgba(240,235,224,0.40);
+      --cream-30:   rgba(240,235,224,0.30);
+      --cream-22:   rgba(240,235,224,0.22);
+      --cream-15:   rgba(240,235,224,0.15);
+      --cream-10:   rgba(240,235,224,0.10);
+      --cream-06:   rgba(240,235,224,0.06);
+      --font-serif: "Cormorant Garamond", "EB Garamond", "Garamond", Georgia, serif;
+      --font-mono:  "IBM Plex Mono", "Fira Mono", "Courier New", monospace;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=IBM+Plex+Mono:wght@300;400&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { overflow: auto; }
+    body {
+      background: var(--dark);
+      color: var(--cream);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    @keyframes grain-shift {
+      0%  { transform: translate(0, 0); }
+      25% { transform: translate(-1px, 1px); }
+      50% { transform: translate(1px, -1px); }
+      75% { transform: translate(-1px, -1px); }
+      100%{ transform: translate(1px, 1px); }
+    }
+
+    .cc-grain {
+      position: fixed; inset: 0; z-index: 1000;
+      pointer-events: none; opacity: 0.06; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 128px;
+      animation: grain-shift 0.45s steps(2) infinite;
+    }
+
+    /* ── Layout ── */
+    .cc {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 6rem 2.5rem 8rem;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 4rem;
+    }
+
+    /* ── Left rail ── */
+    .cc-rail {
+      position: sticky; top: 6rem; align-self: start;
+      font-family: var(--font-mono); font-size: 10px;
+      letter-spacing: 0.32em; text-transform: uppercase;
+      color: var(--cream-30);
+    }
+    .cc-rail__label { display: block; color: var(--cream-22); margin-bottom: 1.4rem; }
+    .cc-rail__list { list-style: none; display: flex; flex-direction: column; gap: 0.9rem; }
+    .cc-rail__list a {
+      color: var(--cream-30); text-decoration: none;
+      transition: color 0.3s ease; display: block;
+    }
+    .cc-rail__list a:hover { color: var(--cream); }
+    .cc-rail__num { display: inline-block; width: 2.3em; color: var(--cream-15); }
+    .cc-rail__back {
+      margin-top: 2.6rem; padding-top: 1.6rem;
+      border-top: 1px solid var(--cream-10);
+    }
+    .cc-rail__back a {
+      font-style: italic; font-family: var(--font-serif);
+      font-size: 13px; letter-spacing: 0.04em;
+      text-transform: none; color: var(--cream-40);
+      text-decoration: none; display: block; margin-bottom: 0.5rem;
+    }
+
+    /* ── Body ── */
+    .cc-body { max-width: 100%; }
+
+    /* ── Header ── */
+    .cc-header { margin-bottom: 5rem; max-width: 720px; }
+    .cc-eyebrow {
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: 0.4em; text-transform: uppercase;
+      color: var(--cream-40); margin-bottom: 1.4rem;
+    }
+    .cc-eyebrow::before { content: "✦ "; color: var(--cream-22); margin-right: 0.3em; }
+    .cc-title {
+      font-family: var(--font-serif); font-weight: 300;
+      font-size: clamp(2.6rem, 5vw, 3.6rem);
+      line-height: 1.1; letter-spacing: -0.005em;
+      color: var(--cream); margin-bottom: 1.2rem;
+    }
+    .cc-title em { font-style: italic; color: var(--cream-72); }
+    .cc-meta {
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--cream-30); display: flex; gap: 1.6rem; flex-wrap: wrap;
+      padding-top: 1.4rem; border-top: 1px solid var(--cream-10);
+    }
+
+    /* ── Section ── */
+    .cc-section { margin-bottom: 5.5rem; scroll-margin-top: 4rem; }
+    .cc-section--prose { max-width: 720px; }
+    .cc-section__head {
+      display: flex; align-items: baseline; gap: 1.2rem;
+      margin-bottom: 2.2rem; padding-bottom: 1.1rem;
+      border-bottom: 1px solid var(--cream-10);
+      max-width: 720px;
+    }
+    .cc-section__num {
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: 0.34em; text-transform: uppercase;
+      color: var(--cream-30); flex-shrink: 0;
+    }
+    .cc-section__title {
+      font-family: var(--font-serif); font-weight: 400; font-style: italic;
+      font-size: clamp(1.6rem, 2.6vw, 2rem); line-height: 1.25;
+      color: var(--cream); letter-spacing: 0.005em;
+    }
+    .cc-section__sub {
+      display: block; font-style: normal; font-family: var(--font-mono);
+      font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--cream-30); margin-top: 0.6rem;
+    }
+
+    /* ── Body text ── */
+    .cc-body p {
+      font-family: var(--font-serif); font-weight: 300;
+      font-size: 18px; line-height: 1.75; letter-spacing: 0.01em;
+      color: var(--cream-72); margin-bottom: 1.4rem; text-wrap: pretty;
+      max-width: 720px;
+    }
+    .cc-body p strong { font-weight: 500; color: var(--cream); }
+    .cc-body p em { font-style: italic; color: var(--cream); }
+    .cc-body a {
+      color: var(--cream); text-decoration: none;
+      border-bottom: 1px solid var(--cream-22); padding-bottom: 1px;
+      transition: border-color 0.3s ease;
+    }
+    .cc-body a:hover { border-bottom-color: var(--cream); }
+
+    /* ── Pull quote ── */
+    .cc-pull {
+      font-family: var(--font-serif); font-style: italic; font-weight: 300;
+      font-size: 26px; line-height: 1.4; color: var(--cream);
+      margin: 2.4rem 0 2.4rem -1.6rem; padding-left: 1.6rem;
+      border-left: 1px solid var(--cream-30); letter-spacing: 0.005em;
+      max-width: 680px;
+    }
+
+    /* ── Aside ── */
+    .cc-aside {
+      font-family: var(--font-mono); font-size: 13px; line-height: 1.7;
+      letter-spacing: 0.01em; color: var(--cream-40);
+      padding: 1.2rem 0; margin: 1.6rem 0;
+      border-top: 1px dashed var(--cream-15);
+      border-bottom: 1px dashed var(--cream-15);
+      max-width: 720px;
+    }
+    .cc-aside strong {
+      color: var(--cream-72); font-weight: 400; letter-spacing: 0.16em;
+      text-transform: uppercase; font-size: 10px;
+      display: block; margin-bottom: 0.4rem;
+    }
+
+    /* ── Lists ── */
+    .cc-list { list-style: none; margin: 1.4rem 0 1.8rem; padding-left: 0; max-width: 680px; }
+    .cc-list li {
+      font-family: var(--font-serif); font-weight: 300;
+      font-size: 18px; line-height: 1.7; color: var(--cream-72);
+      padding-left: 2.4rem; position: relative; margin-bottom: 0.8rem;
+    }
+    .cc-list li::before {
+      content: "—"; position: absolute; left: 0; top: 0;
+      color: var(--cream-30); font-family: var(--font-mono);
+    }
+    .cc-list li strong { font-weight: 500; color: var(--cream); }
+    .cc-list li em { font-style: italic; color: var(--cream); }
+    .cc-list--num { counter-reset: ll; }
+    .cc-list--num li { counter-increment: ll; }
+    .cc-list--num li::before {
+      content: counter(ll, decimal-leading-zero) ".";
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: 0.18em; color: var(--cream-30); top: 0.45em;
+    }
+
+    /* ── References ── */
+    .cc-refs {
+      display: flex; flex-direction: column; gap: 0.9rem;
+      margin: 1.6rem 0 0.4rem; padding: 1.2rem 0 0;
+      border-top: 1px solid var(--cream-10); max-width: 680px;
+    }
+    .cc-ref {
+      display: grid; grid-template-columns: 170px 1fr;
+      gap: 1.2rem; align-items: baseline;
+    }
+    .cc-ref__who {
+      font-family: var(--font-serif); font-style: italic;
+      font-size: 15px; color: var(--cream);
+    }
+    .cc-ref__why {
+      font-family: var(--font-serif); font-weight: 300;
+      font-size: 15px; line-height: 1.55; color: var(--cream-72);
+    }
+
+    /* ── Chamber cards ── */
+    .cc-chamber {
+      margin: 2.8rem 0; padding: 2rem 2.2rem;
+      border: 1px solid var(--cream-10); border-radius: 2px;
+      background: rgba(240, 235, 224, 0.014);
+      position: relative; max-width: 720px;
+    }
+    .cc-chamber__rail {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 2px; background: var(--cream-22);
+    }
+    .cc-chamber__head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 1.6rem; margin-bottom: 1.4rem; padding-bottom: 1rem;
+      border-bottom: 1px solid var(--cream-10); flex-wrap: wrap;
+    }
+    .cc-chamber__name {
+      font-family: var(--font-serif); font-size: 24px;
+      font-weight: 400; letter-spacing: 0.04em; color: var(--cream);
+    }
+    .cc-chamber__cjk {
+      font-family: var(--font-serif); font-size: 18px;
+      letter-spacing: 0.2em; color: var(--cream-40);
+    }
+    .cc-chamber__sub {
+      font-family: var(--font-serif); font-style: italic;
+      font-size: 18px; color: var(--cream-72);
+      margin-bottom: 1.2rem; line-height: 1.45;
+    }
+    .cc-chamber__row {
+      display: grid; grid-template-columns: 130px 1fr;
+      gap: 1.2rem; align-items: baseline;
+      padding: 0.8rem 0; border-top: 1px solid var(--cream-06);
+    }
+    .cc-chamber__row:first-of-type { border-top: none; padding-top: 0; }
+    .cc-chamber__label {
+      font-family: var(--font-mono); font-size: 10px;
+      letter-spacing: 0.28em; text-transform: uppercase; color: var(--cream-30);
+    }
+    .cc-chamber__val {
+      font-family: var(--font-serif); font-weight: 300;
+      font-size: 16px; line-height: 1.65; color: var(--cream-72);
+    }
+    .cc-chamber__val em { font-style: italic; color: var(--cream); }
+    .cc-chamber__val strong { font-weight: 500; color: var(--cream); }
+
+    /* ── Pairing cards ── */
+    .cc-pairs {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 1.6rem; margin-top: 2rem;
+    }
+    .cc-pair {
+      display: grid; grid-template-columns: 200px 1fr;
+      gap: 1.4rem; padding: 1.2rem;
+      border: 1px solid var(--cream-10); border-radius: 2px;
+      background: rgba(240, 235, 224, 0.012);
+      align-items: start;
+    }
+    .cc-pair--anchor {
+      background: rgba(240, 235, 224, 0.028);
+      border-color: var(--cream-22);
+    }
+    .cc-pair__photo {
+      position: relative; width: 200px; height: 200px;
+      overflow: hidden; border-radius: 2px; background: #0c0a08; flex-shrink: 0;
+    }
+    .cc-pair__photo img {
+      width: 100%; height: 100%; object-fit: cover;
+      display: block; filter: brightness(0.92);
+      transition: filter 0.5s ease;
+    }
+    .cc-pair:hover .cc-pair__photo img { filter: brightness(1.04); }
+    .cc-pair__photo::after {
+      content: ""; position: absolute; inset: 0;
+      box-shadow: inset 0 0 80px 6px rgba(10,9,6,0.5); pointer-events: none;
+    }
+    .cc-pair__photo-label {
+      position: absolute; bottom: 8px; left: 10px; right: 10px;
+      font-family: var(--font-mono); font-size: 9px;
+      letter-spacing: 0.24em; text-transform: uppercase;
+      color: var(--cream-40); z-index: 2;
+    }
+    .cc-pair__body {
+      display: flex; flex-direction: column; gap: 0.7rem; padding-top: 0.2rem;
+    }
+    .cc-pair__tag-row {
+      display: flex; gap: 0.7rem; align-items: center;
+      font-family: var(--font-mono); font-size: 9px;
+      letter-spacing: 0.24em; text-transform: uppercase; color: var(--cream-30);
+    }
+    .cc-pair__tag {
+      padding: 2px 7px; border: 1px solid var(--cream-15);
+      border-radius: 2px; color: var(--cream-40);
+    }
+    .cc-pair__tag--anchor { color: var(--cream); border-color: var(--cream-40); }
+    .cc-pair__source { color: var(--cream-72); }
+    .cc-pair__quote {
+      font-family: var(--font-serif); font-style: italic;
+      font-weight: 300; font-size: 17px; line-height: 1.45;
+      color: var(--cream); letter-spacing: 0.005em; margin: 0;
+    }
+    .cc-pair__note {
+      font-family: var(--font-serif); font-weight: 300;
+      font-size: 13px; line-height: 1.55; color: var(--cream-60); margin: 0;
+    }
+    .cc-pair__note strong { color: var(--cream); font-weight: 500; }
+    .cc-pair__note em { font-style: italic; color: var(--cream-72); }
+
+    /* Chamber bar for pairing sections */
+    .cc-chamber-bar {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding-bottom: 1.1rem; margin-bottom: 1.8rem;
+      border-bottom: 1px solid var(--cream-10); flex-wrap: wrap; gap: 1rem;
+    }
+    .cc-chamber-bar__name {
+      font-family: var(--font-serif); font-weight: 400;
+      font-size: 28px; letter-spacing: 0.04em; color: var(--cream);
+    }
+    .cc-chamber-bar__cjk {
+      font-family: var(--font-serif); font-size: 18px;
+      letter-spacing: 0.2em; color: var(--cream-40); margin-left: 1em;
+    }
+    .cc-chamber-bar__principle {
+      font-family: var(--font-serif); font-style: italic;
+      font-size: 16px; color: var(--cream-60);
+      max-width: 480px; text-align: right;
+    }
+
+    /* ── Lede ── */
+    .cc-lede { font-size: 19px !important; color: var(--cream) !important; }
+    .cc-lede::first-letter {
+      font-family: var(--font-serif); font-size: 3.4em; line-height: 0.85;
+      float: left; margin: 0.05em 0.14em 0 0;
+      color: var(--cream); font-weight: 300;
+    }
+
+    /* ── Footer ── */
+    .cc-foot {
+      margin-top: 6rem; padding-top: 2rem;
+      border-top: 1px solid var(--cream-10);
+      font-family: var(--font-mono); font-size: 10px;
+      letter-spacing: 0.28em; text-transform: uppercase;
+      color: var(--cream-22); display: flex;
+      justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 1100px) { .cc-pairs { grid-template-columns: 1fr; } }
+    @media (max-width: 880px) {
+      .cc { grid-template-columns: 1fr; gap: 2rem; padding: 3rem 1.6rem 5rem; }
+      .cc-rail { position: relative; top: 0; }
+      .cc-pair { grid-template-columns: 1fr; }
+      .cc-pair__photo { width: 100%; height: 240px; }
+      .cc-chamber__row { grid-template-columns: 1fr; gap: 0.3rem; }
+      .cc-ref { grid-template-columns: 1fr; gap: 0.2rem; }
+      .cc-chamber-bar { flex-direction: column; align-items: flex-start; }
+      .cc-chamber-bar__principle { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="cc-grain" aria-hidden="true"></div>
+
+  <main class="cc" data-screen-label="Process Notes — Thresholds">
+
+    <aside class="cc-rail" aria-label="Contents">
+      <span class="cc-rail__label">Contents</span>
+      <ol class="cc-rail__list">
+        <li><a href="#these"><span class="cc-rail__num">I</span> The thesis</a></li>
+        <li><a href="#chambres"><span class="cc-rail__num">II</span> Three chambers</a></li>
+        <li><a href="#passages"><span class="cc-rail__num">III</span> Passage curation</a></li>
+        <li><a href="#appariements"><span class="cc-rail__num">IV</span> Pairings</a></li>
+        <li><a href="#photographie"><span class="cc-rail__num">V</span> Photographic method</a></li>
+      </ol>
+      <div class="cc-rail__back">
+        <a href="index.html">← Thresholds</a>
+      </div>
+    </aside>
+
+    <article class="cc-body">
+
+      <header class="cc-header">
+        <p class="cc-eyebrow">Process Notes · Thresholds · May 2026</p>
+        <h1 class="cc-title">What <em>Élégies Oubliées</em><br/>already does to the reader —<br/>and what <em>Thresholds</em> continues.</h1>
+        <p class="cc-meta">
+          <span>Jean Viratel</span>
+          <span>KMD Application</span>
+          <span>Thresholds &middot; 敷居</span>
+        </p>
+      </header>
+
+      <!-- ── Cadrage ── -->
+      <section class="cc-section cc-section--prose">
+        <p class="cc-lede">This document traces the conceptual and curatorial decisions that shaped <em>Thresholds</em> — not as a production log, but as a record of the reasoning beneath the work. It is meant to be read alongside the portfolio.</p>
+        <p>Three questions organise it: <strong>(1)</strong> What is the thesis this project defends, and how did it sharpen over the course of the work? <strong>(2)</strong> How do the three chambers formally embody that thesis, each in its own register? <strong>(3)</strong> On what criteria did I select the passages and pair each text with a photograph?</p>
+      </section>
+
+
+      <!-- ──────────────── I — LA THÈSE ──────────────── -->
+      <section class="cc-section cc-section--prose" id="these">
+        <div class="cc-section__head">
+          <span class="cc-section__num">I</span>
+          <h2 class="cc-section__title">The thesis
+            <span class="cc-section__sub">From resonator to enaction</span>
+          </h2>
+        </div>
+
+        <p>The question <em>Thresholds</em> poses can be formulated as three nested claims. The first is a problem: when a literary text is <em>iconised</em> — adapted, illustrated, mediated — the reader's inner image, singular and lacunary, is gradually replaced by a collective, definitive one. Reading cedes to reception. Film adaptation is the most brutal example, but the phenomenon concerns any process that fixes an authorised image onto a text — an overimposed illustrated cover, a series, viral fan-art, an overly precise description.</p>
+
+        <p>The second claim is a counter-position: an interface can act as a <em>resonator</em> rather than an illustrator. It can bring a textual fragment and a photographic fragment into relation without either one closing the other's reading — without the image filling what the text leaves open. <em>Thresholds</em> is not an anti-adaptation: it is a device that actively maintains the lacuna.</p>
+
+        <p>The third claim is what distinguishes <em>Thresholds</em> from a mere declaration of intent: the three phenomenological chambers — <em>Space</em>, <em>Time</em>, <em>The Other</em> — <em>formally</em> embody, each in its own way, a distinct mode of encounter between the reader and the text. The thesis is not about interface design in general, but about three precise devices, each shaped for its own concept.</p>
+
+        <p>This framing sharpened as I re-read <em>Élégies Oubliées</em> no longer as the literary substrate of the portfolio, but as a theoretical object in its own right. What I found there led me to reformulate the thesis:</p>
+
+        <p class="cc-pull"><em>Élégies Oubliées</em> stages media that look back — photographs whose figures shift position, cassettes whose story becomes the listener's own, footage that transfers grief onto the viewer. <em>Thresholds</em> is the extension of this poetics into interface: not an illustration of the book, but its continuation by other means.</p>
+
+        <p>This shift from a defensive framing (protecting the reader's inner image) to an offensive one (enacting what the book already does) has concrete consequences for the curation of passages and for the pairings — see sections III and IV.</p>
+
+        <p>The theoretical references anchoring this thesis, organised by level of function:</p>
+
+        <!-- Niveau 1 -->
+        <div class="cc-aside" style="margin-bottom:0.4rem;">
+          <strong>Level 1 — Foundation · deep mastery</strong>
+          Remove this reference and the thesis collapses.
+        </div>
+        <div class="cc-refs" style="margin-bottom:2rem;">
+          <div class="cc-ref">
+            <span class="cc-ref__who">Wolfgang Iser</span>
+            <span class="cc-ref__why"><em>The Act of Reading</em> (1978) — the theory of gaps as productive disjunctions, the reciprocal determination of segments, the reader's transcendental position. The mechanical backbone of <em>Thresholds</em>: each chamber is a distinct gap-device. The anchors aim for the complication of representation; the cross-session memory of <em>Time</em> poses a question Iser could not pose with the book — what happens when the medium itself carries the trace of the reader's sacrificed representations?</span>
+          </div>
+        </div>
+
+        <!-- Niveau 2 -->
+        <div class="cc-aside" style="margin-bottom:0.4rem;">
+          <strong>Level 2 — Structuring references · solid mastery</strong>
+          Each structures a precise and irreplaceable argument.
+        </div>
+        <div class="cc-refs" style="margin-bottom:2rem;">
+          <div class="cc-ref">
+            <span class="cc-ref__who">Roland Barthes</span>
+            <span class="cc-ref__why"><em>Camera Lucida</em> — the <em>punctum</em> (what wounds, resonates, escapes knowledge) and the <em>studium</em> (the cultural, learned, recognisable layer). The distinction directly structures the anchor/echo hierarchy: anchors aim for the punctum — they are not decoded, they reach. Echoes inhabit the studium — they are legible, contextual, atmospheric. Direct link with the short story <em>Chambre Noire</em> and with the practice of oblique pairing. <em>The Death of the Author</em> in complement: meaning arises from the reader, not the author — the foundational posture of <em>Thresholds</em> toward its own book.</span>
+          </div>
+          <div class="cc-ref">
+            <span class="cc-ref__who">Jun'ichirō Tanizaki</span>
+            <span class="cc-ref__why"><em>In Praise of Shadows</em> (1933) — beauty as what reveals itself in withdrawal, incompleteness, penumbra. Not an atmospheric reference: a convergence with Iser from a radically different tradition. Tanizaki names aesthetically what Iser theorises functionally — the lacuna as a condition of beauty, not a defect to be filled. The grain, the vignette, the passages that resist direct reading are decisions of poetics in Tanizaki's sense as much as gap-devices in Iser's.</span>
+          </div>
+        </div>
+
+        <!-- Niveau 3 -->
+        <div class="cc-aside" style="margin-bottom:0.4rem;">
+          <strong>Level 3 — Conceptual anchors · targeted mastery</strong>
+          One precise concept borrowed from each — exhaustive reading not required.
+        </div>
+        <div class="cc-refs" style="margin-bottom:2rem;">
+          <div class="cc-ref">
+            <span class="cc-ref__who">W.J.T. Mitchell</span>
+            <span class="cc-ref__why"><em>Iconology</em> / <em>Picture Theory</em> — the concept of iconisation as the process of fixing an authorised image onto a text. Direct theoretical anchor for the first claim: what <em>Thresholds</em> refuses to do. Adaptation is not the enemy — iconisation is the problem, whatever medium produces it.</span>
+          </div>
+          <div class="cc-ref">
+            <span class="cc-ref__who">Maurice Merleau-Ponty</span>
+            <span class="cc-ref__why"><em>L'Œil et l'Esprit</em> (1961) — visual perception as bodily engagement, not passive reception. Anchors the three-chamber structure in phenomenology: spatial, temporal, intersubjective are the three canonical dimensions of lived experience in the perceiving body. The resistance of <em>The Other</em> and the slowness of <em>Time</em> are not stylistic effects — they are distinct modes of bodily engagement.</span>
+          </div>
+        </div>
+
+        <!-- Niveau 4 -->
+        <div class="cc-aside" style="margin-bottom:0.4rem;">
+          <strong>Level 4 — Practice and context references</strong>
+          Situate the work within a lineage without requiring theoretical reading.
+        </div>
+        <div class="cc-refs">
+          <div class="cc-ref">
+            <span class="cc-ref__who">Chris Marker · W.G. Sebald</span>
+            <span class="cc-ref__why">Two practice references — the oblique photograph relative to the text, the resonance that lodges in the gap rather than the coincidence. What the text does not say, the image does not fill either. Marker's <em>Sans Soleil</em> and Sebald's <em>The Rings of Saturn</em>: two works where image and text never illustrate each other — they displace each other.</span>
+          </div>
+          <div class="cc-ref">
+            <span class="cc-ref__who">Janet Murray</span>
+            <span class="cc-ref__why"><em>Hamlet on the Holodeck</em> (1997) — the visitor as agent rather than receptor in an interactive narrative environment. Situates <em>Thresholds</em> within a lineage of interactive narrative without being its centrepiece. Useful for defending that <em>Thresholds</em> is a narrative environment, not an illustrative portfolio — the distinction is not obvious to all juries.</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ──────────────── II — TROIS CHAMBRES ──────────────── -->
+      <section class="cc-section" id="chambres">
+        <div class="cc-section__head">
+          <span class="cc-section__num">II</span>
+          <h2 class="cc-section__title">Three phenomenological chambers
+            <span class="cc-section__sub">Each chamber formally embodies its concept</span>
+          </h2>
+        </div>
+
+        <p style="max-width:720px;">The guiding principle: <em>the visual grammar remains constant</em> — same palette, same grain, same typography — only the <em>behaviour</em> changes. What differentiates the chambers is not their appearance, but what the reader is allowed to do with time. The three operational principles correspond to the three canonical dimensions of lived experience in Merleau-Ponty's sense: spatial, temporal, intersubjective.</p>
+
+        <!-- SPACE -->
+        <div class="cc-chamber">
+          <div class="cc-chamber__rail"></div>
+          <div class="cc-chamber__head">
+            <div>
+              <div class="cc-chamber__name">Space</div>
+              <div class="cc-chamber__cjk">空間</div>
+            </div>
+            <div class="cc-chamber__sub">— to be traversed by a place</div>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Source stories</span>
+            <span class="cc-chamber__val"><em>Isometric Rain</em> (cyberpunk Paris, the Martian colonies), <em>Silent Anomaly</em> (the geometry of the station), <em>Darkroom</em> (a photographer and the city that absorbs him).</span>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Principle</span>
+            <span class="cc-chamber__val"><strong>The canvas exceeds the view.</strong> The reader does not see all passages at once. They drift across a terrain wider than their window — passages emerge at the periphery and recede behind them. No "next" button. No forced scroll. An optional, slow, ambient drift.</span>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Gesture</span>
+            <span class="cc-chamber__val">Horizontal pan (click-drag on desktop, swipe on mobile). The background photograph reveals itself piece by piece, like a street walked at night.</span>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Iserian gap</span>
+            <span class="cc-chamber__val">Each passage contains designated words that <em>disappear</em> when it drifts away from the viewport centre — replaced by a faint monospace em-dash, a trace of what was there. The reader reconstructs the word with their pan: the drift is no longer only spatial, it is semantic. This is not a stylistic effect — it is the disjunction in Iser's sense made literal in space.</span>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Test</span>
+            <span class="cc-chamber__val"><em>A reader who never retrieves an erased word has still produced something.</em> They filled the gap in their own way — and that gap was different for them. That is the point.</span>
+          </div>
+        </div>
+
+        <!-- TIME -->
+        <div class="cc-chamber">
+          <div class="cc-chamber__rail"></div>
+          <div class="cc-chamber__head">
+            <div>
+              <div class="cc-chamber__name">Time</div>
+              <div class="cc-chamber__cjk">時間</div>
+            </div>
+            <div class="cc-chamber__sub">— duration, decomposition, what remains</div>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Source stories</span>
+            <span class="cc-chamber__val"><em>Between Images</em> (memory technology), <em>Reminiscence</em> (the limen between life and death), <em>The Specter of Her Voice</em> (the cassette that resurfaces), <em>Divine Encounter</em> (eyes worn by the years).</span>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Principle</span>
+            <span class="cc-chamber__val"><strong>Passages have ages.</strong> Some are sharp, fully legible. Others are nearly erased — only a fragment remains. The page is not a grid: it is a <em>stratigraphy</em>. The reader does not navigate; they <em>witness</em> a temporal layout.</span>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Gesture</span>
+            <span class="cc-chamber__val">Hovering over an erased passage <em>develops</em> it slowly — like in a photographic bath. One must wait, not click. The interface retains passages already read: on the next visit, they have aged. The interface has a memory.</span>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Transcendental state</span>
+            <span class="cc-chamber__val">After the first complete cycle of anchor words in the PhotoStage, all words simultaneously pass into a very faint trail state and the textual fragment returns alone to the screen — without keywords, without guidance. The reader re-reads with what they have built. This is the <em>transcendental position</em> device in Iser's sense: the moment the interface withdraws and leaves the reader facing their own representations. In subsequent cycles, the loop resumes normally.</span>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Test</span>
+            <span class="cc-chamber__val">A second visit is not like the first. The interface has lived through the reader's absence.</span>
+          </div>
+        </div>
+
+        <!-- THE OTHER -->
+        <div class="cc-chamber">
+          <div class="cc-chamber__rail"></div>
+          <div class="cc-chamber__head">
+            <div>
+              <div class="cc-chamber__name">The Other</div>
+              <div class="cc-chamber__cjk">他者</div>
+            </div>
+            <div class="cc-chamber__sub">— the encounter, the gaze returned</div>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Source stories</span>
+            <span class="cc-chamber__val"><em>Darkroom</em> (a woman whose portrait looks back), <em>Divine Encounter</em> (a face-to-face with the divine), <em>Reminiscence</em> (a figure who returns from the dead), <em>Silent Anomaly</em> (a woman facing her own doubles).</span>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Principle</span>
+            <span class="cc-chamber__val"><strong>The text resists.</strong> This is not a buffet of passages to be consumed. The reader encounters <em>one</em> passage at a time, and that passage has its own agency: it appears, it lingers, it withdraws if approached too quickly, it returns if one waits. The interaction model is <em>encounter</em>, not navigation.</span>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Gesture</span>
+            <span class="cc-chamber__val">Dark field. A passage emerges from the grain at the centre. Moving directly toward it makes it <em>retreat</em>; looking aside, waiting, stabilises it. Impatience is punished. Presence is rewarded.</span>
+          </div>
+          <div class="cc-chamber__row">
+            <span class="cc-chamber__label">Test</span>
+            <span class="cc-chamber__val">The reader who tries to "run" reads <em>less</em>, not more.</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ──────────────── III — CURATION DES PASSAGES ──────────────── -->
+      <section class="cc-section cc-section--prose" id="passages">
+        <div class="cc-section__head">
+          <span class="cc-section__num">III</span>
+          <h2 class="cc-section__title">Passage curation
+            <span class="cc-section__sub">Anchors and echoes — not all passages carry the same weight</span>
+          </h2>
+        </div>
+
+        <p>My first selection of passages had a flaw I took time to name: they were <em>beautiful sentences</em>, not <em>bearing moments</em>. Atmospheric descriptions — pretty, wintry — that do nothing. The moments that sustain the thesis are of a different nature: they <em>enact</em> something. Someone sees their own double. A photograph changes. A cassette restarts. Someone says: <em>«&thinsp;Sometimes, the right place is a person.&thinsp;»</em></p>
+
+        <p>I identified three criteria for choosing a passage:</p>
+
+        <ol class="cc-list cc-list--num">
+          <li><strong>Event over description.</strong> Prefer a passage where <em>something happens</em> over atmospheric description.</li>
+          <li><strong>The double edge.</strong> The passage must work twice: on first reading (it intrigues), and on expert reading (a jury familiar with Iser recognises the gesture).</li>
+          <li><strong>An invitation to the image, not an image caption.</strong> The right passage <em>invites</em> a photograph without prescribing it. Wrong: "a silhouette in the driving rain" — the image is too supplied. Right: "a silhouette a hundred metres away. She was walking, but she was moving further" — the image is summoned as lack.</li>
+        </ol>
+
+        <p>The chosen structure is an <strong>anchor / echo</strong> hierarchy: two anchors per chamber — the bearing passages, more present, that hold the chamber — and three to four echoes, more discreet, atmospheric, that dim when an anchor is hovered. The imbalance is intentional: it creates two levels of reading. Anchors are accessible to the passing visitor. Echoes reward the second reading — exactly like a listener who presses rewind and hears the cassette differently.</p>
+
+        <div class="cc-aside">
+          <strong>Candidate epigraph for the entire portfolio</strong>
+          <em>«&thinsp;Sometimes, the right place is a person.&thinsp;»</em><br/>
+          — <em>Isometric Rain</em>, Élégies Oubliées. Said by an anonymous customer beneath the colonies' advertising screen. It folds space back onto the intimate — exactly what the project does with photographs and passages.
+        </div>
+      </section>
+
+
+      <!-- ──────────────── IV — APPARIEMENTS ──────────────── -->
+      <section class="cc-section" id="appariements">
+        <div class="cc-section__head">
+          <span class="cc-section__num">IV</span>
+          <h2 class="cc-section__title">Passage / photograph pairings
+            <span class="cc-section__sub">18 pairs · 3 chambers · 2 anchors per chamber</span>
+          </h2>
+        </div>
+
+        <p style="max-width:720px;">Four principles guided each pairing.</p>
+
+        <ul class="cc-list">
+          <li><strong>Obliquity over illustration.</strong> No photograph literally represents what its passage says. The matches are not paired with the story's fire by mimicry — they are paired by <em>ritual gesture</em>. The green mirror is not paired with the story's double because one sees a reflection, but because one sees a figure <em>in the act of becoming other</em>.</li>
+          <li><strong>Colour signifies the chamber.</strong> I concentrated black-and-white in <em>Time</em> — time as archive, grain as sediment. <em>Space</em> and <em>The Other</em> admit colour, but colour disciplined by composition.</li>
+          <li><strong>Anchors carry the most restrained images.</strong> Not the most virtuosic — the most held-back. These are photographs that demand a gaze, not photographs that seize it.</li>
+          <li><strong>Never the same operation twice.</strong> Each chamber alternates registers: interior / exterior, day / night, close / distant.</li>
+        </ul>
+
+
+        <!-- SPACE PAIRINGS -->
+        <div class="cc-chamber-bar" style="margin-top:3rem;">
+          <div>
+            <span class="cc-chamber-bar__name">Space</span>
+            <span class="cc-chamber-bar__cjk">空間 &middot; 공간</span>
+          </div>
+          <span class="cc-chamber-bar__principle">— place is what one desires, never what one inhabits</span>
+        </div>
+
+        <div class="cc-pairs">
+
+          <div class="cc-pair cc-pair--anchor">
+            <div class="cc-pair__photo">
+              <img src="mains-statue.jpg" alt="Mains statue" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">hands · statue</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag cc-pair__tag--anchor">Anchor</span>
+                <span class="cc-pair__source">Isometric Rain</span>
+              </div>
+              <p class="cc-pair__quote">Sometimes, the right place is a person.</p>
+              <p class="cc-pair__note">The marble hand does not reach the living hand. The gap between them <em>is</em> the place. What the protagonist understands too late beneath the colonies' advertising screen: the right place was not Mars.</p>
+            </div>
+          </div>
+
+          <div class="cc-pair cc-pair--anchor">
+            <div class="cc-pair__photo">
+              <img src="hanbok-mannequins.jpg" alt="Mannequins hanbok" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">hanbok · mannequins</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag cc-pair__tag--anchor">Anchor</span>
+                <span class="cc-pair__source">Silent Anomaly</span>
+              </div>
+              <p class="cc-pair__quote">Dozens of copies of herself lay scattered across the floor, like shattered replicas of a fragmented reality.</p>
+              <p class="cc-pair__note">Empty dresses, repeated forms, the sole vendor at the centre — the stratigraphy of the dead replicas on the hill of the 9th planet. The science-fiction narrative translated into traditional dress. <strong>Perfect obliquity.</strong></p>
+            </div>
+          </div>
+
+          <div class="cc-pair">
+            <div class="cc-pair__photo">
+              <img src="couple-escaliers.jpg" alt="Homme escaliers" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">couple · stairs</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag">Echo</span>
+                <span class="cc-pair__source">Darkroom</span>
+              </div>
+              <p class="cc-pair__quote">His solitary silhouette dissolved into the ever-shifting urban architecture.</p>
+              <p class="cc-pair__note">A photographer before he finds his subject. The geometry of the steps swallows him as the city does. The horizontal stripes of the floor echo the film strip.</p>
+            </div>
+          </div>
+
+          <div class="cc-pair">
+            <div class="cc-pair__photo">
+              <img src="ruelle-coreenne.jpg" alt="Ruelle coréenne" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">korean · alley</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag">Echo</span>
+                <span class="cc-pair__source">Isometric Rain</span>
+              </div>
+              <p class="cc-pair__quote">The promise of a paradise elsewhere grew more distant, yet he clung to it desperately.</p>
+              <p class="cc-pair__note">The man seated in the alley, his phone lighting his face: a man waiting, the signs promising something he no longer believes. He looks elsewhere.</p>
+            </div>
+          </div>
+
+          <div class="cc-pair">
+            <div class="cc-pair__photo">
+              <img src="musee-orange.jpg" alt="Musée orange" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">museum · orange</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag">Echo</span>
+                <span class="cc-pair__source">Reminiscence</span>
+              </div>
+              <p class="cc-pair__quote">A dark mass moved in the distance. It must have been enormous, given how far away it was.</p>
+              <p class="cc-pair__note">The man seated before the shards faces something too large to take in at once — a mass that nonetheless looks back at him.</p>
+            </div>
+          </div>
+
+          <div class="cc-pair">
+            <div class="cc-pair__photo">
+              <img src="homme-ombre.jpg" alt="Homme ombre" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">man · shadow</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag">Echo</span>
+                <span class="cc-pair__source">Darkroom</span>
+              </div>
+              <p class="cc-pair__quote">Every step was an escape, but also an assertion of his status as a perpetual outsider.</p>
+              <p class="cc-pair__note">The photographer is <em>inside</em> the photograph — the phone's shadow in the foreground — and his subject ignores him. A photographer who discovers he is inside the photograph he thought he was taking.</p>
+            </div>
+          </div>
+
+        </div><!-- end .cc-pairs Space -->
+
+
+        <!-- TIME PAIRINGS -->
+        <div class="cc-chamber-bar" style="margin-top:4rem;">
+          <div>
+            <span class="cc-chamber-bar__name">Time</span>
+            <span class="cc-chamber-bar__cjk">時間 &middot; 시간</span>
+          </div>
+          <span class="cc-chamber-bar__principle">— the image preserves what comes undone</span>
+        </div>
+
+        <div class="cc-pairs">
+
+          <div class="cc-pair cc-pair--anchor">
+            <div class="cc-pair__photo">
+              <img src="couple-flou-fantome.jpg" alt="Couple banquette flou" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">couple · blur</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag cc-pair__tag--anchor">Anchor</span>
+                <span class="cc-pair__source">The Specter of Her Voice</span>
+              </div>
+              <p class="cc-pair__quote">Stories take time to get their teeth into us.</p>
+              <p class="cc-pair__note">The woman's face blurs in the smoke — the cassette begins to bite. The time of the photograph (long exposure) <em>is</em> the time the voice takes to colonise the listener. <strong>The founding sentence of Thresholds.</strong></p>
+            </div>
+          </div>
+
+          <div class="cc-pair cc-pair--anchor">
+            <div class="cc-pair__photo">
+              <img src="femme-rouge-venise.jpg" alt="Femme rouge Venise" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">woman · red · Venice</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag cc-pair__tag--anchor">Anchor</span>
+                <span class="cc-pair__source">Reminiscence</span>
+              </div>
+              <p class="cc-pair__quote">You will always be my favourite memory.</p>
+              <p class="cc-pair__note">Eyes closed, profile turned, desaturated architecture behind: everything fades except her. A woman speaking to the dead in a final clearing. The colour here is <em>of the memory itself</em>, not of presence — an assumed exception to the chamber's black-and-white rule.</p>
+            </div>
+          </div>
+
+          <div class="cc-pair">
+            <div class="cc-pair__photo">
+              <img src="graffiti-fenetre.jpg" alt="Graffiti fenêtre" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">graffiti · window</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag">Echo</span>
+                <span class="cc-pair__source">Reminiscence</span>
+              </div>
+              <p class="cc-pair__quote">A frozen image from simpler times, when the world was still comprehensible.</p>
+              <p class="cc-pair__note">A couple painted on the wall — frozen in a gesture they will never finish — beside a window where someone lives. This is literally the photograph of someone looking at the image of someone who is gone.</p>
+            </div>
+          </div>
+
+          <div class="cc-pair">
+            <div class="cc-pair__photo">
+              <img src="femme-bulles.jpg" alt="Femme bulles" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">woman · bubbles</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag">Echo</span>
+                <span class="cc-pair__source">The Specter of Her Voice</span>
+              </div>
+              <p class="cc-pair__quote">Était-ce un rêve, ou une réalité dont elle ne pouvait échapper ?</p>
+              <p class="cc-pair__note">Ephemeral bubbles, man from behind, indistinct interior scene — A listener's room at the end, where the cassette restarts. The dream that knows itself a dream.</p>
+            </div>
+          </div>
+
+          <div class="cc-pair">
+            <div class="cc-pair__photo">
+              <img src="deux-femmes-embrasure.jpg" alt="Café embrasure" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">café · doorway</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag">Echo</span>
+                <span class="cc-pair__source">Divine Encounter</span>
+              </div>
+              <p class="cc-pair__quote">This place is not really a café. It is an in-between space.</p>
+              <p class="cc-pair__note">A woman at a table, her blurred double in the background — a man learning that he is dead. The limbo-café. The other figure looks away, like a waitress who is also something else entirely.</p>
+            </div>
+          </div>
+
+          <div class="cc-pair">
+            <div class="cc-pair__photo">
+              <img src="allumettes.jpg" alt="Allumettes" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">matches</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag">Echo</span>
+                <span class="cc-pair__source">Between Images</span>
+              </div>
+              <p class="cc-pair__quote">Her silhouette turned into a blaze.</p>
+              <p class="cc-pair__note">Three hands extend three matches. In the story, a single match is lit in solitude. Collective ritual against solitary sacrifice.</p>
+            </div>
+          </div>
+
+        </div><!-- end .cc-pairs Time -->
+
+
+        <!-- THE OTHER PAIRINGS -->
+        <div class="cc-chamber-bar" style="margin-top:4rem;">
+          <div>
+            <span class="cc-chamber-bar__name">The Other</span>
+            <span class="cc-chamber-bar__cjk">他者 &middot; 타자</span>
+          </div>
+          <span class="cc-chamber-bar__principle">— the subject and their revenant cross paths</span>
+        </div>
+
+        <div class="cc-pairs">
+
+          <div class="cc-pair cc-pair--anchor">
+            <div class="cc-pair__photo">
+              <img src="miroir-vert.jpg" alt="Miroir vert" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">mirror · green</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag cc-pair__tag--anchor">Anchor</span>
+                <span class="cc-pair__source">Silent Anomaly</span>
+              </div>
+              <p class="cc-pair__quote">You… you're not real…</p>
+              <p class="cc-pair__note">Profile against a circular field of green light: a figure <em>in the act of becoming other</em>. A woman facing her own double — captured from inside the mirror.</p>
+            </div>
+          </div>
+
+          <div class="cc-pair cc-pair--anchor">
+            <div class="cc-pair__photo">
+              <img src="portrait-pierre-verte.jpg" alt="Portrait pierre verte" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">portrait · green stone</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag cc-pair__tag--anchor">Anchor</span>
+                <span class="cc-pair__source">Darkroom</span>
+              </div>
+              <p class="cc-pair__quote">Her eyes, a deep blue, seemed to pierce through the photograph, as if she were watching Jack with unsettling intensity.</p>
+              <p class="cc-pair__note">The gaze pressed against the stone, the eye that follows you: a portrait that cannot be released. <strong>The photograph that looks back</strong> — this image carries the poetic anchor of the entire collection.</p>
+            </div>
+          </div>
+
+          <div class="cc-pair">
+            <div class="cc-pair__photo">
+              <img src="homme-marbres-elgin.jpg" alt="Homme marbres Elgin" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">Elgin · marbles</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag">Echo</span>
+                <span class="cc-pair__source">Divine Encounter</span>
+              </div>
+              <p class="cc-pair__quote">We are not so different, you and I. We observe, we learn, we try to understand.</p>
+              <p class="cc-pair__note">A man seated, sketching marble figures whose heads are missing. A divine figure telling a dead man: "you are a witness, and that is your trade." The Other as methodological mirror.</p>
+            </div>
+          </div>
+
+          <div class="cc-pair">
+            <div class="cc-pair__photo">
+              <img src="moine-bouddhas.jpg" alt="Moine bouddhas" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">monk · buddhas</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag">Echo</span>
+                <span class="cc-pair__source">The Specter of Her Voice</span>
+              </div>
+              <p class="cc-pair__quote">Stay with me.</p>
+              <p class="cc-pair__note">The monk at the foot of three golden Buddhas, candles lit. The cassette's sentence displaced into the register of devotion. When the Other is colossal — and one invokes it anyway.</p>
+            </div>
+          </div>
+
+          <div class="cc-pair">
+            <div class="cc-pair__photo">
+              <img src="femme-fleurs-arches.jpg" alt="Femme fleurs arches" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">flowers · arches</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag">Echo</span>
+                <span class="cc-pair__source">Reminiscence</span>
+              </div>
+              <p class="cc-pair__quote">Everything is fine. I am here.</p>
+              <p class="cc-pair__note">A woman holds a bouquet beneath monumental arches — like an offering to something not there. The bouquet is proof that someone came. The turned face says: <em>not toward you</em>.</p>
+            </div>
+          </div>
+
+          <div class="cc-pair">
+            <div class="cc-pair__photo">
+              <img src="garde-jardin-statue.jpg" alt="Garde jardin statue" onerror="this.parentElement.style.background='#111008';this.style.display='none'" />
+              <span class="cc-pair__photo-label">garden · statue</span>
+            </div>
+            <div class="cc-pair__body">
+              <div class="cc-pair__tag-row">
+                <span class="cc-pair__tag">Echo</span>
+                <span class="cc-pair__source">Darkroom</span>
+              </div>
+              <p class="cc-pair__quote">A strange and haunting sensation overtook him, as though he were under the spell of an irresistible force.</p>
+              <p class="cc-pair__note">A man in a mauve hanbok, back turned, facing a statue half-hidden in vegetation. A figure held by something he cannot name. The encounter in the garden.</p>
+            </div>
+          </div>
+
+        </div><!-- end .cc-pairs The Other -->
+      </section>
+
+
+      <!-- ──────────────── V — MÉTHODE PHOTOGRAPHIQUE ──────────────── -->
+      <section class="cc-section cc-section--prose" id="photographie">
+        <div class="cc-section__head">
+          <span class="cc-section__num">V</span>
+          <h2 class="cc-section__title">Photographic method
+            <span class="cc-section__sub">What the corpus says before any layout</span>
+          </h2>
+        </div>
+
+        <p class="cc-lede">My corpus has a coherence that the layout of <em>Thresholds</em> must make visible: I work obsessively with the back, the three-quarter figure, the face that withdraws. I almost never photograph someone looking directly into the lens.</p>
+
+        <p>This is not a style — it is a poetics. It corresponds exactly to what the book asks of the interface: never finishing the image, leaving half to the reader. The photograph that withholds its subject is structurally analogous to the text that withholds its resolution.</p>
+
+        <p>I identified two tensions in my corpus that inform the pairing choices:</p>
+
+        <p><strong>Two tonal regimes.</strong> A cinematic black-and-white (couple on a banquette, man on a staircase, graffiti) and a highly saturated colour corpus, almost unreal (matches, green mirror, portrait on green stone). This tension became an axis of differentiation between the chambers: black-and-white is concentrated in <em>Time</em> as an archival mark, while colour — disciplined, never decorative — is admitted in <em>Space</em> and <em>The Other</em>.</p>
+
+        <p><strong>The presence of the face-toward-void.</strong> Many of my photographs frame a figure before a device that returns the gaze: a statue, an altar, a mannequin, a stained-glass window, a shopfront. This grammar is exactly that of the book: figures that look at what looks. It is the grammar of <em>The Other</em>, and it was already in the corpus before I looked for it there.</p>
+
+        <p class="cc-pull">The corpus was sufficient. The next step was not to photograph more — it was to edit.</p>
+      </section>
+
+
+      <footer class="cc-foot">
+        <span>Process Notes · Thresholds</span>
+        <span>Thresholds &middot; 敷居</span>
+        <span>Jean Viratel · 2026</span>
+      </footer>
+
+    </article>
+  </main>
+</body>
+</html>

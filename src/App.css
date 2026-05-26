@@ -157,11 +157,11 @@
      font-weight: 400;
      letter-spacing: 0.38em;
      text-transform: uppercase;
-     color: var(--cream-22);
-     transition: color 0.45s ease, letter-spacing 0.45s ease;
+     color: var(--cream-40);
+     transition: color 0.45s ease, letter-spacing 0.45s ease, opacity 0.45s ease;
      cursor: none;
    }
-   .shared-back--photo:hover { color: var(--cream-60); letter-spacing: 0.48em; }
+   .shared-back--photo:hover { color: var(--cream-72); letter-spacing: 0.48em; }
 
    .shared-label {
      position: fixed;
@@ -289,4 +289,30 @@
 
      .about-trigger { font-size: 11px; bottom: 1.4rem; right: 1.4rem; }
      .shared-progress { right: 1rem; font-size: 9px; }
+   }
+
+
+   /* ── Photo view — nav awakens after delay, resets on passage change ── */
+
+   .shared-ui--photo-hidden {
+     opacity: 0;
+     pointer-events: none;
+   }
+
+   .shared-ui--photo-visible {
+     opacity: 1;
+     transition: opacity 0.7s ease;
+     pointer-events: all;
+   }
+
+   .shared-ui--photo-visible .shared-back--photo {
+     color: var(--cream-40);
+   }
+   .shared-ui--photo-visible .shared-back--photo:hover {
+     color: var(--cream-72);
+     letter-spacing: 0.48em;
+   }
+
+   .shared-ui--photo-visible .shared-home-link {
+     color: var(--cream-22);
    }

@@ -197,12 +197,24 @@ function AnchorsDrift({ anchors, cfg }) {
   );
 }
 
-function AnchorsTemporal({ anchors, photoRef, cfg }) {
+function AnchorsTemporal({ anchors, photoRef, cfg, onTranscendent }) {
   // Time — arrivée séquentielle aux points des tiers, un mot à la fois.
   // Cadence irrégulière. Le dernier mot laisse une trace très faible.
+  //
+  // P.3 — État transcendantal (position iserienne du lecteur) :
+  //   Après le premier cycle complet, tous les mots passent simultanément en
+  //   trail (faibles) pendant 3 s. Le parent affiche le fragment textuel seul.
+  //   Le visiteur relit avec ce qu'il a construit. Cycles suivants : inchangés.
   const [thirds,    setThirds]    = useState([]);
   const [activeIdx, setActiveIdx] = useState(-1);
   const [phase,     setPhase]     = useState("idle"); // 'idle' | 'in' | 'hold' | 'out'
+  const [transcendent, setTranscendent] = useState(false);
+  const firstCycleRef = useRef(true);
+
+  // Ref interne au callback parent : évite que le useEffect de scheduling
+  // se relance à chaque render du parent (l'arrow inline change d'identité).
+  const onTranscendentRef = useRef(onTranscendent);
+  useEffect(() => { onTranscendentRef.current = onTranscendent; }, [onTranscendent]);
 
   const computeThirds = useCallback(() => {
     const el = photoRef.current;
@@ -232,6 +244,13 @@ function AnchorsTemporal({ anchors, photoRef, cfg }) {
     return () => window.removeEventListener("resize", computeThirds);
   }, [computeThirds]);
 
+  // Reset cycle state quand le passage change
+  useEffect(() => {
+    firstCycleRef.current = true;
+    setTranscendent(false);
+    onTranscendentRef.current?.(false);
+  }, [anchors]);
+
   useEffect(() => {
     if (!anchors.length) return;
     let cancelled = false;
@@ -256,9 +275,25 @@ function AnchorsTemporal({ anchors, photoRef, cfg }) {
             if (cancelled) return;
             i = i + 1;
             if (i >= anchors.length) {
-              // Cycle complet — pause, puis recommence
-              i = 0;
-              sched(step, cfg.anchorLoopPauseMs);
+              if (firstCycleRef.current) {
+                // ─── ÉTAT TRANSCENDANTAL ───
+                // Premier cycle fini : tous les mots passent en trail,
+                // le fragment seul revient à l'écran via le parent.
+                firstCycleRef.current = false;
+                setTranscendent(true);
+                onTranscendentRef.current?.(true);
+                sched(() => {
+                  if (cancelled) return;
+                  setTranscendent(false);
+                  onTranscendentRef.current?.(false);
+                  i = 0;
+                  sched(step, 400);
+                }, 3000);
+              } else {
+                // Cycles suivants — boucle directe, comportement inchangé
+                i = 0;
+                sched(step, cfg.anchorLoopPauseMs);
+              }
             } else {
               sched(step, 240);
             }
@@ -283,10 +318,12 @@ function AnchorsTemporal({ anchors, photoRef, cfg }) {
         const pos = thirds[i];
         if (!pos) return null;
         const isActive = i === activeIdx;
-        const cls =
-          isActive
-            ? `ps-anchor--temporal-${phase}`
-            : (i < activeIdx ? "ps-anchor--temporal-trail" : "ps-anchor--temporal-idle");
+        // En état transcendantal : tous les mots en trail simultanément.
+        const cls = transcendent
+          ? "ps-anchor--temporal-trail"
+          : (isActive
+              ? `ps-anchor--temporal-${phase}`
+              : (i < activeIdx ? "ps-anchor--temporal-trail" : "ps-anchor--temporal-idle"));
         return (
           <div
             key={i}
@@ -458,11 +495,11 @@ function AnchorsFlee({ anchors, photoRef, cfg }) {
   );
 }
 
-function AnchorLayer({ anchors, photoRef, cfg }) {
+function AnchorLayer({ anchors, photoRef, cfg, onTranscendent }) {
   if (!anchors?.length) return null;
   const mode = cfg.anchorMode;
   if (mode === "drift")    return <AnchorsDrift    anchors={anchors} cfg={cfg} />;
-  if (mode === "temporal") return <AnchorsTemporal anchors={anchors} photoRef={photoRef} cfg={cfg} />;
+  if (mode === "temporal") return <AnchorsTemporal anchors={anchors} photoRef={photoRef} cfg={cfg} onTranscendent={onTranscendent} />;
   if (mode === "flee")     return <AnchorsFlee     anchors={anchors} photoRef={photoRef} cfg={cfg} />;
   return null;
 }
@@ -479,6 +516,11 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
   const [anchors,  setAnchors]  = useState([]);
   const [flying,   setFlying]   = useState(null);
   const [lines,    setLines]    = useState(false);
+
+  // P.3 — État transcendantal (remonté par AnchorsTemporal après 1er cycle).
+  //       Quand true : la couche d'ancres reste montée (tous mots en trail)
+  //       et un overlay affiche le fragment complet, sans mots-clés soulignés.
+  const [transcendentActive, setTranscendentActive] = useState(false);
 
   // Other — cursor gate
   const [clipRadius, setClipRadius] = useState(0);
@@ -606,6 +648,7 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
     setTextIn(false); setTextOut(false);
     setIrisOpen(false); setAnchors([]);
     setFlying(null); setLines(false);
+    setTranscendentActive(false);   // reset l'état transcendantal au changement de passage
     clipRadiusRef.current = 0;
     setClipRadius(0);
     gateActiveRef.current = false;
@@ -747,7 +790,19 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
           anchors={anchors}
           photoRef={photoRef}
           cfg={cfg}
+          onTranscendent={setTranscendentActive}
         />
+      )}
+
+      {/* P.3 — État transcendantal (Time uniquement, porté par AnchorsTemporal) :
+          le fragment complet revient seul, sans mots-clés soulignés,
+          pendant que toutes les ancres sont en trail. */}
+      {phase === "photo" && transcendentActive && (
+        <div className="ps-transcendent" aria-hidden="true">
+          <p className="ps-transcendent__text">
+            &ldquo;{passage.full}&rdquo;
+          </p>
+        </div>
       )}
 
       {/* Source caption */}

@@ -59,6 +59,11 @@ export default function App() {
   // ── Grain bloom — NEW transition layer for home → passages
   const [grainState, setGrainState] = useState("idle"); // idle | bloom | fading
 
+  // ── P.3 — Threshold (mask sombre + disposition figée) pendant la
+  //    transition passages → photo. Activé immédiatement au clic, désactivé
+  //    dans le callback de dissolveTo juste avant le swap de vue.
+  const [threshold, setThreshold] = useState(false);
+
 
   useEffect(() => {
     const onMove = (e) => setMousePos({ x: e.clientX, y: e.clientY });
@@ -106,17 +111,24 @@ export default function App() {
   }, [expandingWord]);
 
   // ── passages → photo
+  //    Timing :
+  //      t=0    setThreshold(true)   → masque sombre fade-in (CSS 1.6s)
+  //      t=400  dissolveTo()         → fade-out 480ms
+  //      t=880  callback             → setThreshold(false), passageIdx, view
   const handleSelectPassage = useCallback((idx) => {
-    dissolveTo(() => {
-      setPassageIdx(idx);
-      setView("photo");
-      setVisited((prev) => {
-        const existing = prev[chamberIdx] ? new Set(prev[chamberIdx]) : new Set();
-        existing.add(idx);
-        return { ...prev, [chamberIdx]: existing };
+    setThreshold(true);
+    setTimeout(() => {
+      dissolveTo(() => {
+        setThreshold(false);
+        setPassageIdx(idx);
+        setView("photo");
+        setVisited((prev) => {
+          const existing = prev[chamberIdx] ? new Set(prev[chamberIdx]) : new Set();
+          existing.add(idx);
+          return { ...prev, [chamberIdx]: existing };
+        });
       });
-
-    });
+    }, 400);
   }, [dissolveTo, chamberIdx]);
 
   // ── photo → passages
@@ -214,6 +226,7 @@ export default function App() {
             onSelect={handleSelectPassage}
             visitedSet={visited[chamberIdx]}
             enterDir={enterDir}
+            thresholdActive={threshold}
           />
           {visited[chamberIdx]?.size > 0 && (
             <ReturnIndicator
@@ -254,6 +267,7 @@ export default function App() {
             onSwitchChamber={handleSwitchChamber}
             onBack={handleBackToList}
             site={SITE}
+            passageIdx={passageIdx}
             passageProgress={{
               current: passageIdx + 1,
               total: chamber.passages.length,
@@ -296,12 +310,25 @@ function SharedUI({
   onSwitchChamber,
   onBack,
   site,
+  passageIdx,
   passageProgress,
 }) {
   const isPhoto = view === "photo";
+  const [navVisible, setNavVisible] = useState(false);
+
+  useEffect(() => {
+    if (!isPhoto) { setNavVisible(false); return; }
+    setNavVisible(false);
+    const t = setTimeout(() => setNavVisible(true), 2200);
+    return () => clearTimeout(t);
+  }, [isPhoto, passageIdx]);
+
+  const photoClass = isPhoto
+    ? (navVisible ? "shared-ui--photo-visible" : "shared-ui--photo-hidden")
+    : "";
 
   return (
-    <>
+    <div className={`shared-ui ${photoClass}`}>
       <button
         className={isPhoto ? "shared-home-link" : "shared-back"}
         onClick={isPhoto ? onGoHome : onBack}
@@ -350,6 +377,6 @@ function SharedUI({
           {toRoman(passageProgress.current)}&thinsp;/&thinsp;{toRoman(passageProgress.total)}
         </p>
       )}
-    </>
+    </div>
   );
 }

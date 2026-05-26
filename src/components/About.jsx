@@ -206,37 +206,18 @@ export default function About({ about, site, onClose }) {
             </div>
             <div className="about__content-col">
               <p>
-                Three critical notebooks written alongside this work — on the thesis,
-                on passage curation, on the 18 image–text pairings.
-                Each chamber is in conversation with one of these analyses.
+                A critical notebook written alongside this work — thesis,
+                passage curation, the 18 image–text pairings, photographic method.
               </p>
               <div className="about__links">
                 <a
-                  href="/process/Cahier Critique - Thresholds.html"
+                  href="/process/Process_Notes_-_Thresholds.html"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="about__link about__link--dim"
                   data-cursor-large
                 >
-                  I — Thresholds →
-                </a>
-                <a
-                  href="/process/Cahier Critique II - Passages.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="about__link about__link--dim"
-                  data-cursor-large
-                >
-                  II — Passages →
-                </a>
-                <a
-                  href="/process/Cahier Critique III - Appariement.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="about__link about__link--dim"
-                  data-cursor-large
-                >
-                  III — Pairings →
+                  Process Notes →
                 </a>
               </div>
             </div>

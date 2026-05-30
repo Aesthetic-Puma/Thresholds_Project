@@ -727,9 +727,9 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
   })();
 
   const hintText = {
-    space: "click anywhere to reveal",
-    time:  "stay with it — click when ready",
-    other: "move slowly — stillness will open it",
+    space: "drift — do not aim",
+    time:  "wait — it surfaces",
+    other: "be present — it opens",
   }[chamber.id] ?? "click anywhere to reveal";
 
   const showStillnessCue = cfg.useCursorGate && phase === "photo" && clipRadius < 20;

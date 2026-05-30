@@ -10,11 +10,10 @@ const FLOAT_AMP_Y_MIN  = 1.5;
 const FLOAT_AMP_Y_MAX  = 4;
 const ITEM_WIDTH       = 300;
 const MARGIN           = 80;
-const COLS             = 3;
 
 // ── Space chamber — panning canvas
-const SPACE_MAX_PAN   = 0.42;  // × vw — amplitude horizontale
-const SPACE_MAX_PAN_Y = 0.18;  // × vh — amplitude verticale, plus douce
+const SPACE_MAX_PAN   = 0.68;  // × vw — amplitude horizontale
+const SPACE_MAX_PAN_Y = 0.46;  // × vh — amplitude verticale
 
 // ── Space chamber — drift-decay (P.1 — blancs iseriens)
 //    Chaque passage a une fraîcheur (0…1) qui décroit à mesure qu'il quitte
@@ -22,9 +21,9 @@ const SPACE_MAX_PAN_Y = 0.18;  // × vh — amplitude verticale, plus douce
 //    deviennent transparents (avec un cadratin résiduel). Au retour au centre,
 //    ils réapparaissent, plus lentement — c'est le geste du "se souvenir".
 //    Le chemin de pan du visiteur écrit le texte.
-const SPACE_FRESH_RADIUS      = 1000; // px — au-delà, la fraîcheur tombe à 0
+const SPACE_FRESH_RADIUS      = 700;   // px — frontière franche, décay actif dès la marge
 const SPACE_FRESH_LERP        = 0.012; // décroissance lente — le texte ne flicker pas
-const SPACE_LOST_THRESHOLD    = 0.35;  // < ce seuil → tokens lost
+const SPACE_LOST_THRESHOLD    = 0.30;  // < ce seuil → tokens lost
 const SPACE_RESTORE_THRESHOLD = 0.55;  // > ce seuil → tokens restorés (hystérésis)
 const SPACE_REMEMBER_MS       = 1800;  // durée de la transition lente à la restauration
 
@@ -34,7 +33,7 @@ const SPACE_REMEMBER_MS       = 1800;  // durée de la transition lente à la re
 //    TIME_NATURAL_AGES le fait. Chaque item expose une `depth` (0…1)
 //    consommée par le rendu pour cumuler les signaux d'âge.
 const getTimeLayout = (passages) => {
-  const indexed = passages.map((p, i) => ({
+  const indexed = passages.map((_, i) => ({
     i,
     age: TIME_NATURAL_AGES[i] ?? 0,
   }));
@@ -63,6 +62,25 @@ const TIME_VOICE = [
   "do not click yet",
   "wait — it surfaces",
 ];
+
+// ── Space chamber — voix centrale, cycle toutes les 8.4s
+const SPACE_VOICE = [
+  "the canvas exceeds you",
+  "the path writes the words",
+  "what you pass leaves a trace",
+  "drift — do not aim",
+];
+
+// ── Other chamber — voix centrale, cycle toutes les 9s
+const OTHER_VOICE = [
+  "presence is the threshold",
+  "do not aim",
+  "wait — it returns",
+  "the gaze answers stillness",
+];
+
+// ── Other chamber — intimité cumulée
+const INTIMACY_FULL_MS = 180000; // ~3 min de stillness cumulée → confiance pleine
 
 // ── Other chamber — anchors au centre, échos en orbite radiale
 const getOtherLayout = (passages) => {
@@ -109,15 +127,21 @@ const OTHER_ANNOT_LERP       = 0.007;
 function tokenizeShort(text, blanksIdxArr) {
   const blanks = new Set(blanksIdxArr || []);
   const parts  = text.split(/(\s+)/);
-  let wi   = 0;
-  let html = "";
+  let wi        = 0;
+  let blankRank = 0;
+  let html      = "";
   for (const p of parts) {
     if (p === "") continue;
     if (/^\s+$/.test(p)) {
       html += p;
     } else {
       const isBlank = blanks.has(wi);
-      html += `<span class="fp-token${isBlank ? " fp-token--blank" : ""}" data-ti="${wi}">${p}</span>`;
+      if (isBlank) {
+        html += `<span class="fp-token fp-token--blank" data-ti="${wi}" style="--blank-idx:${blankRank}">${p}</span>`;
+        blankRank++;
+      } else {
+        html += `<span class="fp-token" data-ti="${wi}">${p}</span>`;
+      }
       wi++;
     }
   }
@@ -139,13 +163,15 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
   const hoveredRef      = useRef(-1);
   const enterDirRef     = useRef(enterDir);
   const mousePosRef     = useRef({ x: typeof window !== "undefined" ? window.innerWidth / 2 : 0, y: 0 });
-  const panRef          = useRef({ current: 0, target: 0 });
+  const panRef          = useRef({ current: 0, target: 0, currentY: 0, targetY: 0 });
   const isSpaceRef      = useRef(false);
   const isTimeRef       = useRef(false);
   const isOtherRef      = useRef(false);
   const mouseSpeedRef   = useRef(0);
   const prevMouseRef    = useRef({ x: typeof window !== "undefined" ? window.innerWidth / 2 : 0, y: 0, t: 0 });
   const lastMoveTimeRef = useRef(0);
+  const stillCumMsRef   = useRef(0);  // temps d'immobilité cumulé (ms)
+  const intimacyRef     = useRef(0);  // 0 = méfiance, 1 = pleinement reçu
 
   enterDirRef.current = enterDir;
 
@@ -190,6 +216,9 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
     if (!container) return;
 
     container.innerHTML = "";
+    // ── Halo de gravité Space — retiré et recréé à chaque build
+    const prevHalo = containerRef.current?.parentElement?.querySelector(".fp-gravity-halo");
+    if (prevHalo) prevHalo.remove();
     // Clear any pending remember-timers from a previous build (Space)
     itemsRef.current.forEach((it) => {
       if (it.rememberTimer) clearTimeout(it.rememberTimer);
@@ -201,13 +230,23 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
 
     const vw      = window.innerWidth;
     const vh      = window.innerHeight;
-    const n       = chamber.passages.length;
     const isSpace = chamber.id === "space";
     const isTime  = chamber.id === "time";
     const isOther = chamber.id === "other";
     isSpaceRef.current = isSpace;
     isTimeRef.current  = isTime;
     isOtherRef.current = isOther;
+
+    if (isSpace) {
+      const halo = document.createElement("div");
+      halo.className = "fp-gravity-halo";
+      halo.setAttribute("aria-hidden", "true");
+      halo.innerHTML = `
+        <div class="fp-gravity-halo__inner"></div>
+        <div class="fp-gravity-halo__outer"></div>
+      `;
+      containerRef.current?.parentElement?.appendChild(halo);
+    }
 
     if (isOther) lastMoveTimeRef.current = performance.now();
 
@@ -399,6 +438,14 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
       });
 
       el.addEventListener("click", () => {
+        if (isSpace) {
+          const it = itemsRef.current.find((x) => x.idx === i);
+          if (!it || it.lostState) return;
+        }
+        if (isTime) {
+          const it = itemsRef.current.find((x) => x.idx === i);
+          if (!it || it.currentBlur > 0.8) return;
+        }
         if (isTime) {
           try {
             const visits = JSON.parse(localStorage.getItem(LS_TIME_KEY) || "{}");
@@ -420,7 +467,10 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         const dC  = Math.hypot(dxc, dyc);
         initFreshness = Math.max(0, Math.min(1, 1 - dC / SPACE_FRESH_RADIUS));
         initLost      = initFreshness < SPACE_LOST_THRESHOLD;
-        if (initLost) el.classList.add("fp-item--decayed");
+        if (initLost) {
+          el.classList.add("fp-item--decayed");
+          el.classList.add("fp-item--ever-decayed");
+        }
       }
 
       container.appendChild(el);
@@ -470,15 +520,33 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         panRef.current.current += (panRef.current.target  - panRef.current.current)  * lerpFactor;
         panRef.current.targetY  = (0.5 - normY) * 2 * SPACE_MAX_PAN_Y * vhNow;
         panRef.current.currentY += (panRef.current.targetY - panRef.current.currentY) * lerpFactor;
+
+        // Expose le pan en CSS var — consommé par ::after (l'horizon parallaxé)
+        const root = containerRef.current?.parentElement;
+        if (root) {
+          root.style.setProperty("--space-pan-x", `${(panRef.current.current * -0.25).toFixed(1)}px`);
+          root.style.setProperty("--space-pan-y", `${(panRef.current.currentY * -0.25).toFixed(1)}px`);
+        }
       }
 
-      // Other : pré-calcul stillness + item le plus proche
+      // Other : intimité + pré-calcul stillness + item le plus proche
       let otherNearestIdx = -1, otherNearestDist = Infinity;
       if (isOtherMode && !thresholdRef.current) {
         mouseSpeedRef.current *= OTHER_SPEED_DECAY;
         const speed   = mouseSpeedRef.current;
         const isStill = speed < OTHER_SPEED_THRESHOLD &&
                         (performance.now() - lastMoveTimeRef.current) > OTHER_STILL_MS;
+
+        // Accumulation d'intimité — la chambre apprend le visiteur
+        if (isStill) {
+          stillCumMsRef.current = Math.min(stillCumMsRef.current + 16, INTIMACY_FULL_MS);
+        } else {
+          stillCumMsRef.current = Math.max(stillCumMsRef.current - 8, 0);
+        }
+        intimacyRef.current = stillCumMsRef.current / INTIMACY_FULL_MS;
+        const rootEl = containerRef.current?.parentElement;
+        if (rootEl) rootEl.style.setProperty("--intimacy", intimacyRef.current.toFixed(4));
+
         if (isStill) {
           const mx = mousePosRef.current.x;
           const my = mousePosRef.current.y;
@@ -513,9 +581,11 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
             const ddx  = item.cx - mx;
             const ddy  = item.cy - my;
             const dist = Math.sqrt(ddx * ddx + ddy * ddy) || 1;
-            const infl = Math.max(0, 1 - dist / OTHER_INFLUENCE_RADIUS);
+            const adjustedRadius = OTHER_INFLUENCE_RADIUS * (1 - intimacyRef.current * 0.5);
+            const adjustedForce  = OTHER_RETREAT_FORCE    * (1 - intimacyRef.current * 0.6);
+            const infl = Math.max(0, 1 - dist / adjustedRadius);
             if (infl > 0) {
-              const force = (speed - OTHER_SPEED_THRESHOLD) * OTHER_RETREAT_FORCE * infl;
+              const force = (speed - OTHER_SPEED_THRESHOLD) * adjustedForce * infl;
               item.retreatTargetX += (ddx / dist) * force;
               item.retreatTargetY += (ddy / dist) * force;
             }
@@ -552,6 +622,12 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
             item.annotOpacity += (item.annotTarget - item.annotOpacity) * OTHER_ANNOT_LERP;
             item.annotEl.style.opacity = item.annotOpacity.toFixed(4);
           }
+          // Gazed — marque la réponse de présence
+          if (isNearest) {
+            item.el.classList.add("fp-item--gazed");
+          } else {
+            item.el.classList.remove("fp-item--gazed");
+          }
           return;
         }
 
@@ -575,8 +651,8 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         //    Le visiteur écrit le texte avec son pan.
         //    En mode seuil de sortie, la fraîcheur est gelée : la disposition demeure.
         if (isSpaceMode && !thresholdRef.current) {
-          const distX  = newLeft - window.innerWidth  / 2;
-          const distY  = newTop  - window.innerHeight / 2;
+          const distX  = (item.cx + panX) - window.innerWidth  / 2;
+          const distY  = (item.cy + panY) - window.innerHeight / 2;
           const dist   = Math.hypot(distX, distY);
           const target = Math.max(0, Math.min(1, 1 - dist / SPACE_FRESH_RADIUS));
           item.freshness += (target - item.freshness) * SPACE_FRESH_LERP;
@@ -596,6 +672,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
             // Perte — transition normale (0.9s)
             item.lostState = true;
             item.el.classList.add("fp-item--decayed");
+            item.el.classList.add("fp-item--ever-decayed"); // sticky — trace iserienne permanente
             item.el.classList.remove("fp-item--remembering");
             if (item.rememberTimer) {
               clearTimeout(item.rememberTimer);
@@ -679,14 +756,13 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
     };
   }, [chamber.id]);
 
-  // ── Time — voix centrale, cycle toutes les 7.6s
+  // ── Time + Space + Other — voix centrale
   useEffect(() => {
-    if (chamber.id !== "time") return;
+    if (!["time", "space", "other"].includes(chamber.id)) return;
+    const voice  = chamber.id === "time" ? TIME_VOICE : chamber.id === "space" ? SPACE_VOICE : OTHER_VOICE;
+    const period = chamber.id === "time" ? 7600 : chamber.id === "space" ? 8400 : 9000;
     setVoiceIdx(0);
-    const itv = setInterval(
-      () => setVoiceIdx((i) => (i + 1) % TIME_VOICE.length),
-      7600
-    );
+    const itv = setInterval(() => setVoiceIdx((i) => (i + 1) % voice.length), period);
     return () => clearInterval(itv);
   }, [chamber.id]);
 
@@ -707,9 +783,9 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
     <div className={`floating-passages floating-passages--${chamber.id}${enterDir ? ` floating-passages--from-${enterDir}` : ""}${thresholdActive ? " floating-passages--threshold" : ""}`}>
       <div className="fp-center" aria-hidden="true">
         <span className="fp-center__label">{chamber.label}</span>
-        {chamber.id === "time" ? (
-          <span key={voiceIdx} className="fp-center__voice">
-            {TIME_VOICE[voiceIdx]}
+        {["time", "space", "other"].includes(chamber.id) ? (
+          <span key={`${chamber.id}-${voiceIdx}`} className="fp-center__voice">
+            {(chamber.id === "time" ? TIME_VOICE : chamber.id === "space" ? SPACE_VOICE : OTHER_VOICE)[voiceIdx]}
           </span>
         ) : (
           <>

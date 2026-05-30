@@ -102,11 +102,12 @@ export default function About({ about, site, onClose }) {
                 its twelve stories.
               </p>
               <p>
-                Engineering sharpened the same instinct in a different register.
-                A worker who must read a screen in three seconds, an interface where
-                ambiguity has a cost — these are the threshold question, posed in the
-                field. That work was not a detour. It was apprenticeship in the stakes
-                of the seam.
+                Engineering gave me the stakes. Designing a tablet interface for elderly
+                users cut off from digital life, I learned that the threshold between
+                what a system lets through and what it blocks is never a technical
+                problem — it is always a human one. A worker who must read a screen in
+                three seconds, a patient who must understand a notice: these are the
+                threshold question at real scale.
               </p>
             </div>
           </section>
@@ -122,13 +123,26 @@ export default function About({ about, site, onClose }) {
                 It is its formalisation.
               </p>
               <p>
-                I have always worked at the boundary between system and meaning. A
-                programme where technical rigour and artistic practice are not competing
-                disciplines but complementary methods is the context in which this
-                inquiry can go further.
+                For six years, I have built interfaces where clarity has stakes. At SNCF,
+                ambiguity costs a missed train. At Sanofi — in a GxP-regulated environment
+                where product information reaches patients via digital interfaces — a
+                misread notice has consequences that belong to a different order entirely.
+                The threshold question I bring to <em>Thresholds</em> was already present
+                in that work. I did not discover it through photography or fiction.
+                I recognised it there.
+              </p>
+              <p>
+                KMD is not the place where I become an artist. It is the place where the
+                question — how does a system let something through, and at what cost when
+                it doesn't — can be pursued at the scale and with the rigour it requires.
+                A programme where technical discipline and artistic practice are treated
+                as complementary methods of inquiry, not competing identities, is the
+                only context in which this work can go further.
               </p>
               <blockquote className="about__pull-quote">
-                The question I am bringing is not new. The tools to ask it properly are.
+                What I am bringing is not a completed project.
+                It is a question that <em>Thresholds</em> made precise
+                but could not resolve alone.
               </blockquote>
             </div>
           </section>
@@ -143,7 +157,7 @@ export default function About({ about, site, onClose }) {
               {/* Thresholds */}
               <div className="about__work">
                 <span className="about__work-title">Thresholds</span>
-                <span className="about__work-meta">Photography · Writing · Code &thinsp;—&thinsp; 2025</span>
+                <span className="about__work-meta">Photography · Writing · Code &thinsp;—&thinsp; 2026</span>
                 <p>
                   A photography and fiction portfolio built as a single interactive
                   experience. Three chambers — <em>Space</em>, <em>Time</em>,{" "}
@@ -206,18 +220,37 @@ export default function About({ about, site, onClose }) {
             </div>
             <div className="about__content-col">
               <p>
-                A critical notebook written alongside this work — thesis,
-                passage curation, the 18 image–text pairings, photographic method.
+                Three critical notebooks written alongside this work — on the thesis,
+                on passage curation, on the 18 image–text pairings.
+                Each chamber is in conversation with one of these analyses.
               </p>
               <div className="about__links">
                 <a
-                  href="/process/Process_Notes_-_Thresholds.html"
+                  href="/process/Cahier Critique - Thresholds.html"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="about__link about__link--dim"
                   data-cursor-large
                 >
-                  Process Notes →
+                  I — Thresholds →
+                </a>
+                <a
+                  href="/process/Cahier Critique II - Passages.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="about__link about__link--dim"
+                  data-cursor-large
+                >
+                  II — Passages →
+                </a>
+                <a
+                  href="/process/Cahier Critique III - Appariement.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="about__link about__link--dim"
+                  data-cursor-large
+                >
+                  III — Pairings →
                 </a>
               </div>
             </div>

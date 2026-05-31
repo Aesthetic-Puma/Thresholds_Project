@@ -351,8 +351,8 @@ function SharedUI({
 
       <p className="shared-label" aria-hidden="true">
         {chambers[chamberIdx].label}
-        <span className="shared-label__fr">
-          {chambers[chamberIdx].labelFr}
+        <span className="shared-label__jp">
+          {chambers[chamberIdx].labelJp}
         </span>
       </p>
 

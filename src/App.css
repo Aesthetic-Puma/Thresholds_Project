@@ -181,11 +181,11 @@
      gap: 0.8em;
    }
 
-   .shared-label__fr {
-     font-family: var(--font-serif);
-     font-style: italic;
-     font-size: 16px;                 /* was 0.68rem (~10.9px) */
-     letter-spacing: 0.06em;
+   .shared-label__jp {
+     font-family: "Hiragino Mincho ProN", "Yu Mincho", "Songti SC", var(--font-serif);
+     font-style: normal;
+     font-size: 16px;
+     letter-spacing: 0.18em;
      text-transform: none;
      color: var(--cream-10);
    }
@@ -285,7 +285,7 @@
      .shared-back--photo { left: auto; right: 1.4rem; }
 
      .shared-label    { font-size: 9px; letter-spacing: 0.35em; gap: 0.5em; }
-     .shared-label__fr { font-size: 13px; }
+     .shared-label__jp { font-size: 13px; }
 
      .about-trigger { font-size: 11px; bottom: 1.4rem; right: 1.4rem; }
      .shared-progress { right: 1rem; font-size: 9px; }

@@ -16,7 +16,7 @@ export const chambers = [
   {
     id:        "space",
     label:     "Space",
-    labelFr:   "L'Espace",
+    labelJp:   "空間",
     navWord:   "Space",
     videoSrcs: [
       "/videos/space-london.mov",
@@ -147,7 +147,7 @@ export const chambers = [
   {
     id:        "time",
     label:     "Time",
-    labelFr:   "Le Temps",
+    labelJp:   "時間",
     navWord:   "Time",
     videoSrcs: [
       "/videos/time-bridge.mp4",
@@ -248,7 +248,7 @@ export const chambers = [
   {
     id:        "other",
     label:     "The Other",
-    labelFr:   "L'Autre",
+    labelJp:   "他者",
     navWord:   "The Other",
     videoSrcs: [
       "/videos/other-palace.mp4",

@@ -37,7 +37,7 @@ export default function About({ about, site, onClose }) {
         className={`about__nav-label${progress > 0.04 ? " about__nav-label--dim" : ""}`}
         aria-hidden="true"
       >
-        About <span className="about__nav-label-fr">{site.titleFr}</span>
+        About <span className="about__nav-label-jp">{site.titleJp}</span>
       </p>
 
       {/* ── Scroll body ── */}
@@ -197,6 +197,20 @@ export default function About({ about, site, onClose }) {
               {/* Engineering */}
               <div className="about__timeline">
                 <div className="about__tl-entry">
+                  <span className="about__tl-year">Sanofi</span>
+                  <div>
+                    <span className="about__tl-role">Electronic Product Information · GxP-regulated</span>
+                    <p className="about__tl-note">
+                      Making the patient leaflet legible through a QR code, inside an
+                      environment where quality, traceability and compliance are not
+                      features but obligations. The threshold here is the one in this
+                      whole project, at its most literal: what a person is able to
+                      understand, and what happens when they cannot.
+                    </p>
+                    <span className="about__tl-stack">React · Node.js · AWS · OpenShift · Terraform</span>
+                  </div>
+                </div>
+                <div className="about__tl-entry">
                   <span className="about__tl-year">SNCF</span>
                   <div>
                     <span className="about__tl-role">Transport systems · millions of daily users</span>
@@ -220,37 +234,19 @@ export default function About({ about, site, onClose }) {
             </div>
             <div className="about__content-col">
               <p>
-                Three critical notebooks written alongside this work — on the thesis,
-                on passage curation, on the 18 image–text pairings.
-                Each chamber is in conversation with one of these analyses.
+                A single process document written alongside the work — tracing the
+                thesis, the curation of passages, and the 18 image–text pairings.
+                It is meant to be read alongside the portfolio.
               </p>
               <div className="about__links">
                 <a
-                  href="/process/Cahier Critique - Thresholds.html"
+                  href="/process/Process_Notes_-_Thresholds.html"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="about__link about__link--dim"
+                  className="about__link"
                   data-cursor-large
                 >
-                  I — Thresholds →
-                </a>
-                <a
-                  href="/process/Cahier Critique II - Passages.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="about__link about__link--dim"
-                  data-cursor-large
-                >
-                  II — Passages →
-                </a>
-                <a
-                  href="/process/Cahier Critique III - Appariement.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="about__link about__link--dim"
-                  data-cursor-large
-                >
-                  III — Pairings →
+                  Process Notes →
                 </a>
               </div>
             </div>
@@ -289,7 +285,7 @@ export default function About({ about, site, onClose }) {
           </section>
 
           <footer className="about__footer">
-            <span>{site.title} · {site.titleFr} · {new Date().getFullYear()}</span>
+            <span>{site.title} · {site.titleJp} · {new Date().getFullYear()}</span>
           </footer>
 
         </div>

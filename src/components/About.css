@@ -93,11 +93,11 @@
   transition: opacity 0.4s ease;
 }
 .about__nav-label--dim { opacity: 0.35; }
-.about__nav-label-fr {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 16px;                  /* was 0.68rem (~10.9px) */
-  letter-spacing: 0.06em;
+.about__nav-label-jp {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", "Songti SC", var(--font-serif);
+  font-style: normal;
+  font-size: 16px;
+  letter-spacing: 0.14em;
   text-transform: none;
   color: var(--cream-10);
 }
@@ -549,6 +549,6 @@
   .about__link        { font-size: 17px; }
   .about__close       { font-size: 0.9rem; top: 1.4rem; left: 1.4rem; }
   .about__nav-label   { font-size: 9px; letter-spacing: 0.35em; }
-  .about__nav-label-fr { font-size: 13px; }
+  .about__nav-label-jp { font-size: 13px; }
   .about__scroll-hint { bottom: 1.2rem; right: 1.2rem; font-size: 9px; }
 }

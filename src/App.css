@@ -123,8 +123,8 @@
    .shared-back,
    .shared-home-link {
      position: fixed;
-     top: 1.9rem;
-     left: 2rem;
+     top: 0.9rem;
+     left: 0.9rem;
      z-index: 600;
      background: none;
      border: none;
@@ -133,21 +133,23 @@
      font-weight: 400;
      letter-spacing: 0.38em;
      text-transform: uppercase;
-     color: var(--cream-22);
+     color: var(--cream);
+     opacity: 0;                      /* révélé par useProximityReveal (JS) */
      transition: color 0.45s ease, letter-spacing 0.45s ease;
      cursor: none;
      display: block;
+     padding: 1rem 1.1rem;
    }
    .shared-back:hover,
    .shared-home-link:hover {
-     color: var(--cream-60);
+     color: var(--cream);
      letter-spacing: 0.48em;
    }
 
    .shared-back--photo {
      position: fixed;
-     top: 1.9rem;
-     right: 2rem;
+     top: 0.9rem;
+     right: 0.9rem;
      left: auto;
      z-index: 600;
      background: none;
@@ -157,11 +159,13 @@
      font-weight: 400;
      letter-spacing: 0.38em;
      text-transform: uppercase;
-     color: var(--cream-40);
-     transition: color 0.45s ease, letter-spacing 0.45s ease, opacity 0.45s ease;
+     color: var(--cream);
+     opacity: 0;                      /* révélé par useProximityReveal (JS) */
+     transition: color 0.45s ease, letter-spacing 0.45s ease;
      cursor: none;
+     padding: 1rem 1.1rem;
    }
-   .shared-back--photo:hover { color: var(--cream-72); letter-spacing: 0.48em; }
+   .shared-back--photo:hover { color: var(--cream); letter-spacing: 0.48em; }
 
    .shared-label {
      position: fixed;
@@ -192,45 +196,66 @@
 
    .shared-dots {
      position: fixed;
-     bottom: 1.8rem;
+     bottom: 1.6rem;
      left: 50%;
      transform: translateX(-50%);
      z-index: 600;
      display: flex;
-     gap: 12px;                       /* was 10 */
+     gap: 6px;
      align-items: center;
+     opacity: 0;                      /* révélé par useProximityReveal (JS) */
    }
 
+   /* Dots → glyphes CJK courts (空 · 時 · 他) : un glyphe s'auto-explique,
+      un point reste muet. Hit area ~44px via le padding. */
    .shared-dot {
-     width: 5px;                      /* was 4 */
-     height: 5px;
-     border-radius: 50%;
+     position: relative;
+     background: none;
      border: none;
-     background: rgba(240, 235, 224, 0.14);
-     padding: 0;
-     transition: background 0.4s, transform 0.4s;
+     padding: 0.9rem 0.85rem;
      cursor: none;
+     display: flex;
+     align-items: center;
+     justify-content: center;
    }
-   .shared-dot:hover { background: rgba(240, 235, 224, 0.32); }
-
-   .shared-dot--active {
-     background: rgba(240, 235, 224, 0.65);
-     transform: scale(1.5);
+   .shared-dot__glyph {
+     font-family: "Hiragino Mincho ProN", "Yu Mincho", "Songti SC", var(--font-serif);
+     font-size: 15px;
+     line-height: 1;
+     color: var(--cream-72);
+     transition: color 0.4s ease, transform 0.4s ease;
+   }
+   .shared-dot:hover .shared-dot__glyph { color: var(--cream); transform: translateY(-2px); }
+   .shared-dot--active .shared-dot__glyph { color: var(--cream); }
+   .shared-dot--active::after {
+     content: "";
+     position: absolute;
+     bottom: 0.5rem;
+     left: 50%;
+     width: 4px;
+     height: 1px;
+     background: var(--cream-40);
+     transform: translateX(-50%);
    }
 
-   /* ── Passage progress — iii / vi — photo view only ── */
-   .shared-progress {
-     position: fixed;
-     right: 2rem;
-     top: 50%;
-     transform: translateY(-50%);
-     z-index: 600;
+   .shared-dot__label {
+     position: absolute;
+     bottom: calc(100% - 0.15rem);
+     left: 50%;
+     transform: translateX(-50%) translateY(4px);
      font-family: var(--font-mono);
-     font-size: 10px;                 /* was 9 */
+     font-size: 9px;
      letter-spacing: 0.3em;
-     color: var(--cream-22);
+     text-transform: uppercase;
+     white-space: nowrap;
+     color: var(--cream-40);
+     opacity: 0;
      pointer-events: none;
-     writing-mode: vertical-rl;
+     transition: opacity 0.4s ease, transform 0.4s ease;
+   }
+   .shared-dot:hover .shared-dot__label {
+     opacity: 1;
+     transform: translateX(-50%) translateY(0);
    }
 
    /* ── Return indicator — brief memory signal on passages re-entry ── */
@@ -261,7 +286,7 @@
      font-size: 13px;                 /* was 11 */
      letter-spacing: 0.4em;
      text-transform: uppercase;
-     color: var(--cream-22);
+     color: var(--cream-30);
      transition: color 0.45s ease, letter-spacing 0.45s ease;
      cursor: none;
      padding: 0.6rem 0.8rem;
@@ -279,16 +304,15 @@
      .shared-home-link,
      .shared-back--photo {
        font-size: 0.95rem;
-       top: 1.4rem;
-       left: 1.4rem;
+       top: 0.4rem;
+       left: 0.3rem;
      }
-     .shared-back--photo { left: auto; right: 1.4rem; }
+     .shared-back--photo { left: auto; right: 0.3rem; }
 
      .shared-label    { font-size: 9px; letter-spacing: 0.35em; gap: 0.5em; }
      .shared-label__jp { font-size: 13px; }
 
      .about-trigger { font-size: 11px; bottom: 1.4rem; right: 1.4rem; }
-     .shared-progress { right: 1rem; font-size: 9px; }
    }
 
 
@@ -303,16 +327,4 @@
      opacity: 1;
      transition: opacity 0.7s ease;
      pointer-events: all;
-   }
-
-   .shared-ui--photo-visible .shared-back--photo {
-     color: var(--cream-40);
-   }
-   .shared-ui--photo-visible .shared-back--photo:hover {
-     color: var(--cream-72);
-     letter-spacing: 0.48em;
-   }
-
-   .shared-ui--photo-visible .shared-home-link {
-     color: var(--cream-22);
    }

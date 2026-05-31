@@ -6,6 +6,7 @@ import FloatingPassages  from "./components/FloatingPassages";
 import PhotoStage        from "./components/Photostage";
 import About             from "./components/About";
 import Dissolve          from "./components/Dissolve";
+import { useProximityReveal } from "./hooks/useProximityReveal";
 import "./App.css";
 
 // ─────────────────────────────────────────────
@@ -268,10 +269,6 @@ export default function App() {
             onBack={handleBackToList}
             site={SITE}
             passageIdx={passageIdx}
-            passageProgress={{
-              current: passageIdx + 1,
-              total: chamber.passages.length,
-            }}
           />
         </>
       )}
@@ -311,17 +308,26 @@ function SharedUI({
   onBack,
   site,
   passageIdx,
-  passageProgress,
 }) {
   const isPhoto = view === "photo";
-  const [navVisible, setNavVisible] = useState(false);
 
+  // En vue photo, la nav reste supprimée pendant la révélation de la photo
+  // (~2.2s), puis s'active. En vue passages, elle est active d'emblée.
+  const [navVisible, setNavVisible] = useState(false);
   useEffect(() => {
     if (!isPhoto) { setNavVisible(false); return; }
     setNavVisible(false);
     const t = setTimeout(() => setNavVisible(true), 2200);
     return () => clearTimeout(t);
   }, [isPhoto, passageIdx]);
+
+  const navActive = isPhoto ? navVisible : true;
+
+  // Révélation par proximité — chaque contrôle émerge à l'approche du curseur,
+  // avec une amorce (révélation initiale) quand la nav devient active.
+  const homeRef     = useProximityReveal({ active: navActive });
+  const passagesRef = useProximityReveal({ active: navActive });
+  const dotsRef     = useProximityReveal({ active: navActive, radius: 300 });
 
   const photoClass = isPhoto
     ? (navVisible ? "shared-ui--photo-visible" : "shared-ui--photo-hidden")
@@ -330,6 +336,7 @@ function SharedUI({
   return (
     <div className={`shared-ui ${photoClass}`}>
       <button
+        ref={homeRef}
         className={isPhoto ? "shared-home-link" : "shared-back"}
         onClick={isPhoto ? onGoHome : onBack}
         aria-label="Return to home"
@@ -340,6 +347,7 @@ function SharedUI({
 
       {isPhoto && (
         <button
+          ref={passagesRef}
           className="shared-back shared-back--photo"
           onClick={onBack}
           aria-label="Return to passages"
@@ -356,27 +364,22 @@ function SharedUI({
         </span>
       </p>
 
-      <nav className="shared-dots" aria-label="Chamber navigation">
+      <nav ref={dotsRef} className="shared-dots" aria-label="Chamber navigation">
         {chambers.map((ch, i) => (
           <button
             key={i}
-            className={`dot shared-dot ${i === chamberIdx ? "shared-dot--active" : ""}`}
+            className={`shared-dot ${i === chamberIdx ? "shared-dot--active" : ""}`}
             onClick={() => onSwitchChamber(i)}
             aria-label={`Go to ${ch.label}`}
             aria-current={i === chamberIdx}
             data-cursor-large
-          />
+          >
+            <span className="shared-dot__glyph">{ch.labelJp?.[0] ?? ch.label[0]}</span>
+            <span className="shared-dot__label">{ch.label}</span>
+          </button>
         ))}
       </nav>
 
-      {isPhoto && passageProgress && (
-        <p
-          className="shared-progress"
-          aria-label={`Passage ${passageProgress.current} of ${passageProgress.total}`}
-        >
-          {toRoman(passageProgress.current)}&thinsp;/&thinsp;{toRoman(passageProgress.total)}
-        </p>
-      )}
     </div>
   );
 }

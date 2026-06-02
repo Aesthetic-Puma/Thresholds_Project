@@ -3,7 +3,8 @@
     "allow": [
       "PowerShell(cd \"C:\\\\Users\\\\jvira\\\\OneDrive\\\\Documents\\\\Thresholds_Project\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev\" -WindowStyle Normal)",
       "Bash(npm run *)",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "Bash(Select-Object FullName)"
     ]
   }
 }

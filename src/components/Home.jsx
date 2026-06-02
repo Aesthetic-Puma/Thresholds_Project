@@ -76,8 +76,11 @@ export default function Home({
     const video = videoRefs.current[ch.id];
     if (!video) return;
     const prev = currentVidIdx.current[ch.id] ?? -1;
-    let next = prev;
-    if (srcs.length > 1) {
+    let next;
+    if (prev === -1) {
+      next = 0; // première impression : toujours l'index 0
+    } else if (srcs.length > 1) {
+      next = prev;
       while (next === prev) next = Math.floor(Math.random() * srcs.length);
     } else {
       next = 0;

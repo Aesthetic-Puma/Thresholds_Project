@@ -19,10 +19,10 @@ export const chambers = [
     labelJp:   "空間",
     navWord:   "Space",
     videoSrcs: [
+      "/videos/space-buildings.mov",
       "/videos/space-london.mov",
-      "/videos/space-korean-street.mp4",
+      "/videos/space-korean-street.mov",
       "/videos/space-street-piano.mp4",
-      "/videos/space-buildings.mp4",
     ],
 
     passages: [
@@ -150,10 +150,10 @@ export const chambers = [
     labelJp:   "時間",
     navWord:   "Time",
     videoSrcs: [
-      "/videos/time-bridge.mp4",
-      "/videos/time-monk.mp4",
-      "/videos/time-peacock.mp4",
-      "/videos/time-pagoda.mp4",
+      "/videos/time-monk.mov",
+      "/videos/time-bridge.mov",
+      "/videos/time-peacock.mov",
+      "/videos/time-pagoda.mov",
     ],
 
     passages: [
@@ -251,9 +251,9 @@ export const chambers = [
     labelJp:   "他者",
     navWord:   "The Other",
     videoSrcs: [
-      "/videos/other-palace.mp4",
+      "/videos/other-palace.mov",
       "/videos/other-guards.mov",
-      "/videos/other-protest.mp4",
+      "/videos/other-protest.mov",
       "/videos/other-police.mp4",
     ],
 

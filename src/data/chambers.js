@@ -4,6 +4,7 @@ export const SITE = {
   titleJp:    "敷居",
   subtitle:   "Photography · Writing · Code",
   author:     "Jean Viratel",
+  year:       "2026",
   tagline:    "Every image is a door left ajar.",
   enterLabel: "enter",
   bookTitle:  "Élégies Oubliées",

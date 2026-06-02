@@ -4,7 +4,9 @@
       "PowerShell(cd \"C:\\\\Users\\\\jvira\\\\OneDrive\\\\Documents\\\\Thresholds_Project\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev\" -WindowStyle Normal)",
       "Bash(npm run *)",
       "Bash(npx vite *)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Recurse \"c:\\\\Users\\\\jvira\\\\OneDrive\\\\Documents\\\\Thresholds_Project\\\\public\\\\photos\" | Where-Object { -not $_.PSIsContainer } | Select-Object -ExpandProperty FullName | Sort-Object)",
+      "PowerShell(Get-ChildItem -Recurse \"c:\\\\Users\\\\jvira\\\\OneDrive\\\\Documents\\\\Thresholds_Project\\\\public\\\\videos\" | Where-Object { -not $_.PSIsContainer } | Select-Object -ExpandProperty FullName | Sort-Object)"
     ]
   }
 }

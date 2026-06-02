@@ -196,9 +196,12 @@ export default function Home({
           ))}
         </p>
         <p className="home__context" aria-hidden="true">
-          three chambers in conversation with{" "}
-          <em>Élégies Oubliées</em>
-          {" · "}portfolio for a research master in creative technology{" · "}2026
+          <span className="home__context-lead">
+            three chambers in conversation with <em>Élégies Oubliées</em>
+          </span>
+          <span className="home__context-meta">
+            Portfolio · Research Master in Creative Technology · 2026
+          </span>
         </p>
       </div>
 
@@ -233,18 +236,6 @@ export default function Home({
           );
         })}
       </nav>
-
-      {/* ── Hint bas ── */}
-      <p
-        className={[
-          "home__enter",
-          isExpanding ? "home__enter--exit" : "",
-        ].join(" ")}
-        aria-hidden="true"
-      >
-        {site.enterLabel}
-        <span className="home__enter-line" />
-      </p>
 
     </div>
   );

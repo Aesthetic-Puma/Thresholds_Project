@@ -4,7 +4,7 @@ export const SITE = {
   titleJp:    "敷居",
   subtitle:   "Photography · Writing · Code",
   author:     "Jean Viratel",
-  tagline:    "Here, nothing stands quite straight.\nEvery image is a door left ajar.",
+  tagline:    "Every image is a door left ajar.",
   enterLabel: "enter",
   bookTitle:  "Élégies Oubliées",
   bookLink:   "https://www.babelio.com/livres/Viratel-legies-oubliees/1893561",

@@ -213,6 +213,25 @@
     will-change: transform;
   }
 
+  /* Scrim radial — garantit la lisibilité du texte quelle que soit l'image/vidéo derrière */
+  .home__center::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 150%;
+    height: 210%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+      ellipse at center,
+      rgba(10, 9, 6, 0.72) 0%,
+      rgba(10, 9, 6, 0.50) 38%,
+      transparent 72%
+    );
+    z-index: -1;
+    pointer-events: none;
+  }
+
   /* Sortie vers chambre */
   .home__center--exit {
     opacity: 0;
@@ -266,7 +285,7 @@
     font-size: clamp(0.95rem, 1.35vw, 1.1rem);   /* was 0.82–1rem */
     font-weight: 300;
     font-style: italic;
-    color: var(--cream-40);
+    color: rgba(240, 235, 224, 0.58);
     letter-spacing: 0.05em;
     line-height: 1.85;
     max-width: 380px;
@@ -276,30 +295,54 @@
   }
 
   .home__context {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--cream-10);
-    line-height: 1.7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
     max-width: 420px;
     margin: 1.4rem auto 0;
     text-align: center;
     opacity: 0;
     animation: fade-up 2s ease 2.6s forwards;
   }
-  .home__context em {
+
+  /* Registre 1 — la phrase conceptuelle, légèrement présente */
+  .home__context-lead {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--cream-30);
+    line-height: 1.7;
+  }
+  .home__context-lead em {
     font-style: italic;
     font-family: var(--font-serif);
     font-size: 12px;
     text-transform: none;
     letter-spacing: 0.04em;
-    color: var(--cream-15);
+    color: var(--cream-40);
+  }
+
+  /* Registre 2 — la mention administrative, plus discrète */
+  .home__context-meta {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--cream-25);
+    line-height: 1.6;
   }
 
   /* ─────────────────────────────────────────────
      MOTS DE NAVIGATION
      ───────────────────────────────────────────── */
+  /* fade-up variant pour le mot centré — préserve translateX(-50%) pendant et après l'animation */
+  @keyframes fade-up-center {
+    from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
   .home__words {
     position: absolute;
     inset: 0;
@@ -327,7 +370,7 @@
   }
 
   .home__word:nth-child(1) { left: 7%;  top: 50%; transform: translateY(-50%); }
-  .home__word:nth-child(2) { left: 50%; top: 74%; transform: translateX(-50%); }
+  .home__word:nth-child(2) { left: 50%; top: 74%; transform: translateX(-50%); animation-name: fade-up-center; }
   .home__word:nth-child(3) { right: 7%; top: 50%; transform: translateY(-50%); }
 
   .home__word--ready   { color: var(--cream-30); }
@@ -391,41 +434,6 @@
     pointer-events: none;
   }
 
-  /* ─────────────────────────────────────────────
-     HINT BAS DE PAGE
-     ───────────────────────────────────────────── */
-  .home__enter {
-    position: absolute;
-    bottom: 2.4rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 20;
-    font-family: var(--font-mono);
-    font-size: 11px;                   /* was 0.55rem (~8.8px) */
-    letter-spacing: 0.42em;
-    text-transform: uppercase;
-    color: var(--cream-30);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    opacity: 0;
-    animation: fade-up 2s ease 3s forwards;
-    pointer-events: none;
-  }
-
-  .home__enter--exit {
-    opacity: 0;
-    transition: opacity 0.32s ease;
-  }
-
-  .home__enter-line {
-    display: block;
-    width: 1px;
-    height: 22px;
-    background: var(--cream-15);
-    animation: grow-line 1s ease 3.4s both;
-  }
 
   /* ─────────────────────────────────────────────
      RESPONSIVE
@@ -438,7 +446,6 @@
 
     .home__title { font-size: clamp(2.2rem, 11vw, 3.6rem); }
     .home__tagline { max-width: 280px; font-size: 0.95rem; }
-    .home__enter { bottom: 1.6rem; font-size: 10px; }
 
     /* Masquer les rectangles sur mobile — trop étroit */
     .home__vid-rect { display: none; }

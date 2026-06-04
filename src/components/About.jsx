@@ -271,15 +271,6 @@ export default function About({ about, site, onClose }) {
                 >
                   LinkedIn
                 </a>
-                <a
-                  href={about.cv}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="about__link about__link--dim"
-                  data-cursor-large
-                >
-                  Curriculum Vitæ ↓
-                </a>
               </div>
             </div>
           </section>

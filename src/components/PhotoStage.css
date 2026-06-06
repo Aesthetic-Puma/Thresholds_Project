@@ -69,7 +69,7 @@
     font-family: var(--font-serif);
     font-style: italic;
     font-weight: 400;
-    font-size: 17px;
+    font-size: 21px;
     color: rgba(240, 235, 224, 0.92);
     letter-spacing: 0.05em;
     line-height: 1.35;
@@ -95,9 +95,8 @@
   }
 
   .ps-anchor--drift .ps-anchor__word {
+    font-size: 20px;
     color: rgba(240, 235, 224, 0.86);
-    /* Pas de fond — c'est ce qui distingue Space :
-       le mot vit dans le noir, pas posé sur l'image. */
   }
 
 
@@ -111,48 +110,53 @@
 
   .ps-anchor--temporal {
     transition:
-      opacity 0.7s cubic-bezier(0.55, 0, 0.10, 1),
-      filter  0.7s cubic-bezier(0.55, 0, 0.10, 1);
+      opacity   0.7s cubic-bezier(0.55, 0, 0.10, 1),
+      filter    0.7s cubic-bezier(0.55, 0, 0.10, 1),
+      transform 0.9s cubic-bezier(0.55, 0, 0.10, 1);
     opacity: 0;
-    filter: blur(0);
+    filter: brightness(0.18) blur(8px) sepia(0.15) contrast(0.6);
   }
 
+  /* Pas de fond — bannir le tooltip d'UI. Ombre douce pour tenir sur photo claire. */
   .ps-anchor--temporal .ps-anchor__word {
-    font-size: 19px;
-    background: rgba(10, 9, 6, 0.55);
-    padding: 0.18rem 0.7rem;
-    border-radius: 1px;
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    font-size: 22px;
+    text-shadow:
+      0 1px 8px rgba(10, 9, 6, 0.88),
+      0 0 20px rgba(10, 9, 6, 0.55);
   }
 
   .ps-anchor--temporal-idle {
     opacity: 0;
-    filter: blur(6px);
+    filter: brightness(0.18) blur(8px) sepia(0.15) contrast(0.6);
+    transform: translate(-50%, -50%) translateY(-6px);
   }
 
+  /* Courbe chimique : le mot se développe depuis le noir vers la clarté,
+     et se pose (sédiment) depuis -6px vers 0. */
   .ps-anchor--temporal-in,
   .ps-anchor--temporal-hold {
     opacity: var(--hold-opacity, 0.95);
-    filter: blur(0);
-    transition-duration: 0.7s;
+    filter: brightness(1) blur(0) sepia(0) contrast(1);
+    transform: translate(-50%, -50%) translateY(0);
+    transition-duration: 0.9s;
   }
 
   .ps-anchor--temporal-out {
     opacity: 0;
-    filter: blur(8px);
+    filter: brightness(0.22) blur(7px) sepia(0.1) contrast(0.7);
+    transform: translate(-50%, -50%) translateY(4px);
     transition-duration: 1.2s;
   }
 
-  /* Trace — le mot a été montré ; opacité et flou pondérés par --trail-opacity / --trail-blur */
+  /* Trace sédiment — pondérée par --trail-opacity / --trail-blur */
   .ps-anchor--temporal-trail {
     opacity: var(--trail-opacity, 0.18);
     filter: blur(var(--trail-blur, 2px));
+    transform: translate(-50%, -50%) translateY(0);
     transition-duration: 2s;
   }
 
   .ps-anchor--temporal-trail .ps-anchor__word {
-    background: transparent;
     color: rgba(240, 235, 224, 0.5);
   }
 
@@ -169,16 +173,11 @@
     transition: none; /* JS pilote opacity et transform en RAF */
   }
 
+  /* Le mot repose dans le creux qu'il a creusé — pas d'ombre portée dure. */
   .ps-anchor--flee .ps-anchor__word {
-    font-size: 18px;
+    font-size: 21px;
     color: rgba(240, 235, 224, 0.96);
     letter-spacing: 0.08em;
-    /* Pas de fond — le mot émerge depuis le creux de la photo,
-       il n'est pas posé dessus. Texte ombré pour rester lisible
-       quand il sort de la zone sombre. */
-    text-shadow:
-      0 0 12px rgba(10, 9, 6, 0.95),
-      0 0 24px rgba(10, 9, 6, 0.7);
   }
 
 
@@ -308,8 +307,6 @@
 
   .ps-kw {
     color: rgba(240, 235, 224, 0.96);
-    border-bottom: 1px dotted rgba(240, 235, 224, 0.5);
-    padding-bottom: 1px;
   }
 
   .ps-fly {
@@ -410,9 +407,7 @@
     }
     .ps-anchor--temporal .ps-anchor__word {
       font-size: 17px;
-      background: rgba(10, 9, 6, 0.78);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
+      text-shadow: 0 1px 6px rgba(10, 9, 6, 0.9);
     }
     /* Sur mobile on ne montre que l'actif — trail/idle/out superposés seraient illisibles */
     .ps-anchor--temporal-idle,

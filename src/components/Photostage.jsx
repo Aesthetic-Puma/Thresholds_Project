@@ -34,8 +34,8 @@ const REVEAL = {
     anchorPadY:        90,
     anchorOpacityRest: 0.55,
     anchorOpacityHover:0.85,
-    anchorDriftAmp:    11,     // px d'amplitude de dérive
-    anchorDriftSpeed:  0.22,
+    anchorDriftAmp:    22,     // px d'amplitude latérale (enseigne vue d'un train)
+    anchorDriftSpeed:  0.08,   // lent — éloigné des orbites
     anchorParallax:    0.04,   // suit le pan, en sens inverse
   },
   time: {
@@ -76,8 +76,8 @@ const REVEAL = {
     // Anchor — flee (Other)
     anchorMode:         "flee",
     fleeRadius:         220,
-    fleeForce:          1.2,
-    fleeDecay:          0.88,
+    fleeForce:          0.72,  // moins de force — glisse grave, ne détale pas
+    fleeDecay:          0.80,  // plus de friction
     fleeSpring:         0.005,
     stillSpeedMax:      1.6,
     emergenceRadius:    500,   // < cette distance, le mot le plus proche peut émerger
@@ -173,10 +173,15 @@ function AnchorsDrift({ anchors, cfg }) {
       {anchors.map((a, i) => {
         const phase = i * 1.4;
         const t     = tick * cfg.anchorDriftSpeed;
-        const dx    = Math.cos(t + phase) * cfg.anchorDriftAmp
-                    - mouseRef.current.x * 18;
-        const dy    = Math.sin(t * 1.3 + phase) * (cfg.anchorDriftAmp * 0.75)
-                    - mouseRef.current.y * 14;
+        // Dérive latérale (majorité X) — enseigne vue d'un train qui passe
+        const dx    = Math.sin(t + phase) * cfg.anchorDriftAmp
+                    - mouseRef.current.x * 14;
+        const dy    = Math.sin(t * 0.28 + phase + 0.9) * (cfg.anchorDriftAmp * 0.18)
+                    - mouseRef.current.y * 8;
+        // Souffle de luminance — oscillation lente, intègre le mot à la clarté de la photo
+        const opBreath = cfg.anchorOpacityRest +
+          (Math.sin(tick * 0.2 + phase * 1.8) * 0.5 + 0.5) *
+          (cfg.anchorOpacityHover - cfg.anchorOpacityRest) * 0.5;
         return (
           <div
             key={i}
@@ -184,7 +189,7 @@ function AnchorsDrift({ anchors, cfg }) {
             style={{
               left:  a.wx + dx,
               top:   a.wy + dy,
-              opacity: cfg.anchorOpacityRest,
+              opacity: opBreath,
               animationDelay: `${i * 0.22}s`,
             }}
             aria-hidden="true"
@@ -363,7 +368,9 @@ function AnchorsFlee({ anchors, photoRef, cfg }) {
       hx: a.wx, hy: a.wy,
       x:  a.wx, y:  a.wy,
       vx: 0,    vy: 0,
-      opacity: 0,
+      opacity:     0,
+      hollowOp:    0,   // creux s'ouvre ~150ms avant le mot
+      delayFrames: 0,
     }));
     maskedImg.current = photoRef.current;
     setReady(true);
@@ -432,11 +439,20 @@ function AnchorsFlee({ anchors, photoRef, cfg }) {
         s.x  += s.vx;
         s.y  += s.vy;
 
-        // Opacité : émerge si (repos ET le plus proche ET dans le rayon d'émergence)
+        // Creux (hollow) : s'ouvre immédiatement quand curseur immobile + proche
         const isClosest    = i === closestIdx;
         const inRange      = closestD < cfg.emergenceRadius;
-        const targetOp     = (isStill && isClosest && inRange) ? 1 : 0.06;
-        s.opacity += (targetOp - s.opacity) * 0.05;
+        const hollowTarget = (isStill && isClosest && inRange) ? 1 : 0;
+        s.hollowOp += (hollowTarget - s.hollowOp) * 0.05;
+
+        // Mot : apparaît ~150ms (≈9 frames) après le creux
+        if (isStill && isClosest && inRange) {
+          s.delayFrames = (s.delayFrames || 0) + 1;
+        } else {
+          s.delayFrames = 0;
+        }
+        const wordTarget = (isStill && isClosest && inRange && s.delayFrames >= 9) ? 1 : 0.06;
+        s.opacity += (wordTarget - s.opacity) * 0.05;
 
         // Écriture DOM directe (perf)
         const node = nodesRef.current[i];
@@ -451,11 +467,11 @@ function AnchorsFlee({ anchors, photoRef, cfg }) {
       // Mask de la photo : creuse autour du mot émergent
       const img = maskedImg.current;
       const emerge = closestIdx >= 0 ? state[closestIdx] : null;
-      if (img && emerge && emerge.opacity > 0.25) {
+      if (img && emerge && emerge.hollowOp > 0.12) {
         const r  = img.getBoundingClientRect();
         const lx = ((emerge.x - r.left) / r.width)  * 100;
         const ly = ((emerge.y - r.top)  / r.height) * 100;
-        const dim = emerge.opacity * cfg.maskDimMax;
+        const dim = emerge.hollowOp * cfg.maskDimMax;
         const m  =
           `radial-gradient(${cfg.maskRadiusPx}px at ${lx}% ${ly}%, ` +
           `rgba(0,0,0,${(1 - dim).toFixed(3)}) 0%, ` +

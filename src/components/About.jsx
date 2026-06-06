@@ -89,25 +89,35 @@ export default function About({ about, site, onClose }) {
             </div>
             <div className="about__content-col">
               <p>
-                Photography taught me to wait. Every image in this work concerns a
-                threshold: a body becoming a silhouette, a doorway becoming a question.
-                I do not stage. I wait until the world admits something.
+                <em>Thresholds</em> began with a discomfort.
               </p>
               <p>
-                Fiction extends that attention into language. The stories in{" "}
-                <em>{about.book.title}</em> operate close to the photographs — same
-                vocabulary, different medium. The book is not beside this portfolio;
-                it is the material from which this portfolio is made. Every passage
-                a reader encounters in a chamber is in conversation with one of
-                its twelve stories.
+                While rereading <em>{about.book.title}</em> — a collection of seven
+                stories published in 2024 — I noticed how quickly a literary image
+                can become fixed once it receives a visual counterpart. A face
+                acquires a face. A place acquires a place. The indeterminate
+                becomes determined. Reading leaves room for uncertainty;
+                illustration often closes it.
               </p>
               <p>
-                Engineering gave me the stakes. Designing a tablet interface for elderly
-                users cut off from digital life, I learned that the threshold between
-                what a system lets through and what it blocks is never a technical
-                problem — it is always a human one. A worker who must read a screen in
-                three seconds, a patient who must understand a notice: these are the
-                threshold question at real scale.
+                Photography had already taught me something about that closure.
+                Every image in this work concerns a threshold: a body becoming a
+                silhouette, a doorway becoming a question. I do not stage.
+                I wait until the world admits something — and even then, I try
+                not to say too much. The photographs that work are the ones
+                that stop just before they explain.
+              </p>
+              <p>
+                Engineering sharpened the same instinct at a different scale.
+                Designing for elderly users cut off from digital life, then
+                building systems where a misread notice has medical consequences —
+                I learned that the threshold between what a system lets through
+                and what it blocks is never a technical problem. It is always
+                a human one.
+              </p>
+              <p>
+                The three disciplines are not parallel tracks. They are
+                the same question, asked with different materials.
               </p>
             </div>
           </section>
@@ -119,8 +129,8 @@ export default function About({ about, site, onClose }) {
             </div>
             <div className="about__content-col">
               <p>
-                A Master in Creative Technology is not a departure from engineering.
-                It is its formalisation.
+                Pursuing a Master in Creative Technology is not a rejection of engineering.
+                It is an attempt to understand questions that engineering alone cannot fully address.
               </p>
               <p>
                 For six years, I have built interfaces where clarity has stakes. At SNCF,

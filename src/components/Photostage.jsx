@@ -83,6 +83,8 @@ const REVEAL = {
     emergenceRadius:    500,   // < cette distance, le mot le plus proche peut émerger
     maskRadiusPx:       140,   // taille du "creux" dans la photo
     maskDimMax:         0.55,  // assombrissement max autour du mot
+    leanForce:          0.02,  // douceur du retournement vers le curseur
+    leanMax:            42,    // px — décalage max
   },
 };
 
@@ -132,7 +134,8 @@ function FlyingWord({ data, delay }) {
         transform: active
           ? `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(0.72)`
           : "translate(-50%, -50%)",
-        transitionDelay: `${delay}s`,
+        opacity: active ? 0 : 1,
+        transition: `transform 1.4s cubic-bezier(0.4, 0, 0.15, 1) ${delay}s, opacity 0.4s ease ${delay + 1.0}s`,
       }}
     >
       {data.word}
@@ -340,6 +343,8 @@ function AnchorsTemporal({ anchors, photoRef, cfg, onTranscendent }) {
               "--trail-opacity": (cfg.anchorTrailOpacity * w).toFixed(3),
               "--trail-blur":    `${(2 + (1 - w) * 2).toFixed(2)}px`,
               "--hold-opacity":  (0.95 - (1 - w) * 0.15).toFixed(3),
+              "--rest-blur":     `${((1 - w) * 2.6).toFixed(2)}px`,
+              "--settle":        `${(6 + (1 - w) * 10).toFixed(1)}px`,
             }}
             aria-hidden="true"
           >
@@ -365,8 +370,8 @@ function AnchorsFlee({ anchors, photoRef, cfg }) {
   useEffect(() => {
     if (!anchors.length) return;
     stateRef.current = anchors.map((a) => ({
-      hx: a.wx, hy: a.wy,
-      x:  a.wx, y:  a.wy,
+      hx: a.ax, hy: a.ay,
+      x:  a.ax, y:  a.ay,
       vx: 0,    vy: 0,
       opacity:     0,
       hollowOp:    0,   // creux s'ouvre ~150ms avant le mot
@@ -420,41 +425,41 @@ function AnchorsFlee({ anchors, photoRef, cfg }) {
 
       for (let i = 0; i < state.length; i++) {
         const s    = state[i];
-        const dx   = s.x - c.x;
-        const dy   = s.y - c.y;
+        const dx   = s.x - c.x, dy = s.y - c.y;
         const dist = Math.hypot(dx, dy);
 
-        // Force de fuite
-        if (dist < cfg.fleeRadius && dist > 0.01) {
+        const isClosest = i === closestIdx;
+        const inRange   = closestD < cfg.emergenceRadius;
+        if (isStill && isClosest && inRange) s.delayFrames = (s.delayFrames || 0) + 1;
+        else                                 s.delayFrames = 0;
+        const emerging  = isStill && isClosest && inRange && s.delayFrames >= 9;
+
+        // Fuite — SAUF le mot qui émerge : il ne fuit plus, il se retourne.
+        if (!emerging && dist < cfg.fleeRadius && dist > 0.01) {
           const strength = ((cfg.fleeRadius - dist) / cfg.fleeRadius) * cfg.fleeForce;
           s.vx += (dx / dist) * strength;
           s.vy += (dy / dist) * strength;
         }
-        // Rappel vers la maison
+        // Rappel maison
         s.vx += (s.hx - s.x) * cfg.fleeSpring;
         s.vy += (s.hy - s.y) * cfg.fleeSpring;
-        // Friction
-        s.vx *= cfg.fleeDecay;
-        s.vy *= cfg.fleeDecay;
-        s.x  += s.vx;
-        s.y  += s.vy;
-
-        // Creux (hollow) : s'ouvre immédiatement quand curseur immobile + proche
-        const isClosest    = i === closestIdx;
-        const inRange      = closestD < cfg.emergenceRadius;
-        const hollowTarget = (isStill && isClosest && inRange) ? 1 : 0;
-        s.hollowOp += (hollowTarget - s.hollowOp) * 0.05;
-
-        // Mot : apparaît ~150ms (≈9 frames) après le creux
-        if (isStill && isClosest && inRange) {
-          s.delayFrames = (s.delayFrames || 0) + 1;
-        } else {
-          s.delayFrames = 0;
+        // Le regard penche vers le curseur
+        if (emerging) {
+          s.vx += (c.x - s.x) * cfg.leanForce;
+          s.vy += (c.y - s.y) * cfg.leanForce;
         }
-        const wordTarget = (isStill && isClosest && inRange && s.delayFrames >= 9) ? 1 : 0.06;
+        s.vx *= cfg.fleeDecay; s.vy *= cfg.fleeDecay;
+        s.x += s.vx; s.y += s.vy;
+        // Plafonner le lean : décalage max depuis la maison
+        const ox = s.x - s.hx, oy = s.y - s.hy, om = Math.hypot(ox, oy);
+        if (om > cfg.leanMax) { s.x = s.hx + ox / om * cfg.leanMax; s.y = s.hy + oy / om * cfg.leanMax; }
+
+        // Creux + opacité
+        const hollowTarget = emerging || (isStill && isClosest && inRange) ? 1 : 0;
+        s.hollowOp += (hollowTarget - s.hollowOp) * 0.05;
+        const wordTarget = emerging ? 1 : 0.06;
         s.opacity += (wordTarget - s.opacity) * 0.05;
 
-        // Écriture DOM directe (perf)
         const node = nodesRef.current[i];
         if (node) {
           node.style.transform = `translate(-50%, -50%) translate3d(${s.x}px, ${s.y}px, 0)`;
@@ -502,7 +507,7 @@ function AnchorsFlee({ anchors, photoRef, cfg }) {
           className="ps-anchor ps-anchor--flee"
           style={{
             left: 0, top: 0,
-            transform: `translate(-50%, -50%) translate3d(${a.wx}px, ${a.wy}px, 0)`,
+            transform: `translate(-50%, -50%) translate3d(${a.ax}px, ${a.ay}px, 0)`,
             opacity: 0,
           }}
           aria-hidden="true"
@@ -597,18 +602,20 @@ export default function PhotoStage({ chamber, passageIdx, onBackToList, site }) 
     const computed = getAnchors();
     if (computed) {
       setAnchors(computed);
-      setFlying(
-        passage.anchors.map((a, i) => {
-          const rc = kwRefs.current[i]?.getBoundingClientRect();
-          return {
-            word: a.word,
-            sx: rc ? rc.left + rc.width  / 2 : window.innerWidth  / 2,
-            sy: rc ? rc.top  + rc.height / 2 : window.innerHeight / 2,
-            tx: computed[i].wx,
-            ty: computed[i].wy,
-          };
-        })
-      );
+      if (chamber.id !== "time") {
+        setFlying(
+          passage.anchors.map((a, i) => {
+            const rc = kwRefs.current[i]?.getBoundingClientRect();
+            return {
+              word: a.word,
+              sx: rc ? rc.left + rc.width  / 2 : window.innerWidth  / 2,
+              sy: rc ? rc.top  + rc.height / 2 : window.innerHeight / 2,
+              tx: computed[i].wx,
+              ty: computed[i].wy,
+            };
+          })
+        );
+      }
     }
 
     if (cfg.useCursorGate) {

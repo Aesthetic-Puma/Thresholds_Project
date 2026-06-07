@@ -39,6 +39,8 @@
   border-color: rgba(240, 235, 224, 0.62);
 }
 
+.cursor-ring--blocked { width: 20px; height: 20px; border-color: rgba(240,235,224,.16); }
+
 /* ── Hide OS cursor everywhere ── */
 * {
   cursor: none !important;

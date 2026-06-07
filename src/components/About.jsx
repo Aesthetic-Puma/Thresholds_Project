@@ -133,10 +133,10 @@ export default function About({ about, site, onClose }) {
                 It is an attempt to understand questions that engineering alone cannot fully address.
               </p>
               <p>
-                For six years, I have built interfaces where clarity has stakes. At SNCF,
-                ambiguity costs a missed train. At Sanofi — in a GxP-regulated environment
-                where product information reaches patients via digital interfaces — a
-                misread notice has consequences that belong to a different order entirely.
+                For six years, I have worked inside interfaces where clarity has stakes. At SNCF,
+                ambiguity costs a missed train. At Sanofi — in a pharmaceutical environment
+                where every interface that reaches a patient is subject to strict regulatory
+                audit — a misread notice has consequences that belong to a different order entirely.
                 The threshold question I bring to <em>Thresholds</em> was already present
                 in that work. I did not discover it through photography or fiction.
                 I recognised it there.
@@ -209,7 +209,7 @@ export default function About({ about, site, onClose }) {
                 <div className="about__tl-entry">
                   <span className="about__tl-year">Sanofi</span>
                   <div>
-                    <span className="about__tl-role">Electronic Product Information · GxP-regulated</span>
+                    <span className="about__tl-role">Electronic Product Information · regulated environment</span>
                     <p className="about__tl-note">
                       Making the patient leaflet legible through a QR code, inside an
                       environment where quality, traceability and compliance are not
@@ -225,9 +225,11 @@ export default function About({ about, site, onClose }) {
                   <div>
                     <span className="about__tl-role">Transport systems · millions of daily users</span>
                     <p className="about__tl-note">
-                      The worker who must understand a screen in three seconds was
-                      my first school in UX at real stakes — interfaces where
-                      ambiguity costs a missed train.
+                      I spent five years inside interfaces that had not been redesigned
+                      since the 1990s — maintaining, debugging, improving systems that
+                      thousands of operators used daily under real operational pressure.
+                      I did not design those interfaces. I learned what breaks
+                      when they fail.
                     </p>
                     <span className="about__tl-stack">React · Java · REST · Agile</span>
                   </div>

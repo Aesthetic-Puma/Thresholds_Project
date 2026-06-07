@@ -136,7 +136,7 @@
   .ps-anchor--temporal-in,
   .ps-anchor--temporal-hold {
     opacity: var(--hold-opacity, 0.95);
-    filter: brightness(1) blur(0) sepia(0) contrast(1);
+    filter: brightness(1) blur(var(--rest-blur, 0px)) sepia(0) contrast(1);
     transform: translate(-50%, -50%) translateY(0);
     transition-duration: 0.9s;
   }
@@ -152,7 +152,7 @@
   .ps-anchor--temporal-trail {
     opacity: var(--trail-opacity, 0.18);
     filter: blur(var(--trail-blur, 2px));
-    transform: translate(-50%, -50%) translateY(0);
+    transform: translate(-50%, -50%) translateY(var(--settle, 8px));
     transition-duration: 2s;
   }
 
@@ -307,6 +307,16 @@
 
   .ps-kw {
     color: rgba(240, 235, 224, 0.96);
+  }
+
+  /* Time : le mot-clé se brouille hors de la phrase, il ne voyage pas */
+  .ps-reading--time .ps-kw {
+    display: inline-block;
+    transition: filter 0.7s ease, opacity 0.7s ease;
+  }
+  .ps-reading--time.ps-reading--out .ps-kw {
+    filter: blur(7px);
+    opacity: 0;
   }
 
   .ps-fly {

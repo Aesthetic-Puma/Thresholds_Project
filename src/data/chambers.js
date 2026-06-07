@@ -352,7 +352,7 @@ export const about = {
   tagline:  "I work at the threshold between systems and stories — building software, photographing the spaces between people and their worlds, writing fiction where the real quietly unravels.",
   book: {
     title:     "Élégies Oubliées",
-    subtitle:  "Recueil de fictions courtes",
+    subtitle:  "Collection of short fiction",
     publisher: "2024",
     link:      "https://www.babelio.com/livres/Viratel-legies-oubliees/1893561",
     cover:     "/photos/auteur/book-cover.png",

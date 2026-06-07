@@ -342,6 +342,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
 
       if (isSpace && spaceLayout[i].far) el.classList.add("fp-item--far");
       if (!isTime && !isOther && visitedSet?.has(i)) el.classList.add("fp-item--visited");
+      if (isOther) el.classList.add("fp-item--ready");
 
       el.style.left = `${cx}px`;
       el.style.top  = `${cy}px`;
@@ -462,15 +463,10 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
       let initFreshness = 1;
       let initLost      = false;
       if (isSpace) {
-        const dxc = cx - vw / 2;
-        const dyc = cy - vh / 2;
-        const dC  = Math.hypot(dxc, dyc);
-        initFreshness = Math.max(0, Math.min(1, 1 - dC / SPACE_FRESH_RADIUS));
-        initLost      = initFreshness < SPACE_LOST_THRESHOLD;
-        if (initLost) {
-          el.classList.add("fp-item--decayed");
-          el.classList.add("fp-item--ever-decayed");
-        }
+        initFreshness = 0;
+        initLost      = true;
+        el.classList.add("fp-item--decayed");
+        el.classList.add("fp-item--ever-decayed");
       }
 
       container.appendChild(el);
@@ -679,6 +675,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
               item.rememberTimer = null;
             }
           }
+          item.el.classList.toggle("fp-item--ready", !item.lostState);
         }
 
         // Time — opacité + flou : le souvenir se brouille avec le temps
@@ -698,6 +695,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
             : TIME_LERP_AGE;
           item.currentBlur += (item.targetBlur - item.currentBlur) * blurLerp;
           item.el.style.filter = `blur(${item.currentBlur.toFixed(3)}px)`;
+          item.el.classList.toggle("fp-item--ready", item.currentBlur < 0.8);
         }
       });
 

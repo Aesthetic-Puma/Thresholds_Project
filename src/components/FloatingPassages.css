@@ -172,6 +172,16 @@
     color: rgba(240, 235, 224, 0.60);
   }
 
+  /* Filet seuil — lisibilité diégétique */
+  .fp-source { position: relative; }
+  .fp-source::after {
+    content: ""; position: absolute; left: 50%; bottom: -6px;
+    width: 0; height: 1px; background: var(--cream-40);
+    transform: translateX(-50%); transition: width .6s cubic-bezier(.4,0,.2,1);
+  }
+  .fp-item--ready .fp-source::after { width: 26px; }
+  .fp-item--ready .fp-source { color: var(--cream-40); }
+
   /* Siblings dimmed when an ECHO is hovered */
   .fp-item--dimmed {
     opacity: 0.18;

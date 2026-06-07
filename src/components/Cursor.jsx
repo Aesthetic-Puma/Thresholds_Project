@@ -7,6 +7,8 @@ export default function Cursor({ mousePos }) {
   const rafRef  = useRef(null);
 
   useEffect(() => {
+    const READY = ".cw, .home-link, .photo-slot, a, [data-cursor-large], button:not(.fp-item)";
+
     const animate = () => {
       const ring = ringRef.current;
       if (!ring) return;
@@ -17,29 +19,18 @@ export default function Cursor({ mousePos }) {
       ring.style.left = `${posRef.current.x}px`;
       ring.style.top  = `${posRef.current.y}px`;
 
+      const hit     = document.elementFromPoint(mousePos.x, mousePos.y);
+      const ready   = hit && (hit.closest(READY) || hit.closest(".fp-item--ready"));
+      const blocked = hit && hit.closest(".fp-item") && !hit.closest(".fp-item--ready");
+      ring.classList.toggle("cursor-ring--large",   !!ready);
+      ring.classList.toggle("cursor-ring--blocked", !!blocked);
+
       rafRef.current = requestAnimationFrame(animate);
     };
 
     rafRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafRef.current);
   }, [mousePos]);
-
-  useEffect(() => {
-    const interactiveSelectors = [
-      ".cw", ".dot", ".home-link", ".photo-slot",
-      "button", "a", "[data-cursor-large]",
-    ].join(", ");
-
-    const scaleUp   = (e) => { if (e.target.closest(interactiveSelectors)) ringRef.current?.classList.add("cursor-ring--large"); };
-    const scaleDown = (e) => { if (e.target.closest(interactiveSelectors)) ringRef.current?.classList.remove("cursor-ring--large"); };
-
-    document.addEventListener("mouseover",  scaleUp);
-    document.addEventListener("mouseout",   scaleDown);
-    return () => {
-      document.removeEventListener("mouseover",  scaleUp);
-      document.removeEventListener("mouseout",   scaleDown);
-    };
-  }, []);
 
   return (
     <>

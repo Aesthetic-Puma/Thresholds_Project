@@ -60,8 +60,7 @@
 }
 
 .gate__jp {
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", "Songti SC",
-               var(--font-serif, serif);
+  font-family: var(--font-jp);
   font-weight: 300;
   font-size: 0.95rem;
   letter-spacing: 0.3em;

@@ -27,6 +27,7 @@
 
      --font-serif:   'Cormorant Garamond', Georgia, serif;
      --font-mono:    'Courier Prime', 'Courier New', monospace;
+     --font-jp:      'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
 
      --transition-slow:   1.4s ease;
      --transition-medium: 0.8s ease;
@@ -186,7 +187,7 @@
    }
 
    .shared-label__jp {
-     font-family: "Hiragino Mincho ProN", "Yu Mincho", "Songti SC", var(--font-serif);
+     font-family: var(--font-jp);
      font-style: normal;
      font-size: 16px;
      letter-spacing: 0.18em;
@@ -219,7 +220,7 @@
      justify-content: center;
    }
    .shared-dot__glyph {
-     font-family: "Hiragino Mincho ProN", "Yu Mincho", "Songti SC", var(--font-serif);
+     font-family: var(--font-jp);
      font-size: 15px;
      line-height: 1;
      color: var(--cream-72);

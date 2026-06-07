@@ -359,7 +359,7 @@ function SharedUI({
 
       <p className="shared-label" aria-hidden="true">
         {chambers[chamberIdx].label}
-        <span className="shared-label__jp">
+        <span className="shared-label__jp" lang="ja">
           {chambers[chamberIdx].labelJp}
         </span>
       </p>
@@ -374,7 +374,7 @@ function SharedUI({
             aria-current={i === chamberIdx}
             data-cursor-large
           >
-            <span className="shared-dot__glyph">{ch.labelJp?.[0] ?? ch.label[0]}</span>
+            <span className="shared-dot__glyph" lang="ja">{ch.labelJp?.[0] ?? ch.label[0]}</span>
             <span className="shared-dot__label">{ch.label}</span>
           </button>
         ))}

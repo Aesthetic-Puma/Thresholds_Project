@@ -19,7 +19,7 @@ export default function DesktopGate({ site }) {
 
       <div className="gate__inner">
         <h1 className="gate__title">{site.title.toUpperCase()}</h1>
-        <p className="gate__jp" aria-hidden="true">{site.titleJp}</p>
+        <p className="gate__jp" aria-hidden="true" lang="ja">{site.titleJp}</p>
 
         <div className="gate__divider" aria-hidden="true" />
 

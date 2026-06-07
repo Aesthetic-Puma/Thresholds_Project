@@ -21,7 +21,7 @@ export const chambers = [
     navWord:   "Space",
     videoSrcs: [
       "/videos/space-buildings.mov",
-      "/videos/space-london.mov",
+      "/videos/space-london.mp4",
       "/videos/space-korean-street.mov",
       "/videos/space-street-piano.mp4",
     ],
@@ -253,7 +253,7 @@ export const chambers = [
     navWord:   "The Other",
     videoSrcs: [
       "/videos/other-palace.mov",
-      "/videos/other-guards.mov",
+      "/videos/other-guards.mp4",
       "/videos/other-protest.mov",
       "/videos/other-police.mp4",
     ],
@@ -356,7 +356,7 @@ export const about = {
     publisher: "2024",
     link:      "https://www.babelio.com/livres/Viratel-legies-oubliees/1893561",
     cover:     "/photos/auteur/book-cover.png",
-    desc:      "Twelve stories, set in the half-light between memory and presence. A collection about thresholds, in the literal and figurative sense — doorways, nightfalls, faces seen and not quite recognised. Each piece in this portfolio is in conversation with one of these stories.",
+    desc:      "Seven stories, set in the half-light between memory and presence. A collection about thresholds, in the literal and figurative sense — doorways, nightfalls, faces seen and not quite recognised. Each piece in this portfolio is in conversation with one of these stories.",
   },
   contact:  "jviratel@gmail.com",
   linkedin: "https://www.linkedin.com/in/jean-viratel/",

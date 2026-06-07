@@ -37,7 +37,7 @@ export default function About({ about, site, onClose }) {
         className={`about__nav-label${progress > 0.04 ? " about__nav-label--dim" : ""}`}
         aria-hidden="true"
       >
-        About <span className="about__nav-label-jp">{site.titleJp}</span>
+        About <span className="about__nav-label-jp" lang="ja">{site.titleJp}</span>
       </p>
 
       {/* ── Scroll body ── */}
@@ -129,7 +129,7 @@ export default function About({ about, site, onClose }) {
             </div>
             <div className="about__content-col">
               <p>
-                Pursuing a Master in Creative Technology is not a rejection of engineering.
+                Pursuing a Master of Media Design is not a rejection of engineering.
                 It is an attempt to understand questions that engineering alone cannot fully address.
               </p>
               <p>
@@ -286,7 +286,7 @@ export default function About({ about, site, onClose }) {
           </section>
 
           <footer className="about__footer">
-            <span>{site.title} · {site.titleJp} · {new Date().getFullYear()}</span>
+            <span>{site.title} · <span lang="ja">{site.titleJp}</span> · {new Date().getFullYear()}</span>
           </footer>
 
         </div>

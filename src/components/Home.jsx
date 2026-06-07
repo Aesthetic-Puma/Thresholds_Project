@@ -186,7 +186,7 @@ export default function Home({
         ref={titleRef}
       >
         <h1 className="home__title">{site.title.toUpperCase()}</h1>
-        <p className="home__title-jp" aria-label={site.titleJp}>
+        <p className="home__title-jp" aria-label={site.titleJp} lang="ja">
           {site.titleJp}
         </p>
         <div className="home__divider" aria-hidden="true" />

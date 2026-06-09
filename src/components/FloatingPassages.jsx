@@ -137,7 +137,7 @@ function tokenizeShort(text, blanksIdxArr) {
     } else {
       const isBlank = blanks.has(wi);
       if (isBlank) {
-        html += `<span class="fp-token fp-token--blank" data-ti="${wi}" style="--blank-idx:${blankRank}">${p}</span>`;
+        html += `<span class="fp-token fp-token--blank" data-ti="${wi}" style="--blank-idx:${blankRank}"><span class="fp-word">${p}</span><span class="fp-dash" aria-hidden="true">—</span></span>`;
         blankRank++;
       } else {
         html += `<span class="fp-token" data-ti="${wi}">${p}</span>`;

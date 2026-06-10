@@ -92,7 +92,7 @@ export default function About({ about, site, onClose }) {
                 <em>Thresholds</em> began with a discomfort.
               </p>
               <p>
-                While rereading <em>{about.book.title}</em> — a collection of seven
+                While rereading <em>{about.book.title}</em> — a collection of twelve
                 stories published in 2024 — I noticed how quickly a literary image
                 can become fixed once it receives a visual counterpart. A face
                 acquires a face. A place acquires a place. The indeterminate
@@ -206,6 +206,18 @@ export default function About({ about, site, onClose }) {
 
               {/* Engineering */}
               <div className="about__timeline">
+                <div className="about__tl-entry">
+                  <span className="about__tl-year">T.O.M.A.S</span>
+                  <div>
+                    <span className="about__tl-role">EPITECH project · 2019</span>
+                    <p className="about__tl-note">
+                      All-in-one tablet interface for elderly users facing digital
+                      exclusion. Three months of field research with seniors in local
+                      associations — before building anything, we listened to the
+                      fear of failing.
+                    </p>
+                  </div>
+                </div>
                 <div className="about__tl-entry">
                   <span className="about__tl-year">Sanofi</span>
                   <div>

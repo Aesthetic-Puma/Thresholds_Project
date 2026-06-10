@@ -200,7 +200,7 @@ export default function Home({
             three chambers in conversation with <em>Élégies Oubliées</em>
           </span>
           <span className="home__context-meta">
-            Portfolio · Research Master in Creative Technology · 2026
+            Portfolio · Pursuing a Master of Media Design · 2026
           </span>
         </p>
       </div>

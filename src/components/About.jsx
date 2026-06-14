@@ -92,7 +92,7 @@ export default function About({ about, site, onClose }) {
                 <em>Thresholds</em> began with a discomfort.
               </p>
               <p>
-                While rereading <em>{about.book.title}</em> — a collection of twelve
+                While rereading <em>{about.book.title}</em> — a collection of seven
                 stories published in 2024 — I noticed how quickly a literary image
                 can become fixed once it receives a visual counterpart. A face
                 acquires a face. A place acquires a place. The indeterminate

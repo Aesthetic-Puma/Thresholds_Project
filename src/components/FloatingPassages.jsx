@@ -94,6 +94,7 @@ const getOtherLayout = (passages) => {
 };
 
 // ── Time chamber — stratigraphie des âges (signal : flou, pas opacité)
+// Layout post-reorder : écho·01(0px), écho·02(0px) | ancre·03(1.8px), ancre·04(1.8px) | écho·05(3.5px), écho·06(3.5px)
 const TIME_NATURAL_AGES  = [0, 0, 1, 1, 2, 2];
 const TIME_BASE_BLUR     = [0, 1.8, 3.5, 5.5];   // px — flou par niveau d'âge (0→3)
 const TIME_OPACITY_REST  = 0.82;                    // opacité uniforme — le flou porte le temps
@@ -103,7 +104,11 @@ const TIME_LERP_ENTRANCE = 0.038;  // résolution rapide du flou d'entrée
 const TIME_LERP_REVEAL   = 0.008;  // mise au point lente au survol
 const TIME_LERP_AGE      = 0.020;  // retour au flou mémoriel
 const TIME_FLOAT_SCALE   = 0.55;
-const LS_TIME_KEY        = "thresholds-time-visits";
+const LS_TIME_KEY        = "thresholds-time-visits-v2";
+
+// Stable ID per passage — keyed on filename, not array index.
+// This ensures visit counts survive passage reordering.
+const passageId = (p) => p.src.split("/").pop().replace(/\.\w+$/, "");
 
 // ── Other chamber — impatience punie, stillness récompensée
 const OTHER_SPEED_THRESHOLD  = 1.8;   // seuil bas — la moindre hâte déclenche la fuite
@@ -326,7 +331,7 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
       let targetOpacity  = 0;
       if (isTime) {
         const naturalAge = TIME_NATURAL_AGES[i] ?? 0;
-        const visitCount = timeVisits[i] || 0;
+        const visitCount = timeVisits[passageId(passage)] || 0;
         const totalAge   = Math.min(naturalAge + visitCount, TIME_BASE_BLUR.length - 1);
         baseBlur       = TIME_BASE_BLUR[totalAge];
         currentBlur    = 9;   // tous les passages entrent très flous
@@ -450,7 +455,8 @@ export default function FloatingPassages({ chamber, onSelect, visitedSet, enterD
         if (isTime) {
           try {
             const visits = JSON.parse(localStorage.getItem(LS_TIME_KEY) || "{}");
-            visits[i] = (visits[i] || 0) + 1;
+            const pk = passageId(chamber.passages[i]);
+            visits[pk] = (visits[pk] || 0) + 1;
             localStorage.setItem(LS_TIME_KEY, JSON.stringify(visits));
           } catch (_) { /* localStorage indisponible */ }
         }

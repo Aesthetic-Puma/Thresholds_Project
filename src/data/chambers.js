@@ -158,35 +158,7 @@ export const chambers = [
     ],
 
     passages: [
-      // ── ANCRE 01
-      {
-        anchor: true,
-        src:    "/photos/autre/couple-flou-fantome.jpg",
-        alt:    "Couple back to back, motion blur on one face, B&W",
-        source: "The Specter of Her Voice",
-        short:  "Stories take time to get their teeth into us.",
-        full:   "Stories take time to get their teeth into us.",
-        anchors: [
-          { word: "take time",       weight: 0.6, note: "the smoke\nbeginning",           px: 35, py: 28 },
-          { word: "get their teeth", weight: 1.0, note: "a face\ngoing under",            px: 62, py: 52 },
-          { word: "into us",         weight: 0.4, note: "the exposure\nstretching",       px: 50, py: 78 },
-        ],
-      },
-      // ── ANCRE 02
-      {
-        anchor: true,
-        src:    "/photos/autre/femme-rouge-venise.jpg",
-        alt:    "Woman in red dress, Venice, eyes closed",
-        source: "Reminiscence",
-        short:  "You will always be my favourite memory.",
-        full:   "You will always be my favourite memory.",
-        anchors: [
-          { word: "always",    weight: 0.6, note: "the columns\nunmoving",    px: 50, py: 25 },
-          { word: "favourite", weight: 1.0, note: "the red\nof memory",      px: 72, py: 72 },
-          { word: "memory",    weight: 0.8, note: "eyes closed\nto the past", px: 28, py: 55 },
-        ],
-      },
-      // ── ÉCHO 03
+      // ── ÉCHO 01
       {
         anchor: false,
         src:    "/photos/espace/graffiti-fenetre.jpg",
@@ -200,7 +172,49 @@ export const chambers = [
           { word: "comprehensible", weight: 0.5, note: "the frozen couple\nagainst the living", px: 50, py: 74 },
         ],
       },
-      // ── ÉCHO 04
+      // ── ÉCHO 02
+      {
+        anchor: false,
+        src:    "/photos/autre/allumettes.jpg",
+        alt:    "Woman in red dress, hands lighting matches",
+        source: "Between Images",
+        short:  "Her silhouette turned into a blaze.",
+        full:   "Her silhouette turned into a blaze.",
+        anchors: [
+          { word: "silhouette", weight: 1.0, note: "three hands\none flame", px: 50, py: 25 },
+          { word: "turned",     weight: 0.5, note: "the collective\nritual",  px: 28, py: 55 },
+          { word: "blaze",      weight: 1.0, note: "the flame\nalready lit",  px: 68, py: 74 },
+        ],
+      },
+      // ── ANCRE 03
+      {
+        anchor: true,
+        src:    "/photos/autre/couple-flou-fantome.jpg",
+        alt:    "Couple back to back, motion blur on one face, B&W",
+        source: "The Specter of Her Voice",
+        short:  "Stories take time to get their teeth into us.",
+        full:   "Stories take time to get their teeth into us.",
+        anchors: [
+          { word: "take time",       weight: 0.6, note: "the smoke\nbeginning",           px: 35, py: 28 },
+          { word: "get their teeth", weight: 1.0, note: "a face\ngoing under",            px: 62, py: 52 },
+          { word: "into us",         weight: 0.4, note: "the exposure\nstretching",       px: 50, py: 78 },
+        ],
+      },
+      // ── ANCRE 04
+      {
+        anchor: true,
+        src:    "/photos/autre/femme-rouge-venise.jpg",
+        alt:    "Woman in red dress, Venice, eyes closed",
+        source: "Reminiscence",
+        short:  "You will always be my favourite memory.",
+        full:   "You will always be my favourite memory.",
+        anchors: [
+          { word: "always",    weight: 0.6, note: "the columns\nunmoving",    px: 50, py: 25 },
+          { word: "favourite", weight: 1.0, note: "the red\nof memory",      px: 72, py: 72 },
+          { word: "memory",    weight: 0.8, note: "eyes closed\nto the past", px: 28, py: 55 },
+        ],
+      },
+      // ── ÉCHO 05
       {
         anchor: false,
         src:    "/photos/autre/femme-bulles.jpg",
@@ -214,7 +228,7 @@ export const chambers = [
           { word: "escape",  weight: 0.8, note: "the scene\ndissolving",    px: 65, py: 74 },
         ],
       },
-      // ── ÉCHO 05
+      // ── ÉCHO 06
       {
         anchor: false,
         src:    "/photos/espace/deux-femmes-embrasure.jpg",
@@ -226,20 +240,6 @@ export const chambers = [
           { word: "not really",       weight: 0.4, note: "the doorframe\nbetween two worlds", px: 15, py: 38 },
           { word: "café",             weight: 0.6, note: "a woman\nher blurred double",        px: 55, py: 35 },
           { word: "in-between space", weight: 1.0, note: "neither inside\nnor outside",        px: 50, py: 72 },
-        ],
-      },
-      // ── ÉCHO 06
-      {
-        anchor: false,
-        src:    "/photos/autre/allumettes.jpg",
-        alt:    "Woman in red dress, hands lighting matches",
-        source: "Between Images",
-        short:  "Her silhouette turned into a blaze.",
-        full:   "Her silhouette turned into a blaze.",
-        anchors: [
-          { word: "silhouette", weight: 1.0, note: "three hands\none flame", px: 50, py: 25 },
-          { word: "turned",     weight: 0.5, note: "the collective\nritual",  px: 28, py: 55 },
-          { word: "blaze",      weight: 1.0, note: "the flame\nalready lit",  px: 68, py: 74 },
         ],
       },
     ],
